@@ -42,6 +42,7 @@ const rail = Astro.slots.has('rail');
   <link rel="alternate" hreflang="x-default" href={new URL(href('en', path), Astro.site)}>
   <link rel="manifest" href={`${base}manifest.webmanifest`}>
   <link rel="apple-touch-icon" href={`${base}icons/apple-touch-icon.png`}>
+  <script is:inline>try{if(localStorage.getItem('mlv-rail')==='min')document.documentElement.dataset.rail='min'}catch(e){}</script>
   <script is:inline>addEventListener('beforeinstallprompt',function(e){e.preventDefault();window.__mlvInstall=e;dispatchEvent(new Event('mlv:installable'))})</script>
 </head>
 <body class:list={{ 'has-rail': rail }}>
@@ -89,11 +90,12 @@ const rail = Astro.slots.has('rail');
 <style>
   .coursebtn { display: none; align-items: center; gap: 7px; height: 34px; padding: 0 12px; border: 1.5px solid var(--rule); background: var(--sheet); color: var(--ink); border-radius: 10px; font: 700 14px var(--body); cursor: pointer; box-shadow: 0 3px 0 var(--lift); }
   .coursebtn:hover { border-color: var(--muted); }
-  .has-rail .wrap { max-width: 1360px; }
-  .withrail { display: grid; grid-template-columns: 252px minmax(0, 1fr); gap: 30px; align-items: start; }
+  .has-rail .wrap { max-width: 1720px; padding: 0 28px; }
+  .withrail { display: grid; grid-template-columns: 290px minmax(0, 1fr); gap: 36px; align-items: start; transition: grid-template-columns .2s ease; }
+  :global(html[data-rail="min"]) .withrail { grid-template-columns: 58px minmax(0, 1fr); }
   .withrail > main { min-width: 0; }
   @media (max-width: 1099px) {
-    .has-rail .wrap { max-width: 1060px; }
+    .has-rail .wrap { max-width: 1060px; padding: 0 22px; }
     .withrail { display: block; }
     .coursebtn { display: inline-flex; }
   }
