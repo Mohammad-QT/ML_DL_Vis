@@ -1,0 +1,50 @@
+---
+model: logistic
+short: Logistic regression
+title: Logistic Regression
+lede: Draw one straight line between the classes, and give every point a probability based on which side it sits on.
+figure: { preset: blobs, seed: 11, cell: 4, dot: 3.6, tint: 0.24 }
+steps:
+  - Give each feature a <b>weight</b> and add them up into one score.
+  - Squash the score into a probability between 0 and 1.
+  - 'Above 0.5 means class B. Below means class A.'
+  - Training nudges the weights until the training points get the best probabilities.
+caution:
+  h: One straight line, nothing else
+  p: 'The boundary is always a straight line. If one group wraps around the other, like rings or moons, logistic regression <mark>cannot separate them</mark>. Switch to a model that bends.'
+play:
+  p: Add points of both classes and watch the line tilt to keep them apart. Then load Moons or Circles and see how it struggles.
+  preset: blobs
+  seed: 3
+  hints: {}
+quiz:
+  - q: '''You train logistic regression on two groups shaped like rings, one inside the other. What does its line look like?'''
+    a:
+      - A curve that wraps around the inner ring
+      - A single straight line that cannot separate the rings
+      - Lots of small boxes
+    correct: 1
+    right: 'Right. Logistic regression only draws a straight line, so ring-shaped groups are out of its reach.'
+    wrong: 'Not quite. Go to Play, load Circles and look at the line.'
+  - q: '''The model says a customer has a 0.85 chance of buying. Which class does it pick?'''
+    a:
+      - Bought, because 0.85 is above 0.5
+      - Did not buy, because 0.85 is not 1
+      - It cannot decide until you add more data
+    correct: 0
+    right: 'Right. Anything above 0.5 goes to class B, so this customer is predicted to buy.'
+    wrong: 'Not quite. The model picks class B whenever its probability is above 0.5.'
+predict:
+  preset: moons
+  seed: 11
+  options: [tree, logistic, knn]
+  answer: 1
+  why: 'Logistic regression draws one straight line, whatever the data looks like. Here it cuts the moons in half and gets some points wrong.'
+code: |
+  from sklearn.linear_model import LogisticRegression
+  classifier = LogisticRegression(random_state=0)
+  classifier.fit(X_train, y_train)
+  y_pred = classifier.predict(X_test)
+compare: knn
+---
+Logistic regression is the simplest classifier. It scores each point with a weighted sum of its features, turns that score into a <mark>probability</mark>, and the 0.5 mark becomes your line. If the probability that you buy is 0.85, it bets you will.

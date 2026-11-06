@@ -1,0 +1,50 @@
+---
+model: ksvm
+short: Kernel SVM
+title: Kernel SVM
+lede: Let every important point cast a bump of influence, and the line can bend around curves and islands.
+figure: { preset: moons, seed: 12, cell: 4, dot: 3.6, tint: 0.24 }
+steps:
+  - 'A <b>kernel</b> measures how similar two points are: close points count as very similar.'
+  - Each support point casts a smooth bump of influence over its neighbourhood.
+  - Add up the bumps for class B and subtract those for class A.
+  - 'The sign of the total decides the class. <b>Gamma</b> sets how wide each bump is.'
+caution:
+  h: Watch gamma, and scale first
+  p: 'A very large gamma makes tiny bumps, so the model <mark>memorises every point</mark> and does worse on new ones. Scale your features first too: the kernel uses distances.'
+play:
+  p: Load Circles, where a straight line fails. Then drag gamma up and watch the smooth curve break into islands.
+  preset: circles
+  seed: 3
+  param_label: 'Gamma · how wiggly'
+  hints:
+    low: { max: 0.3, text: 'Small gamma: wide, smooth bumps. The line can only bend a little.' }
+    high: { min: 1.8, text: 'Large gamma: tiny bumps around each point. Train score is perfect, test score drops.' }
+quiz:
+  - q: 'Gamma is very large. What do you expect to see?'
+    a:
+      - One straight line
+      - Tiny islands around single points, with a perfect train score and a weaker test score
+      - The same line as with a small gamma
+    correct: 1
+    right: 'Right. Each point gets its own small bump, so the line wraps every point. That is <mark>overfitting</mark>.'
+    wrong: 'Not quite. Go to Play, drag gamma all the way up and look at the line.'
+predict:
+  preset: moons
+  seed: 11
+  options: [ksvm, svm, tree]
+  answer: 0
+  why: 'Kernel SVM draws a smooth curve that follows the moons. A linear SVM would draw a straight line, and a tree would draw boxes.'
+beat:
+  preset: circles
+  seed: 31
+  start: 2.3
+  target: 95
+code: |
+  from sklearn.svm import SVC
+  classifier = SVC(kernel='rbf', gamma='scale', random_state=0)
+  classifier.fit(X_train, y_train)
+  y_pred = classifier.predict(X_test)
+compare: svm
+---
+A linear SVM can only draw straight lines. A Kernel SVM measures how <mark>similar</mark> points are instead, so its boundary can curve around rings, moons and islands. It is still an SVM: it looks for the widest gap, just in a bendy space.

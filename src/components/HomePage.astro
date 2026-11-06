@@ -5,12 +5,13 @@ import NavLinks from './NavLinks.astro';
 import { common, href, type Lang } from '../i18n/ui';
 import { home } from '../i18n/pages';
 import { MODEL_NAMES } from '../engine';
+import { CLASSIFICATION, lessonPath } from '../lessons';
 
 interface Props { lang: Lang }
 const { lang } = Astro.props;
 const t = { ...common[lang], ...home[lang] };
 const m = (n: string) => t[`m_${n}` as keyof typeof t];
-const lessonHref: Record<string, string> = { knn: href(lang, 'learn/3-classification/knn/') };
+const lessonHref: Record<string, string> = Object.fromEntries(CLASSIFICATION.map(id => [id, href(lang, lessonPath(id))]));
 
 // strings the client script needs (model names, shapes, picker results)
 const strings = {
