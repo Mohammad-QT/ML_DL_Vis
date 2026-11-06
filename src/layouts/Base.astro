@@ -49,6 +49,10 @@ const { path } = parsePath(Astro.url.pathname);
     try { localStorage.setItem('mlv-theme', next); } catch { /* storage blocked: theme still switches */ }
     dispatchEvent(new Event('themechange'));
   }));
+  // keep page state such as Compare's ?a=&b= when switching language
+  document.querySelectorAll<HTMLAnchorElement>('.seg a').forEach(a => a.addEventListener('click', () => {
+    a.href = a.href.split(/[?#]/)[0] + location.search;
+  }));
 </script>
 </body>
 </html>

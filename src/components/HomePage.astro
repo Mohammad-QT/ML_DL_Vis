@@ -1,0 +1,250 @@
+---
+// Course home, ported from sketches/home: live hero, the route, and the algorithm picker.
+import Base from '../layouts/Base.astro';
+import NavLinks from './NavLinks.astro';
+import { common, href, type Lang } from '../i18n/ui';
+import { home } from '../i18n/pages';
+import { MODEL_NAMES } from '../engine';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const t = { ...common[lang], ...home[lang] };
+const m = (n: string) => t[`m_${n}` as keyof typeof t];
+const lessonHref: Record<string, string> = { knn: href(lang, 'learn/3-classification/knn/') };
+
+// strings the client script needs (model names, shapes, picker results)
+const strings = {
+  ...Object.fromEntries(Object.keys(t).filter(k => /^(m_|s_|why_|res_)/.test(k) || k === 'restart').map(k => [k, t[k as keyof typeof t]])),
+  compareUrl: href(lang, 'compare/'),
+};
+const json = JSON.stringify(strings).replace(/</g, '\\u003c');
+
+const dots = [[8, 40], [16, 35], [24, 35], [32, 28], [40, 27], [48, 20], [56, 18], [64, 11], [72, 9]];
+const REG: Array<[keyof typeof t, string]> = [
+  ['r_lin', '<path d="M4 41 L76 7"/>'],
+  ['r_mlin', '<path d="M4 41 L76 7"/><path d="M4 33 L76 1" opacity=".35" stroke-dasharray="3 3"/>'],
+  ['r_poly', '<path d="M4 41 C 34 40, 46 22, 76 5"/>'],
+  ['r_svr', '<path d="M4 41 L76 7"/><path d="M4 35 L76 1 M4 47 L76 13" opacity=".45" stroke-dasharray="3 3"/>'],
+  ['r_tree', '<path d="M4 38 H22 V32 H40 V25 H56 V14 H76"/>'],
+  ['r_forest', '<path d="M4 39 H12 V36 H22 V33 H30 V29 H40 V26 H48 V21 H56 V17 H66 V11 H76"/>'],
+];
+---
+<Base lang={lang} title={t.page_title} description={t.lede.replace(/<[^>]+>/g, '')}>
+  <NavLinks slot="crumbs" lang={lang} cur="course" />
+
+  <section class="hero" id="top">
+    <div>
+      <h1 class="display" set:html={t.h1} />
+      <p class="lede">{t.lede}</p>
+      <div class="ctas">
+        <a class="btn" href="#route"><span>{t.start}</span> <span class="arr">→</span></a>
+        <a class="btn ghost" href="#pick">{t.pick}</a>
+      </div>
+    </div>
+    <figure class="sheet stage" id="stage">
+      <canvas class="board" id="hero" aria-hidden="true"></canvas>
+      <figcaption>
+        <div class="now"><span class="label">{t.drawing}</span><b id="nowName">{m('knn')}</b><span class="shape" id="nowShape">{t.s_knn}</span></div>
+        <div class="algos">{MODEL_NAMES.map((n, i) => <button class:list={['chip', { on: i === 0 }]} data-m={n}>{m(n)}</button>)}</div>
+      </figcaption>
+    </figure>
+  </section>
+
+  <section class="block" id="route">
+    <h2 class="display">{t.route_h}</h2>
+    <p class="sub">{t.route_p}</p>
+    <ol class="route">
+      <li class="stop first"><div class="pt">0</div><div class="sheet body"><h3 class="display"><span>{t.p0}</span></h3><p>{t.p0_d}</p></div></li>
+      <li class="stop"><div class="pt">1</div><div class="sheet body"><h3 class="display"><span>{t.p1}</span><small>4 {t.lessons}</small></h3><p>{t.p1_d}</p></div></li>
+      <li class="stop"><div class="pt">2</div><div class="sheet body"><h3 class="display"><span>{t.p2}</span><small>6 {t.lessons}</small></h3><p>{t.p2_d}</p>
+        <div class="minis">{REG.map(([k, path]) => (
+          <div class="mini soon"><svg viewBox="0 0 80 48" preserveAspectRatio="none" aria-hidden="true"><g fill="none" stroke="var(--ink)" stroke-width="1.8" stroke-linecap="round" set:html={path} /><g fill="var(--a)">{dots.map(([x, y]) => <circle cx={x} cy={y} r="2.2" />)}</g></svg><span>{t[k]}</span><small>{t.soon}</small></div>
+        ))}</div>
+      </div></li>
+      <li class="stop"><div class="pt">3</div><div class="sheet body"><h3 class="display"><span>{t.p3}</span><small>7 {t.lessons}</small></h3><p>{t.p3_d}</p>
+        <div class="minis">{MODEL_NAMES.map(n => lessonHref[n]
+          ? <a class="mini" href={lessonHref[n]}><canvas class="board" data-m={n} aria-hidden="true"></canvas><span>{m(n)}</span></a>
+          : <div class="mini soon"><canvas class="board" data-m={n} aria-hidden="true"></canvas><span>{m(n)}</span><small>{t.soon}</small></div>
+        )}</div>
+      </div></li>
+      <li class="stop later"><div class="pt">4–9</div><div class="sheet body"><h3 class="display"><span>{t.later}</span></h3><p>{t.later_d}</p></div></li>
+      <li class="stop"><div class="pt">10</div><div class="sheet body"><h3 class="display"><span>{t.p10}</span><small>3 {t.lessons}</small></h3><p>{t.p10_d}</p></div></li>
+    </ol>
+  </section>
+
+  <section class="block" id="pick">
+    <h2 class="display">{t.pick_h}</h2>
+    <p class="sub">{t.pick_p}</p>
+    <div class="sheet picker">
+      <div class="qs">
+        <div class="qblock" data-q="1"><h3 class="display">{t.q1}</h3><div class="opts">
+          <button class="opt" data-v="num"><span>{t.q1a}</span><small>{t.q1a_d}</small></button>
+          <button class="opt" data-v="cat"><span>{t.q1b}</span><small>{t.q1b_d}</small></button>
+          <button class="opt" data-v="grp"><span>{t.q1c}</span><small>{t.q1c_d}</small></button></div></div>
+        <div class="qblock off" data-q="2"><h3 class="display">{t.q2}</h3><div class="opts">
+          <button class="opt" data-v="yes">{t.q2a}</button><button class="opt" data-v="no">{t.q2b}</button></div></div>
+        <div class="qblock off" data-q="3"><h3 class="display">{t.q3}</h3><div class="opts">
+          <button class="opt" data-v="clean">{t.q3a}</button><button class="opt" data-v="curvy">{t.q3b}</button><button class="opt" data-v="unsure">{t.q3c}</button></div></div>
+      </div>
+      <div class="result off" id="result" aria-live="polite"></div>
+    </div>
+  </section>
+  <script type="application/json" id="strings" set:html={json} />
+</Base>
+
+<style>
+  .hero { display: grid; grid-template-columns: 1fr 1.25fr; gap: 44px; align-items: center; padding: 34px 0 70px; }
+  h1 { font-size: 66px; line-height: .98; margin-bottom: 18px; }
+  .lede { font-size: 19.5px; color: var(--muted); margin-bottom: 26px; }
+  .ctas { display: flex; flex-wrap: wrap; gap: 12px; }
+  .stage { padding: 10px; min-width: 0; }
+  #hero { height: 380px; cursor: default; }
+  .now { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; padding: 12px 6px 4px; }
+  .now .label { margin: 0; }
+  .now b { font: 750 20px var(--display); letter-spacing: -.01em; }
+  .now span.shape { color: var(--muted); font-size: 15px; }
+  .algos { display: flex; flex-wrap: wrap; gap: 6px; padding: 8px 4px 4px; }
+  .algos .chip { font-size: 13px; padding: 3px 10px; }
+
+  section.block { padding: 40px 0; }
+  .block > h2 { font-size: 40px; line-height: 1.05; }
+  .block > p.sub { color: var(--muted); font-size: 18px; margin: 8px 0 26px; max-width: 36em; }
+
+  .route { list-style: none; position: relative; }
+  .route::before { content: ""; position: absolute; inset-inline-start: 27px; top: 30px; bottom: 30px; width: 2px; background: repeating-linear-gradient(var(--ink) 0 8px, transparent 8px 14px); opacity: .35; }
+  .stop { position: relative; display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: 18px; margin-bottom: 16px; }
+  .stop .pt { width: 56px; height: 56px; border-radius: 16px; display: grid; place-items: center; font: 600 20px var(--mono); background: var(--sheet); border: 1.5px solid var(--ink); box-shadow: 0 4px 0 var(--lift); z-index: 1; }
+  .stop.first .pt { background: var(--hl); color: #15202b; border-color: #d9b928; }
+  .stop .body { padding: 18px 22px; }
+  .stop h3 { font-size: 24px; line-height: 1.15; display: flex; justify-content: space-between; gap: 10px; }
+  .stop h3 small { font: 500 13px var(--mono); color: var(--muted); white-space: nowrap; }
+  .stop p { color: var(--muted); margin-top: 4px; }
+  .stop.later .pt { border-style: dashed; color: var(--muted); background: transparent; box-shadow: none; }
+  .stop.later .body { border-style: dashed; background: transparent; box-shadow: none; }
+  .minis { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 10px; margin-top: 14px; }
+  .mini { text-decoration: none; border: 1.5px solid var(--rule); border-radius: 12px; padding: 6px; background: var(--paper); transition: border-color .12s, transform .12s; }
+  a.mini:hover { border-color: var(--ink); transform: translateY(-2px); }
+  .mini canvas, .mini svg { width: 100%; height: 62px; display: block; border-radius: 7px; background: var(--sheet); }
+  a.mini canvas { cursor: pointer; }
+  .mini.soon canvas, .mini.soon svg { cursor: default; opacity: .7; }
+  .mini span { display: block; font-size: 13px; font-weight: 700; padding: 6px 2px 1px; line-height: 1.25; }
+  .mini small { display: block; font: 500 11px var(--mono); color: var(--muted); padding: 0 2px; }
+
+  .picker { padding: 28px 30px; }
+  .qs { display: grid; gap: 22px; }
+  .qblock.off { display: none; }
+  .qblock h3 { font-size: 21px; margin-bottom: 10px; }
+  .opts { display: flex; flex-wrap: wrap; gap: 10px; }
+  .opt { border: 1.5px solid var(--rule); background: var(--paper); color: var(--ink); border-radius: 14px; padding: 12px 16px; text-align: start; font: 700 16px var(--body); cursor: pointer; transition: border-color .12s, transform .12s; }
+  .opt small { display: block; font-weight: 400; color: var(--muted); font-size: 14px; }
+  .opt:hover { border-color: var(--muted); transform: translateY(-1px); }
+  .opt.on { border-color: var(--ink); background: var(--ink); color: var(--sheet); }
+  .opt.on small { color: inherit; opacity: .75; }
+  .result { margin-top: 26px; padding-top: 22px; border-top: 1.5px dashed var(--rule); }
+  .result.off { display: none; }
+  .result :global(h3) { font-size: 24px; margin-bottom: 12px; }
+  .result :global(.picks) { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; margin-bottom: 18px; }
+  .result :global(.pick) { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 12px; align-items: center; background: var(--paper); border-radius: 14px; padding: 10px; }
+  .result :global(.pick canvas) { width: 96px; height: 70px; border-radius: 8px; cursor: default; }
+  .result :global(.pick b) { display: block; font-size: 16px; }
+  .result :global(.pick small) { color: var(--muted); font-size: 13.5px; line-height: 1.35; display: block; }
+  .result :global(.rank) { font: 600 12px var(--mono); color: var(--muted); }
+  .result :global(p.plain) { max-width: 40em; margin-bottom: 14px; }
+  .result :global(.resrow) { display: flex; flex-wrap: wrap; gap: 10px; }
+
+  @media (max-width: 860px) {
+    .hero { grid-template-columns: 1fr; padding-bottom: 40px; } h1 { font-size: 46px; } #hero { height: 300px; }
+    .picker { padding: 20px; } .block > h2 { font-size: 32px; } .stop .body { padding: 16px; }
+    .stop { grid-template-columns: 44px minmax(0, 1fr); gap: 12px; } .stop .pt { width: 44px; height: 44px; font-size: 16px; border-radius: 13px; }
+    .route::before { inset-inline-start: 21px; }
+    .minis { grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; }
+    .result :global(.picks) { grid-template-columns: 1fr; }
+  }
+</style>
+
+<script>
+  import { Board } from '../engine/board';
+  import { Store, fitModel, MODEL_NAMES, type Model, type ModelName } from '../engine';
+
+  const S: Record<string, string> = JSON.parse(document.getElementById('strings')!.textContent!);
+  const $ = <T extends HTMLElement = HTMLElement>(s: string) => document.querySelector<T>(s)!;
+  const $$ = (s: string) => [...document.querySelectorAll<HTMLElement>(s)];
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // one shared dataset for every drawing on the page, so the shapes are comparable
+  const data = new Store();
+  data.preset('moons', 11);
+  data.points.forEach(p => (p.test = false));
+  const fitted = Object.fromEntries(MODEL_NAMES.map(n => [n, fitModel(n, {}, data.points)])) as Record<ModelName, Model>;
+  const thumb = (c: HTMLCanvasElement) => new Board(c, data, { static: true, cell: 3, dot: 1.8, tint: 0.3 }).setModel(fitted[c.dataset.m as ModelName]);
+
+  // hero: the same points, redrawn by each algorithm in turn
+  const hero = new Board($<HTMLCanvasElement>('#hero'), data, { static: true, cell: 5, dot: 4.5, tint: 0.24 });
+  let cur = 0, timer: number | undefined;
+  function show(i: number, animate = true) {
+    cur = i;
+    const n = MODEL_NAMES[i];
+    hero.setModel(fitted[n], animate);
+    $('#nowName').textContent = S[`m_${n}`];
+    $('#nowShape').textContent = S[`s_${n}`];
+    $$('.algos .chip').forEach(c => c.classList.toggle('on', c.dataset.m === n));
+  }
+  const stop = () => { clearInterval(timer); timer = undefined; };
+  const play = () => { if (!reduced && !timer) timer = window.setInterval(() => show((cur + 1) % MODEL_NAMES.length), 3200); };
+  $$('.algos .chip').forEach((b, i) => b.addEventListener('click', () => { stop(); show(i); }));
+  $('#stage').addEventListener('mouseenter', stop);
+  $('#stage').addEventListener('mouseleave', play);
+
+  // route thumbnails
+  $$('.minis canvas[data-m]').forEach(c => thumb(c as HTMLCanvasElement));
+
+  // picker
+  type Ans = Partial<Record<1 | 2 | 3, string>>;
+  const ans: Ans = {};
+  const TABLE: Record<string, ModelName[]> = {
+    'yes-clean': ['logistic', 'tree'], 'yes-curvy': ['tree', 'knn'], 'yes-unsure': ['tree', 'logistic', 'knn'],
+    'no-clean': ['svm', 'logistic'], 'no-curvy': ['ksvm', 'forest', 'knn'], 'no-unsure': ['forest', 'ksvm', 'knn'],
+  };
+  function recommend(): { plain: string } | { list: ModelName[] } | null {
+    if (ans[1] === 'num') return { plain: 'res_reg' };
+    if (ans[1] === 'grp') return { plain: 'res_clu' };
+    if (!ans[2] || !ans[3]) return null;
+    return { list: TABLE[`${ans[2]}-${ans[3]}`] };
+  }
+  const restartBtn = `<button class="btn ghost" data-restart>${S.restart}</button>`;
+  function renderResult() {
+    const r = recommend(), el = $('#result');
+    el.classList.toggle('off', !r);
+    if (!r) return;
+    if ('plain' in r) {
+      el.innerHTML = `<p class="plain">${S[r.plain]}</p><div class="resrow">${restartBtn}</div>`;
+    } else {
+      const picks = r.list.map((n, i) => `<div class="pick"><canvas class="board" data-m="${n}" aria-hidden="true"></canvas><div><span class="rank">#${i + 1}</span><b>${S[`m_${n}`]}</b><small>${S[`why_${n}`]}</small></div></div>`).join('');
+      el.innerHTML = `<h3 class="display">${S.res_h}</h3><div class="picks">${picks}</div>
+        <div class="resrow"><a class="btn" href="${S.compareUrl}?a=${r.list[0]}&b=${r.list[1]}">${S.res_compare} <span class="arr">→</span></a>${restartBtn}</div>`;
+      el.querySelectorAll('canvas').forEach(c => thumb(c));
+    }
+    el.querySelector('[data-restart]')!.addEventListener('click', () => {
+      delete ans[1]; delete ans[2]; delete ans[3];
+      $$('.opt').forEach(o => o.classList.remove('on'));
+      $$('.qblock').forEach(q => q.classList.toggle('off', q.dataset.q !== '1'));
+      renderResult();
+    });
+  }
+  $$('.qblock').forEach(q => q.querySelectorAll<HTMLElement>('.opt').forEach(o => o.addEventListener('click', () => {
+    const n = Number(q.dataset.q) as 1 | 2 | 3;
+    ans[n] = o.dataset.v;
+    q.querySelectorAll('.opt').forEach(x => x.classList.toggle('on', x === o));
+    if (n === 1) {
+      const cat = ans[1] === 'cat';
+      $$('.qblock').forEach(b => { const k = Number(b.dataset.q); if (k > 1) b.classList.toggle('off', !cat || (k === 3 && !ans[2])); });
+      if (!cat) { delete ans[2]; delete ans[3]; $$('.qblock:not([data-q="1"]) .opt').forEach(x => x.classList.remove('on')); }
+    }
+    if (n === 2) $('.qblock[data-q="3"]').classList.remove('off');
+    renderResult();
+  })));
+
+  show(0, false);
+  play();
+  requestAnimationFrame(() => requestAnimationFrame(() => $('#top').classList.add('lit')));
+</script>

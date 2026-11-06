@@ -1,0 +1,16 @@
+---
+import { common, href, type Lang } from '../i18n/ui';
+
+interface Props { lang: Lang; cur?: 'course' | 'compare' }
+const { lang, cur } = Astro.props;
+const t = common[lang];
+---
+<nav class="navlinks">
+  <a href={href(lang) + '#route'} class:list={{ cur: cur === 'course' }}>{t.nav_course}</a>
+  <a href={href(lang) + '#pick'}>{t.nav_pick}</a>
+  <a href={href(lang, 'compare/')} class:list={{ cur: cur === 'compare' }}>{t.nav_compare}</a>
+</nav>
+
+<style>
+  @media (max-width: 900px) { .navlinks { display: none; } }
+</style>
