@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>K-NN · Playful + calm</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Nunito:wght@500;700;800;900&family=Tajawal:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+  /* Playful structure (one step at a time, chunky buttons) dressed in the calm palette + serif headings. */
+  :root { --paper:#f7f4ee; --card:#fffdf9; --ink:#1f1d1a; --muted:#6d675e; --line:#e6dfd2; --a:#3b5bdb; --b:#e0435a; --accent:#c2620c; --mint:#1fb488; --sun:#f2c35b; --shadow:#e2d9c8; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:var(--paper); color:var(--ink); font:17px/1.65 Nunito, system-ui, sans-serif; min-height:100vh; -webkit-font-smoothing:antialiased; }
+  html[dir=rtl] body { font-family:Tajawal, Nunito, sans-serif; }
+  .serif { font-family:Fraunces, serif; letter-spacing:-.015em; font-weight:700; }
+  html[dir=rtl] .serif { font-family:Tajawal, sans-serif; letter-spacing:0; font-weight:800; }
+  .wrap { max-width:980px; margin:0 auto; padding:20px 20px 80px; }
+
+  header { display:flex; align-items:center; gap:16px; margin-bottom:28px; }
+  .brand { font-size:19px; } .brand span { color:var(--accent); }
+  .prog { flex:1; max-width:420px; margin-inline-start:auto; }
+  .prog small { color:var(--muted); font-weight:700; font-size:12.5px; }
+  .bar { height:8px; background:#ebe4d6; border-radius:99px; overflow:hidden; margin-top:3px; }
+  .bar i { display:block; height:100%; width:28%; background:linear-gradient(90deg,var(--mint),#6fdcb8); border-radius:99px; transition:width .5s; }
+  .lang { display:flex; border:1px solid var(--line); border-radius:999px; overflow:hidden; background:#fff; }
+  .lang button { border:0; background:none; padding:5px 13px; font:inherit; font-size:13px; font-weight:800; color:var(--muted); cursor:pointer; }
+  .lang button.on { background:var(--ink); color:var(--paper); }
+
+  .hero { display:flex; align-items:center; gap:22px; margin-bottom:24px; }
+  .badge { width:80px; height:80px; border-radius:22px; background:var(--sun); display:grid; place-items:center; font-size:38px; transform:rotate(-6deg); box-shadow:0 5px 0 #d9a73c; flex:none; }
+  .kicker { color:var(--accent); font-weight:800; font-size:13px; letter-spacing:.08em; text-transform:uppercase; }
+  h1 { font-size:46px; line-height:1.05; margin:2px 0 6px; }
+  .lede { color:var(--muted); font-size:19px; }
+
+  .tabs { display:flex; gap:10px; margin-bottom:18px; flex-wrap:wrap; }
+  .tab { border:1px solid var(--line); background:var(--card); border-radius:14px; padding:9px 18px 9px 10px; font:inherit; font-weight:800; cursor:pointer; color:var(--muted); box-shadow:0 3px 0 var(--shadow); display:flex; align-items:center; gap:9px; transition:.12s; }
+  html[dir=rtl] .tab { padding:9px 10px 9px 18px; }
+  .tab .n { width:26px; height:26px; border-radius:50%; background:#ebe4d6; display:grid; place-items:center; font-size:13px; }
+  .tab:hover { transform:translateY(-2px); }
+  .tab.on { background:var(--ink); border-color:var(--ink); color:#fff; box-shadow:0 3px 0 #000; } .tab.on .n { background:var(--sun); color:var(--ink); }
+  .tab.done .n { background:var(--mint); color:#fff; }
+
+  .card { background:var(--card); border:1px solid var(--line); border-radius:24px; padding:32px 34px; box-shadow:0 6px 0 var(--shadow); display:none; animation:pop .25s ease; }
+  .card.on { display:block; }
+  @keyframes pop { from { opacity:0; transform:translateY(8px); } }
+  h2 { font-size:28px; margin-bottom:12px; }
+  .read { max-width:640px; } /* calm reading measure inside playful cards */
+  p { margin-bottom:12px; }
+  code { background:#ece6da; padding:1px 6px; border-radius:5px; font-size:.86em; }
+  .steps { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin:20px 0; }
+  .step { background:var(--paper); border-radius:16px; padding:14px; font-size:15px; line-height:1.5; }
+  .step b.num { display:block; font-size:26px; color:var(--accent); font-family:Fraunces, serif; }
+  .note { background:#fff6e4; border:1px solid #f0dfbb; border-radius:14px; padding:13px 16px; font-size:15.5px; }
+
+  .play { display:grid; grid-template-columns:1fr 230px; gap:20px; }
+  .frame { border:1px solid var(--line); border-radius:16px; padding:10px; background:#fff; }
+  #board { width:100%; height:420px; border-radius:10px; cursor:crosshair; display:block; }
+  .cap { display:flex; justify-content:space-between; gap:12px; font-size:13.5px; color:var(--muted); padding:8px 4px 0; }
+  .side { display:flex; flex-direction:column; gap:12px; }
+  .box { background:var(--paper); border-radius:16px; padding:12px 14px; }
+  .box label { display:block; font-weight:800; font-size:12.5px; color:var(--muted); margin-bottom:5px; }
+  .big { font-size:36px; font-weight:900; line-height:1; transition:color .3s; }
+  input[type=range] { width:100%; accent-color:var(--accent); }
+  #khint { font-size:12.5px; font-weight:700; color:var(--accent); min-height:18px; line-height:1.35; margin-top:4px; }
+  .btns { display:flex; flex-wrap:wrap; gap:6px; }
+  .b { border:1.5px solid var(--line); background:#fff; border-radius:10px; padding:4px 10px; font:inherit; font-weight:700; font-size:13.5px; cursor:pointer; color:var(--ink); transition:.12s; }
+  .b:hover { border-color:#cfc5b3; } .b.on { border-color:var(--ink); background:var(--ink); color:#fff; }
+  .dot { display:inline-block; width:10px; height:10px; border-radius:50%; margin-inline-end:5px; }
+  .c0 { color:var(--a); } .c1 { color:var(--b); }
+
+  .q { font-weight:800; font-size:20px; margin-bottom:6px; }
+  .ans { display:block; width:100%; text-align:start; border:2px solid var(--line); background:#fff; border-radius:16px; padding:14px 18px; margin:10px 0; font:inherit; font-weight:700; cursor:pointer; color:var(--ink); box-shadow:0 3px 0 var(--shadow); transition:.12s; }
+  .ans:hover { transform:translateY(-2px); }
+  .ans.right { border-color:var(--mint); background:#ecfaf4; box-shadow:0 3px 0 var(--mint); }
+  .ans.wrong { border-color:var(--b); background:#fdf0f2; box-shadow:0 3px 0 var(--b); animation:shake .3s; }
+  @keyframes shake { 25% { transform:translateX(-6px); } 75% { transform:translateX(6px); } }
+  .fb { font-weight:700; } .fb.right { color:#11865f; } .fb.wrong { color:#c42f46; }
+
+  pre { background:#24211c; color:#f1ece2; border-radius:16px; padding:16px 18px; font-size:14px; overflow:auto; direction:ltr; text-align:left; }
+  pre .k { color:#f2c35b; } pre .n { color:#8fd3ff; }
+  .colab { display:inline-flex; align-items:center; gap:12px; background:var(--sun); color:var(--ink); text-decoration:none; font-weight:900; font-size:18px; padding:14px 24px; border-radius:16px; box-shadow:0 5px 0 #d9a73c; transition:.12s; margin:8px 0 6px; }
+  .colab:hover { transform:translateY(-2px); }
+
+  .navrow { display:flex; justify-content:space-between; margin-top:26px; }
+  .go { border:0; background:var(--ink); color:#fff; font:inherit; font-weight:800; padding:10px 22px; border-radius:14px; cursor:pointer; box-shadow:0 4px 0 #000; transition:.12s; }
+  .go:hover { transform:translateY(-2px); }
+  .go.ghost { background:#fff; color:var(--ink); border:1px solid var(--line); box-shadow:0 4px 0 var(--shadow); }
+  .arr { display:inline-block; } html[dir=rtl] .arr { transform:scaleX(-1); }
+
+  #confetti { position:fixed; inset:0; pointer-events:none; }
+  #toast { position:fixed; bottom:22px; left:50%; transform:translate(-50%,20px); background:var(--ink); color:#fff; padding:10px 18px; border-radius:12px; font-size:14px; font-weight:700; opacity:0; transition:.25s; pointer-events:none; }
+  #toast.show { opacity:1; transform:translate(-50%,0); }
+  @media (max-width:800px) { .play { grid-template-columns:1fr; } .steps { grid-template-columns:1fr 1fr; } h1 { font-size:34px; } .card { padding:22px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand serif">ML <span>Visual</span></div>
+    <div class="prog"><small data-i18n="progress"></small><div class="bar"><i id="pbar"></i></div></div>
+    <div class="lang"><button data-lang="en">EN</button><button data-lang="ar">ع</button></div>
+  </header>
+
+  <div class="hero">
+    <div class="badge">🏘️</div>
+    <div><div class="kicker" data-i18n="part"></div><h1 class="serif" data-i18n="title"></h1><div class="lede" data-i18n="lede"></div></div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab on" data-step="0"><span class="n">1</span><span data-i18n="s1"></span></button>
+    <button class="tab" data-step="1"><span class="n">2</span><span data-i18n="s2"></span></button>
+    <button class="tab" data-step="2"><span class="n">3</span><span data-i18n="s3"></span></button>
+    <button class="tab" data-step="3"><span class="n">4</span><span data-i18n="s4"></span></button>
+  </div>
+
+  <section class="card on">
+    <div class="read">
+      <h2 class="serif" data-i18n="idea_h"></h2>
+      <p data-i18n="idea_p"></p>
+    </div>
+    <div class="steps">
+      <div class="step"><b class="num">1</b><span data-i18n="step1"></span></div>
+      <div class="step"><b class="num">2</b><span data-i18n="step2"></span></div>
+      <div class="step"><b class="num">3</b><span data-i18n="step3"></span></div>
+      <div class="step"><b class="num">4</b><span data-i18n="step4"></span></div>
+    </div>
+    <div class="note"><b data-i18n="scaling_h"></b><br><span data-i18n="scaling_p"></span></div>
+    <div class="navrow"><span></span><button class="go" data-goto="1"><span data-i18n="s2"></span> <span class="arr">→</span></button></div>
+  </section>
+
+  <section class="card">
+    <h2 class="serif" data-i18n="play_h"></h2>
+    <div class="play">
+      <div class="frame">
+        <canvas id="board"></canvas>
+        <div class="cap"><span data-i18n="play_hint"></span></div>
+        <div class="cap"><span id="hover">&nbsp;</span></div>
+      </div>
+      <div class="side">
+        <div class="box"><label data-i18n="acc"></label><div class="big" id="acc">–</div><small><b id="npts">0</b> <span data-i18n="pts"></span></small></div>
+        <div class="box"><label><span data-i18n="k_label"></span>: <b id="kval">5</b></label><input id="k" type="range" min="1" max="25" value="5"><div id="khint"></div></div>
+        <div class="box"><label data-i18n="cls_label"></label><div class="btns">
+          <button class="b on" data-cls="0"><span class="dot" style="background:var(--a)"></span><span data-i18n="cls_a"></span></button>
+          <button class="b" data-cls="1"><span class="dot" style="background:var(--b)"></span><span data-i18n="cls_b"></span></button></div></div>
+        <div class="box"><label data-i18n="presets"></label><div class="btns">
+          <button class="b on" data-preset="blobs" data-i18n="p_blobs"></button><button class="b" data-preset="moons" data-i18n="p_moons"></button>
+          <button class="b" data-preset="circles" data-i18n="p_circles"></button><button class="b" data-preset="xor" data-i18n="p_xor"></button>
+          <button class="b" id="clear" data-i18n="clear"></button></div></div>
+      </div>
+    </div>
+    <div class="navrow"><button class="go ghost" data-goto="0"><span class="arr">←</span> <span data-i18n="s1"></span></button><button class="go" data-goto="2"><span data-i18n="s3"></span> <span class="arr">→</span></button></div>
+  </section>
+
+  <section class="card">
+    <div class="read">
+      <h2 class="serif" data-i18n="quiz_h"></h2>
+      <p class="q" data-i18n="q1"></p>
+      <button class="ans" data-ans="a1" data-i18n="a1"></button>
+      <button class="ans" data-ans="a2" data-i18n="a2"></button>
+      <button class="ans" data-ans="a3" data-i18n="a3"></button>
+      <p id="feedback" class="fb"></p>
+    </div>
+    <div class="navrow"><button class="go ghost" data-goto="1"><span class="arr">←</span> <span data-i18n="s2"></span></button><button class="go" data-goto="3"><span data-i18n="s4"></span> <span class="arr">→</span></button></div>
+  </section>
+
+  <section class="card">
+    <div class="read">
+      <h2 class="serif" data-i18n="toc4"></h2>
+<pre><span class="k">from</span> sklearn.neighbors <span class="k">import</span> KNeighborsClassifier
+classifier = KNeighborsClassifier(n_neighbors=<span class="n">5</span>)
+classifier.fit(X_train, y_train)
+y_pred = classifier.predict(X_test)</pre>
+      <p style="margin-top:16px;color:var(--muted)" data-i18n="colab_sub"></p>
+      <a class="colab" href="#colab">📓 <span data-i18n="colab"></span></a>
+    </div>
+    <div class="navrow"><button class="go ghost" data-goto="2"><span class="arr">←</span> <span data-i18n="s3"></span></button><button class="go"><span data-i18n="next"></span> <span class="arr">→</span></button></div>
+  </section>
+</div>
+<canvas id="confetti"></canvas>
+<div id="toast">On the real site this opens the notebook in Google Colab.</div>
+<script src="../shared/knn-playground.js"></script>
+<script src="../shared/content.js"></script>
+<script src="../shared/wire.js"></script>
+<script>
+  const tabs = document.querySelectorAll('.tab'), cards = document.querySelectorAll('.card');
+  function go(i) {
+    tabs.forEach((t, j) => { t.classList.toggle('on', j === i); if (j < i) t.classList.add('done'); });
+    cards.forEach((c, j) => c.classList.toggle('on', j === i));
+    document.getElementById('pbar').style.width = (28 + i * 4) + '%';
+  }
+  tabs.forEach(t => t.addEventListener('click', () => go(+t.dataset.step)));
+  document.querySelectorAll('[data-goto]').forEach(b => b.addEventListener('click', () => go(+b.dataset.goto)));
+
+  function confetti() {
+    const c = document.getElementById('confetti'), x = c.getContext('2d');
+    c.width = innerWidth; c.height = innerHeight;
+    const cols = ['#3b5bdb', '#e0435a', '#1fb488', '#f2c35b', '#c2620c'];
+    const bits = Array.from({ length: 80 }, () => ({ x: innerWidth / 2, y: innerHeight / 2, vx: (Math.random() - .5) * 14, vy: -Math.random() * 14 - 4, c: cols[Math.random() * 5 | 0], r: Math.random() * 6 + 3 }));
+    let f = 0; (function tick() {
+      x.clearRect(0, 0, c.width, c.height);
+      bits.forEach(b => { b.x += b.vx; b.y += b.vy; b.vy += .45; x.fillStyle = b.c; x.fillRect(b.x, b.y, b.r, b.r * 1.6); });
+      if (++f < 90) requestAnimationFrame(tick); else x.clearRect(0, 0, c.width, c.height);
+    })();
+  }
+  let lastAcc = null;
+  wireLesson({
+    colors: [[59,91,219],[224,67,90]], background: '#ffffff', tint: .18,
+    onAnswer: ok => ok && confetti(),
+    onUpdate: s => {
+      const el = document.getElementById('acc');
+      if (lastAcc != null && s.accuracy != null && s.accuracy !== lastAcc) {
+        el.style.color = s.accuracy > lastAcc ? 'var(--mint)' : 'var(--b)';
+        clearTimeout(el._t); el._t = setTimeout(() => el.style.color = '', 600);
+      }
+      lastAcc = s.accuracy;
+    },
+  });
+</script>
+</body>
+</html>

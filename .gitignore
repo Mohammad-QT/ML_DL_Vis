@@ -1,0 +1,10 @@
+# Original course files: reference only, never published (copyright belongs to the course authors)
+course_material/
+
+node_modules/
+dist/
+.astro/
+.DS_Store
+__pycache__/
+.ipynb_checkpoints/
+.claude/settings.local.json
