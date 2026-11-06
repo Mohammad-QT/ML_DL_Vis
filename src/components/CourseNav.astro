@@ -177,11 +177,15 @@ const chev = '<svg class="chev" viewBox="0 0 24 24" width="16" height="16" fill=
   }
 
   @media (max-width: 1099px) {
-    .rail { position: fixed; z-index: 40; top: 0; bottom: 0; inset-inline-start: 0; width: min(330px, 88vw); max-height: none; margin: 0;
-      border-radius: 0 20px 20px 0; border-block: 0; border-inline-start: 0;
-      transform: translateX(-104%); visibility: hidden; transition: transform .25s ease, visibility 0s .25s; }
-    :global(html[dir="rtl"]) .rail { transform: translateX(104%); border-radius: 20px 0 0 20px; }
-    :global(body.rail-open) .rail { transform: none; visibility: visible; transition: transform .25s ease; }
+    /* closed: not rendered at all, so it can't stick out past the screen edge (phones would let you pan to it) */
+    .rail { display: none; position: fixed; z-index: 40; top: 0; bottom: 0; inset-inline-start: 0; width: min(330px, 88vw); max-height: none; margin: 0;
+      border-radius: 0 20px 20px 0; border-block: 0; border-inline-start: 0; }
+    :global(html[dir="rtl"]) .rail { border-radius: 20px 0 0 20px; }
+    :global(body.rail-open) .rail { display: block; animation: slide-ltr .22s ease; }
+    :global(html[dir="rtl"] body.rail-open) .rail { animation-name: slide-rtl; }
+    @keyframes slide-ltr { from { transform: translateX(-100%); } }
+    @keyframes slide-rtl { from { transform: translateX(100%); } }
+    :global(body.rail-open) { overflow: hidden; }
     .x { display: grid; }
     .mini-toggle { display: none; }
     .scrim:not([hidden]) { display: block; position: fixed; inset: 0; z-index: 39; background: rgba(8, 14, 20, .45); }
