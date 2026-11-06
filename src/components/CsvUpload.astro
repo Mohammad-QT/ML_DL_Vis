@@ -1,19 +1,19 @@
 ---
-// "Use your own data" panel. The logic lives in src/csvui.ts; the CSV never leaves the browser.
+// "Your CSV" panel, shown inside the Compare page's data card when its tab is picked.
+// The logic lives in src/csvui.ts; the CSV never leaves the browser.
 import type { Lang } from '../i18n/ui';
 interface Props { lang: Lang; t: Record<string, string> }
 const { t } = Astro.props;
 const samples = [['customers.csv', t.c_s_customers], ['mpg.csv', t.c_s_mpg]];
 ---
-<div class="sheet csv" id="csv" data-csv>
+<div class="csv" id="csv" data-csv hidden>
   <div class="csv-row">
-    <span class="label">{t.c_h}</span>
-    <label class="chip csv-pick">{t.c_upload}<input type="file" accept=".csv,text/csv,text/plain,.tsv,.txt" hidden></label>
-    <span class="muted csv-try">{t.c_try}{" "}
+    <label class="btn ghost csv-pick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H6v18h12V7zM14 3v4h4M12 17v-6m0 0-3 3m3-3 3 3"/></svg>{t.c_upload}<input type="file" accept=".csv,text/csv,text/plain,.tsv,.txt" hidden></label>
+    <span class="csv-try">{t.c_try}{" "}
       {samples.map(([f, label], i) => <Fragment>{i > 0 && ' · '}<a href={`${import.meta.env.BASE_URL.replace(/\/?$/, '/')}samples/${f}`} download={f} data-sample={f}>{label}</a></Fragment>)}
     </span>
-    <span class="muted csv-private">{t.c_private}</span>
   </div>
+  <p class="muted csv-private"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>{t.c_private}</p>
   <div class="csv-fields" hidden>
     <p class="csv-file"><span class="muted">{t.c_file}</span> <bdi class="csv-name mono"></bdi></p>
     <div class="csv-grid">
@@ -29,14 +29,16 @@ const samples = [['customers.csv', t.c_s_customers], ['mpg.csv', t.c_s_mpg]];
 </div>
 
 <style>
-  .csv { padding: 14px 18px; margin-bottom: 18px; }
+  .csv { margin-top: 14px; padding-top: 14px; border-top: 1.5px dashed var(--rule); }
+  .csv[hidden], .csv-fields[hidden], .csv-msg[hidden], .csv-err[hidden] { display: none; }
   .csv-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
-  .csv-row .label { margin: 0; }
-  .csv-pick { cursor: pointer; }
+  .csv-pick { cursor: pointer; font-size: 15px; padding: 7px 14px; box-shadow: 0 3px 0 var(--lift); }
+  .csv-pick svg { width: 17px; height: 17px; }
   .csv-pick:focus-within { outline: 3px solid var(--a); outline-offset: 2px; }
-  .csv-try, .csv-private { font-size: 14px; }
+  .csv-try { font-size: 14.5px; }
+  .csv-private { display: flex; align-items: center; gap: 6px; font-size: 13.5px; margin-top: 8px; }
+  .csv-private svg { width: 14px; height: 14px; flex: none; }
   .csv-fields { margin-top: 12px; }
-  .csv-fields[hidden], .csv-msg[hidden], .csv-err[hidden] { display: none; }
   .csv-file { font-size: 14px; margin-bottom: 8px; }
   .csv-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
   .csv-grid label { display: block; }
