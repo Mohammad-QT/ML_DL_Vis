@@ -3,15 +3,16 @@
 import type { CollectionEntry } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import Board from './Board.astro';
-import { href, common, lesson, type Lang } from '../i18n/ui';
+import { href, common, lesson, sel as selText, type Lang } from '../i18n/ui';
 import { MODELS, type ModelName } from '../engine';
-import { CLASSIFICATION, lessonPath, notebookUrl, regPath } from '../lessons';
+import { CLASSIFICATION, lessonPath, notebookUrl, regPath, selPath } from '../lessons';
 
 interface Props { lang: Lang; entry: CollectionEntry<'lessons'> }
 const { lang, entry } = Astro.props;
 const d = entry.data;
 const c = common[lang];
 const t = lesson[lang];
+const sel = selText[lang];
 const name = (id: string) => c[`m_${id}` as keyof typeof c];
 const fill = (s: string, vars: Record<string, string | number>) => s.replace(/\{(\w+)\}/g, (_, k) => String(vars[k]));
 const n = CLASSIFICATION.indexOf(d.model as never) + 1;
@@ -117,7 +118,7 @@ const hl = (code: string) => code.replace(/&/g, '&amp;').replace(/</g, '&lt;')
       <button class="btn ghost" data-goto="2"><span class="arr">←</span> <span>{t.s3}</span></button>
       {next
         ? <a class="btn" href={href(lang, lessonPath(next))}><span>{fill(t.next, { m: name(next) })}</span> <span class="arr">→</span></a>
-        : <a class="btn" href={href(lang) + '#route'}><span>{t.route}</span> <span class="arr">→</span></a>}
+        : <a class="btn" href={href(lang, selPath('cv'))}><span>{fill(t.next, { m: sel[`n_cv`] })}</span> <span class="arr">→</span></a>}
     </div>
   </section>
 </Base>

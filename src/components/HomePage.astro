@@ -2,15 +2,17 @@
 // Course home, ported from sketches/home: live hero, the route, and the algorithm picker.
 import Base from '../layouts/Base.astro';
 import NavLinks from './NavLinks.astro';
-import { common, href, prep, type Lang } from '../i18n/ui';
+import { common, href, prep, sel, type Lang } from '../i18n/ui';
 import { home } from '../i18n/pages';
 import { MODEL_NAMES } from '../engine';
-import { CLASSIFICATION, REGRESSION, lessonPath, prepPath, regPath, type PrepId } from '../lessons';
+import { CLASSIFICATION, REGRESSION, SELECTION, lessonPath, prepPath, regPath, selPath, type PrepId } from '../lessons';
 
 interface Props { lang: Lang }
 const { lang } = Astro.props;
 const t = { ...common[lang], ...home[lang] };
 const pn = prep[lang];
+const sn = sel[lang];
+const SEL = SELECTION;
 const PART1: PrepId[] = ['missing', 'categories', 'split', 'scaling'];
 const m = (n: string) => t[`m_${n}` as keyof typeof t];
 const lessonHref: Record<string, string> = Object.fromEntries(CLASSIFICATION.map(id => [id, href(lang, lessonPath(id))]));
@@ -72,7 +74,8 @@ const REG: Array<[keyof typeof t, string]> = [
         )}</div>
       </div></li>
       <li class="stop later"><div class="pt">4–9</div><div class="sheet body"><h3 class="display"><span>{t.later}</span></h3><p>{t.later_d}</p></div></li>
-      <li class="stop"><div class="pt">10</div><div class="sheet body"><h3 class="display"><span>{t.p10}</span><small>3 {t.lessons}</small></h3><p>{t.p10_d}</p></div></li>
+      <li class="stop"><div class="pt">10</div><div class="sheet body"><h3 class="display"><a href={href(lang, selPath('cv'))}>{t.p10}</a><small>3 {t.lessons}</small></h3><p>{t.p10_d}</p>
+        <div class="links">{SEL.map(id => <a class="chip" href={href(lang, selPath(id))}>{sn[`n_${id}` as keyof typeof sn]}</a>)}</div></div></li>
     </ol>
   </section>
 

@@ -6,10 +6,10 @@ type Vec = [number, number];
 
 /**
  * Support vector machine trained with simplified SMO (Platt). Fine for a few hundred points.
- * Board coordinates are mapped to [-1, 1]. `C` and `gamma` are log10 values, as the sliders show them.
+ * Board coordinates are mapped to [-1, 1]. `C` and `gamma` are log10 values (C defaults to 10 for both kernels), as the sliders show them.
  */
 export function svm(kernel: 'linear' | 'rbf', p: { C?: number; gamma?: number }): Trainable {
-  const C = kernel === 'linear' ? Math.pow(10, p.C ?? 1) : 10;
+  const C = Math.pow(10, p.C ?? 1);
   const gamma = Math.pow(10, p.gamma ?? 1);
   const K = kernel === 'linear'
     ? (a: Vec, b: Vec) => a[0] * b[0] + a[1] * b[1]

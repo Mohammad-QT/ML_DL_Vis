@@ -1,0 +1,71 @@
+---
+id: grid
+short: Grid search
+title: Grid search
+lede: Settings like C and gamma change the model a lot. Grid search tries them all and keeps the one with the best cross-validated score.
+figure: { preset: circles, seed: 9, model: ksvm, caption: A Kernel SVM with a well-chosen gamma }
+steps_h: How grid search works
+steps:
+  - Choose the settings to try and a list of values for each. Together they make a grid.
+  - For every cell of the grid, run k-fold cross-validation and record the mean score.
+  - Pick the cell with the best mean score.
+  - Train the final model once on all the training data, using that cell's settings.
+caution:
+  h: Do not pick the best cell by its training score
+  p: 'A model can reach 100% on its training data by memorising it. Choose by the <mark>cross-validated</mark> score. A big gap between train and CV score is the sign of overfitting.'
+play:
+  p: 'The grid fills in while the page stays usable. Hover over a cell (or tap it) to see that cell''s boundary. The cell with a star has the best CV score. Then scan K-NN or a tree below the grid.'
+ui:
+  heat_h: 'Mean CV accuracy (%), Kernel SVM'
+  axis_c: C
+  axis_g: gamma
+  computing: 'Computing cell {n} of {t}…'
+  grid_done: 'Done. Each cell is a {k}-fold cross-validation.'
+  train: Train
+  cv: CV
+  gap: Gap
+  pts: pts
+  hover_hint: Hover over a cell to see its boundary and its scores.
+  v_over: 'Big gap: the model memorises the training folds. This is overfitting.'
+  v_under: 'Both scores are low: the model is too simple (underfitting).'
+  v_good: 'Train and CV are close and high. This is a good fit.'
+  new_data: New data
+  chart_h: One setting at a time
+  chip_knn: K-NN, k
+  chip_tree: Decision tree, depth
+  x_knn: k (neighbours)
+  x_tree: Depth
+  line_train: Train score
+  line_cv: CV score
+  best_at: 'Best CV score: {s} at {x}.'
+quiz:
+  - q: A cell scores 100% on training data but 82% in cross-validation. What is going on?
+    a:
+      - The model is overfitting
+      - The model is underfitting
+      - The grid is too small
+    correct: 0
+    right: 'Right. A large gap between train and CV means the model memorised the training folds and does worse on points it has not seen.'
+    wrong: 'Not this one. Train is much higher than CV, so the model has memorised the training data: <mark>overfitting</mark>.'
+  - q: You try 6 values of C and 6 values of gamma with 5-fold cross-validation. How many models does the search train?
+    a:
+      - '11'
+      - '36'
+      - '180'
+    correct: 2
+    right: 'Right. 6 × 6 = 36 cells, and each runs 5 folds: 36 × 5 = 180 models. This is why grids get slow fast.'
+    wrong: 'Not quite. Each of the 36 cells (6 × 6) needs a full 5-fold run, so 36 × 5 = 180 models.'
+code: |
+  from sklearn.model_selection import GridSearchCV
+  from sklearn.svm import SVC
+
+  grid = {"C": [0.1, 1, 10, 100], "gamma": [0.01, 0.1, 1, 10]}
+  search = GridSearchCV(SVC(kernel="rbf"), grid, cv=5)
+  search.fit(X_train, y_train)
+  print(search.best_params_, search.best_score_)
+---
+Most models have settings you choose before training: the <mark>hyperparameters</mark>. Kernel SVM has two. C says how hard the model tries to classify every training point. Gamma says how far a single point's influence reaches. Pick badly and the model is either too stiff or wildly bent.
+
+**Grid search** picks them with brute force. List a few values for each setting, try every combination, and score each one with cross-validation. The best mean CV score wins.
+
+Why not just use the training score? Because a bent enough model can fit the training points perfectly. The gap between the <mark>train score</mark> and the <mark>CV score</mark> is your overfitting meter. Look for the cell where the CV score is high and the gap is small.

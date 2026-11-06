@@ -1,0 +1,64 @@
+---
+id: boost
+short: XGBoost
+title: XGBoost and gradient boosting
+lede: Build the model one small tree at a time, where each new tree fixes the mistakes of the ones before it.
+figure: { preset: moons, seed: 4, model: tree, caption: Boosting adds many small trees like this one }
+steps_h: How boosting works
+steps:
+  - 'Start with a plain guess: the share of class B in the training data.'
+  - Measure each point's error, and fit a small tree that predicts those errors.
+  - 'Add that tree to the model, but only a small step of it (the <b>learning rate</b>).'
+  - Repeat for many rounds. Stop when the test score stops improving.
+caution:
+  h: More rounds is not always better
+  p: 'The training score keeps climbing as rounds pass. The test score stops, then can slip back. That is overfitting, and <mark>early stopping</mark> means stopping near the peak.'
+play:
+  p: 'Drag the round slider or press Play and watch the boundary sharpen. Lower the learning rate and it learns slower. Make the trees deeper and it overfits sooner. Look at the chart for the round where the test score peaks.'
+ui:
+  round: Round
+  prev: ← Back
+  next: Next →
+  play: Play
+  pause: Pause
+  lr: Learning rate
+  depth: Tree depth
+  new_data: New data
+  train: Train
+  test: Test
+  legend_test: Ringed points are test. Filled points train the model.
+  chart_h: Train and test score by round
+  line_train: Train score
+  line_test: Test score
+  best_round: 'Test score peaks at {s} in round {r}. Early stopping would stop there.'
+  note: 'This page uses a simplified gradient boosting that we wrote for the site: small trees, log-loss, a learning rate. The notebook uses the real <code>xgboost</code> library, which adds speed, regularisation and many more options.'
+quiz:
+  - q: What does each new tree in gradient boosting try to predict?
+    a:
+      - The final class
+      - The mistakes of the model so far
+      - A random sample of the data
+    correct: 1
+    right: 'Right. Each tree is trained on what the current model still gets wrong, so the errors shrink round by round.'
+    wrong: 'Not quite. A boosted tree does not predict the class. It predicts the <mark>errors</mark> left by the trees before it.'
+  - q: Train score is 100% and test score has been falling for ten rounds. What should you do?
+    a:
+      - Add more rounds
+      - Stop earlier, or use a lower learning rate or shallower trees
+      - Remove the test set
+    correct: 1
+    right: 'Right. That is overfitting. Early stopping picks the round where the test score was best.'
+    wrong: 'Not this one. More rounds would overfit further. Stop earlier, or make the model gentler.'
+code: |
+  from xgboost import XGBClassifier
+
+  model = XGBClassifier(n_estimators=200, learning_rate=0.1, max_depth=3,
+                        early_stopping_rounds=10, eval_metric="logloss")
+  model.fit(X_train, y_train, eval_set=[(X_test, y_test)], verbose=False)
+  print(model.best_iteration, model.score(X_test, y_test))
+---
+A single shallow tree is weak: it draws a few straight cuts and misses most of the pattern. **Gradient boosting** turns many weak trees into a strong model by adding them one at a time.
+
+Each round looks at where the model is still wrong and fits a new small tree to those errors. The new tree is added with a <mark>small weight</mark>, the learning rate, so no single tree can change the picture much. After many rounds the boundary becomes sharp.
+
+**XGBoost** is a fast, carefully engineered version of this idea. It wins many table-data competitions. The Play tab shows the idea on two features, with a simplified version we wrote for this site. In the notebook you use the real library.
