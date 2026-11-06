@@ -2,6 +2,7 @@
 // Course home, ported from sketches/home: live hero, the route, and the algorithm picker.
 import Base from '../layouts/Base.astro';
 import NavLinks from './NavLinks.astro';
+import CourseNav from './CourseNav.astro';
 import { common, href, fill, nav, prep, sel, type Lang } from '../i18n/ui';
 import { LESSONS, lessonName, partName } from '../course';
 import { home } from '../i18n/pages';
@@ -29,6 +30,7 @@ const nt = nav[lang];
 const course = LESSONS.map(l => ({ key: l.key, name: lessonName(lang, l), part: fill(nt.cont_part, { n: l.part, p: partName(lang, l.part) }), href: href(lang, l.path) }));
 const courseJson = JSON.stringify(course).replace(/</g, '\\u003c');
 
+const PAIRS: Array<[string, string, boolean?]> = [['logistic', 'ksvm'], ['tree', 'forest'], ['knn', 'nb'], ['linear', 'polynomial', true]];
 const dots = [[8, 40], [16, 35], [24, 35], [32, 28], [40, 27], [48, 20], [56, 18], [64, 11], [72, 9]];
 const REG: Array<[keyof typeof t, string]> = [
   ['r_lin', '<path d="M4 41 L76 7"/>'],
@@ -41,6 +43,7 @@ const REG: Array<[keyof typeof t, string]> = [
 ---
 <Base lang={lang} title={t.page_title} description={t.lede.replace(/<[^>]+>/g, '')}>
   <NavLinks slot="crumbs" lang={lang} cur="course" />
+  <CourseNav slot="rail" lang={lang} />
 
   <section class="hero" id="top">
     <div>
@@ -64,6 +67,24 @@ const REG: Array<[keyof typeof t, string]> = [
         <div class="algos">{MODEL_NAMES.map((n, i) => <button class:list={['chip', { on: i === 0 }]} data-m={n}>{m(n)}</button>)}</div>
       </figcaption>
     </figure>
+  </section>
+
+  <section class="sheet cmpfeat" id="compare" aria-labelledby="cmpfeat-h">
+    <div class="cf-text">
+      <span class="kick">{nt.cmpf_k}</span>
+      <h2 class="display" id="cmpfeat-h" set:html={nt.cmpf_h} />
+      <p>{nt.cmpf_p}</p>
+      <a class="btn hl" href={href(lang, 'compare/')}><span>{nt.cmpf_cta}</span> <span class="arr">→</span></a>
+      <p class="pairs-l">{nt.cmpf_try}</p>
+      <div class="pairs">{PAIRS.map(([a, b, reg]) => (
+        <a class="chip" href={href(lang, `compare/?a=${a}&b=${b}${reg ? '&task=reg' : ''}`)}>{m(a)} <span class="vs">{nt.vs}</span> {m(b)}</a>
+      ))}</div>
+    </div>
+    <a class="cf-boards" href={href(lang, 'compare/?a=logistic&b=ksvm')} aria-label={`${m('logistic')} ${nt.vs} ${m('ksvm')}`}>
+      <figure><canvas class="board" data-m="logistic" aria-hidden="true"></canvas><figcaption>{m('logistic')}</figcaption></figure>
+      <span class="vsbadge" aria-hidden="true">{nt.vs}</span>
+      <figure><canvas class="board" data-m="ksvm" aria-hidden="true"></canvas><figcaption>{m('ksvm')}</figcaption></figure>
+    </a>
   </section>
 
   <section class="block" id="route">
@@ -133,6 +154,24 @@ const REG: Array<[keyof typeof t, string]> = [
   .algos { display: flex; flex-wrap: wrap; gap: 6px; padding: 8px 4px 4px; }
   .algos .chip { font-size: 13px; padding: 3px 10px; }
 
+  .cmpfeat { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 36px; align-items: center; padding: 30px 34px; margin: 0 0 20px; border-color: var(--ink); }
+  .cmpfeat .kick { display: inline-block; font: 600 12px var(--mono); text-transform: uppercase; letter-spacing: .06em; background: var(--hl); color: #15202b; padding: 3px 9px; border-radius: 7px; }
+  :global(html[dir="rtl"]) .cmpfeat .kick { letter-spacing: 0; font-family: var(--body); }
+  .cmpfeat h2 { font-size: 40px; line-height: 1.05; margin: 12px 0 10px; }
+  .cmpfeat p { color: var(--muted); font-size: 17.5px; margin-bottom: 18px; max-width: 34em; }
+  .cmpfeat p.pairs-l { font-size: 14px; margin: 18px 0 8px; }
+  .pairs { display: flex; flex-wrap: wrap; gap: 6px; }
+  .pairs .chip { text-decoration: none; font-size: 13.5px; }
+  .pairs .vs, .vsbadge { font: 600 11px var(--mono); color: var(--muted); }
+  .cf-boards { position: relative; display: grid; grid-template-columns: 1fr 1fr; gap: 14px; text-decoration: none; color: var(--ink); }
+  .cf-boards figure { background: var(--paper); border: 1.5px solid var(--rule); border-radius: 16px; padding: 8px; transition: transform .15s, border-color .15s; }
+  .cf-boards figure:first-child { transform: rotate(-1.2deg); }
+  .cf-boards figure:last-child { transform: rotate(1.2deg); }
+  .cf-boards:hover figure { border-color: var(--ink); transform: none; }
+  .cf-boards canvas { height: 200px; cursor: pointer; }
+  .cf-boards figcaption { font-weight: 700; font-size: 14.5px; padding: 8px 4px 2px; }
+  .vsbadge { position: absolute; left: 50%; top: 44%; transform: translate(-50%, -50%); z-index: 1; width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: var(--ink); color: var(--sheet); font-size: 13px; box-shadow: 0 3px 0 var(--lift); }
+
   section.block { padding: 40px 0; }
   .block > h2 { font-size: 40px; line-height: 1.05; }
   .block > p.sub { color: var(--muted); font-size: 18px; margin: 8px 0 26px; max-width: 36em; }
@@ -195,6 +234,7 @@ const REG: Array<[keyof typeof t, string]> = [
 
   @media (max-width: 860px) {
     .hero { grid-template-columns: 1fr; padding-bottom: 40px; } h1 { font-size: 46px; } #hero { height: 300px; }
+    .cmpfeat { grid-template-columns: 1fr; padding: 22px; gap: 22px; } .cmpfeat h2 { font-size: 32px; } .cf-boards canvas { height: 150px; }
     .picker { padding: 20px; } .block > h2 { font-size: 32px; } .stop .body { padding: 16px; }
     .stop { grid-template-columns: 44px minmax(0, 1fr); gap: 12px; } .stop .pt { width: 44px; height: 44px; font-size: 16px; border-radius: 13px; }
     .route::before { inset-inline-start: 21px; }
@@ -246,7 +286,7 @@ const REG: Array<[keyof typeof t, string]> = [
   const regThumb = (c: HTMLCanvasElement) => new RegBoard(c, regData, { static: true, dot: 1.8 }).setReg(fitReg(c.dataset.r as RegModelName, {}, regData.points));
 
   // route thumbnails
-  $$('.minis canvas[data-m]').forEach(c => thumb(c as HTMLCanvasElement));
+  $$('.minis canvas[data-m], .cf-boards canvas[data-m]').forEach(c => thumb(c as HTMLCanvasElement));
 
   // picker
   type Ans = Partial<Record<1 | 2 | 3, string>>;
