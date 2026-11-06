@@ -6,12 +6,15 @@ import { common, type Lang } from '../i18n/ui';
 
 interface Props {
   lang: Lang;
-  model: ModelName;
+  /** Omit with `variant="figure"` to draw just the data, no model. */
+  model?: ModelName;
   params?: Params;
   preset?: PresetName;
   /** Fixed seed for the starting data. Presets picked later are random. */
   seed?: number;
   variant?: 'play' | 'figure';
+  /** "Beat the score": data is fixed, only the setting slider is live, and reaching `target` (0-100) test accuracy wins. */
+  challenge?: { target: number };
   /** Label for the model's tunable setting (the first entry in its params). */
   paramLabel?: string;
   /** Hint under the slider when the value is at or below `low.max` / at or above `high.min`. */
@@ -22,15 +25,18 @@ interface Props {
   tint?: number;
 }
 const {
-  lang, model, preset = 'blobs', seed = 3, variant = 'play', paramLabel, hints = {},
+  lang, model, preset = 'blobs', seed = 3, variant = 'play', challenge, paramLabel, hints = {},
   height = variant === 'figure' ? '190px' : '440px', cell, dot, tint,
 } = Astro.props;
 const t = common[lang];
-const params = { ...defaults(model), ...Astro.props.params };
-const specs: Record<string, ParamSpec> = MODELS[model].params;
+const params = model ? { ...defaults(model), ...Astro.props.params } : {};
+const specs: Record<string, ParamSpec> = model ? MODELS[model].params : {};
 const paramName = Object.keys(specs)[0];
 const spec = paramName ? specs[paramName] : undefined;
-const config = { model, params, preset, seed, variant, paramName, hints, cell, dot, tint };
+const log = !!spec?.log;
+/** Settings marked `log` are log10 values: show the real number, e.g. 10 instead of 1. */
+const show = (v: number) => (log ? String(Number((10 ** v).toPrecision(2))) : String(v));
+const config = { model, params, preset, seed, variant, paramName, hints, cell, dot, tint, log, target: challenge?.target };
 const presets = ['blobs', 'moons', 'circles', 'xor'] as const;
 ---
 {variant === 'figure' ? (
@@ -48,12 +54,21 @@ const presets = ['blobs', 'moons', 'circles', 'xor'] as const;
       </div>
       {spec && (
         <label class="box">
-          <span class="label">{paramLabel ?? paramName} · <b data-role="pval">{params[paramName]}</b></span>
+          <span class="label">{paramLabel ?? paramName} · <b data-role="pval">{show(params[paramName])}</b></span>
           <input type="range" data-role="param" min={spec.min} max={spec.max} step={spec.step} value={params[paramName]}>
           <div class="hint" data-role="hint"></div>
         </label>
       )}
-      <div class="box"><span class="label">{t.adding}</span><div class="chips">
+      {!spec && <div class="box"><span class="hint">{t.p_none}</span></div>}
+      {challenge && (
+        <div class="box goal">
+          <span class="label">{t.goal}</span>
+          <div class="num">{t.goal_test.replace('{t}', String(challenge.target))}</div>
+          <p class="win" data-role="win" hidden>{t.win}</p>
+          <p class="win" data-role="won" hidden>{t.win_before}</p>
+        </div>
+      )}
+      {!challenge && <><div class="box"><span class="label">{t.adding}</span><div class="chips">
         <button class="chip on" data-cls="0"><span class="swatch a"></span><span>{t.cls_a}</span></button>
         <button class="chip" data-cls="1"><span class="swatch b"></span><span>{t.cls_b}</span></button>
       </div></div>
@@ -61,7 +76,7 @@ const presets = ['blobs', 'moons', 'circles', 'xor'] as const;
         {presets.map(p => <button class:list={['chip', { on: p === preset }]} data-preset={p}>{t[`d_${p}`]}</button>)}
         <button class="chip" data-role="resplit">{t.resplit}</button>
         <button class="chip" data-role="clear">{t.clear}</button>
-      </div></div>
+      </div></div></>}
       <p class="legend"><span class="swatch ring"></span><span>{t.legend_test}</span></p>
     </div>
   </div>
@@ -90,40 +105,55 @@ const presets = ['blobs', 'moons', 'circles', 'xor'] as const;
   import { Store, fitModel, score, pct, isPreset, type ModelName, type Params, type PresetName, type Label } from '../engine';
 
   interface Config {
-    model: ModelName; params: Params; preset: PresetName; seed: number; variant: 'play' | 'figure';
+    model?: ModelName; params: Params; preset: PresetName; seed: number; variant: 'play' | 'figure';
     paramName?: string; hints: { low?: { max: number; text: string }; high?: { min: number; text: string } };
-    cell?: number; dot?: number; tint?: number;
+    cell?: number; dot?: number; tint?: number; log?: boolean; target?: number;
   }
 
   for (const root of document.querySelectorAll<HTMLElement>('[data-board]')) {
     const cfg: Config = JSON.parse(root.dataset.config!);
     const style = { cell: cfg.cell, dot: cfg.dot, tint: cfg.tint };
 
-    if (cfg.variant === 'figure') {
+    if (cfg.variant === 'figure' || !cfg.model) {
       // fixed data, every point trains: a fingerprint of the model's line
       const store = new Store();
       const board = new Board(root as HTMLCanvasElement, store, { static: true, ...style });
       store.preset(cfg.preset, cfg.seed);
       store.points.forEach(p => (p.test = false));
-      board.setModel(fitModel(cfg.model, cfg.params, store.points));
+      if (cfg.model) board.setModel(fitModel(cfg.model, cfg.params, store.points));
       continue;
     }
 
     const $ = <T extends Element = HTMLElement>(s: string) => root.querySelector<T>(s);
     const $$ = (s: string) => [...root.querySelectorAll<HTMLElement>(s)];
+    const model = cfg.model;
     const params = { ...cfg.params };
     let cls: Label = 0;
+    const storeKey = `mlv-beat-${model}`;
+    const won = $('[data-role="won"]'), win = $('[data-role="win"]');
+    if (cfg.target != null) {
+      try { if (localStorage.getItem(storeKey)) won!.hidden = false; } catch { /* storage blocked: the goal still works */ }
+    }
 
     const store = new Store({ testFrac: 0.25 });
     const board = new Board($<HTMLCanvasElement>('canvas')!, store, {
       ...style,
-      onAdd: (p, e) => store.add(p.x, p.y, (e.shiftKey ? 1 - cls : cls) as Label),
+      onAdd: cfg.target != null ? undefined : (p, e) => store.add(p.x, p.y, (e.shiftKey ? 1 - cls : cls) as Label),
     });
     const refit = () => {
-      const m = fitModel(cfg.model, params, store.train());
+      const m = fitModel(model, params, store.train());
       board.setModel(m);
+      const te = score(m, store.test());
       $('[data-role="train"]')!.textContent = pct(score(m, store.train()));
-      $('[data-role="test"]')!.textContent = pct(score(m, store.test()));
+      $('[data-role="test"]')!.textContent = pct(te);
+      if (cfg.target != null && te != null) {
+        const reached = Math.round(te * 100) >= cfg.target;
+        win!.hidden = !reached;
+        if (reached) {
+          won!.hidden = true;
+          try { localStorage.setItem(storeKey, '1'); } catch { /* storage blocked: success just isn't remembered */ }
+        }
+      }
     };
     store.subscribe(refit);
 
@@ -136,13 +166,14 @@ const presets = ['blobs', 'moons', 'circles', 'xor'] as const;
       };
       slider.addEventListener('input', () => {
         params[name] = Number(slider.value);
-        $('[data-role="pval"]')!.textContent = slider.value;
+        $('[data-role="pval"]')!.textContent = cfg.log ? String(Number((10 ** params[name]).toPrecision(2))) : slider.value;
         showHint();
         refit();
       });
       showHint();
     }
 
+    if (cfg.target != null) { store.preset(cfg.preset, cfg.seed); continue; }
     $$('[data-cls]').forEach(b => b.addEventListener('click', () => {
       cls = Number(b.dataset.cls) as Label;
       $$('[data-cls]').forEach(x => x.classList.toggle('on', x === b));
