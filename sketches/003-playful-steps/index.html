@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>K-NN · Playful steps</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800;900&family=Tajawal:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root { --bg:#fff8ec; --ink:#2b2340; --muted:#7a7290; --card:#fff; --a:#4f6bff; --b:#ff5d73; --mint:#2fd3a1; --sun:#ffc94d; --line:#efe6d6; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:var(--bg); color:var(--ink); font:17px/1.6 Nunito, system-ui, sans-serif; min-height:100vh; }
+  html[dir=rtl] body { font-family:Tajawal, Nunito, sans-serif; }
+  .wrap { max-width:980px; margin:0 auto; padding:20px 20px 80px; }
+  header { display:flex; align-items:center; gap:14px; margin-bottom:26px; }
+  .logo { width:40px; height:40px; border-radius:12px; background:var(--a); color:#fff; display:grid; place-items:center; font-weight:900; font-size:18px; box-shadow:0 4px 0 #3448c7; }
+  .prog { flex:1; }
+  .prog small { color:var(--muted); font-weight:700; font-size:13px; }
+  .bar { height:10px; background:#f1e6d2; border-radius:99px; overflow:hidden; margin-top:4px; }
+  .bar i { display:block; height:100%; width:28%; background:linear-gradient(90deg,var(--mint),#7be8c6); border-radius:99px; transition:width .5s; }
+  .lang { display:flex; gap:4px; }
+  .lang button { border:2px solid var(--line); background:#fff; border-radius:10px; padding:4px 12px; font:inherit; font-weight:800; font-size:14px; cursor:pointer; color:var(--muted); }
+  .lang button.on { border-color:var(--ink); color:var(--ink); }
+  .hero { display:flex; align-items:center; gap:22px; margin-bottom:22px; }
+  .badge { width:84px; height:84px; border-radius:24px; background:var(--sun); display:grid; place-items:center; font-size:40px; transform:rotate(-6deg); box-shadow:0 6px 0 #e0a92a; flex:none; }
+  .kicker { color:var(--a); font-weight:800; font-size:14px; }
+  h1 { font-size:42px; font-weight:900; line-height:1.1; letter-spacing:-.01em; }
+  .lede { color:var(--muted); font-size:18px; }
+  .tabs { display:flex; gap:10px; margin-bottom:18px; flex-wrap:wrap; }
+  .tab { border:0; background:#fff; border-radius:14px; padding:10px 18px; font:inherit; font-weight:800; cursor:pointer; color:var(--muted); box-shadow:0 3px 0 var(--line); display:flex; align-items:center; gap:8px; transition:.12s; }
+  .tab .n { width:24px; height:24px; border-radius:50%; background:var(--line); display:grid; place-items:center; font-size:13px; }
+  .tab:hover { transform:translateY(-2px); }
+  .tab.on { background:var(--ink); color:#fff; box-shadow:0 3px 0 #120d20; } .tab.on .n { background:var(--sun); color:var(--ink); }
+  .tab.done .n { background:var(--mint); color:#fff; }
+  .card { background:var(--card); border-radius:24px; padding:28px; box-shadow:0 6px 0 var(--line); display:none; animation:pop .25s ease; }
+  .card.on { display:block; }
+  @keyframes pop { from { opacity:0; transform:translateY(8px); } }
+  h2 { font-size:24px; font-weight:900; margin-bottom:10px; }
+  p { margin-bottom:12px; }
+  .steps { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin:18px 0; }
+  .step { background:var(--bg); border-radius:16px; padding:14px; font-size:15px; }
+  .step b.num { display:block; font-size:26px; color:var(--a); font-weight:900; }
+  .note { background:#eef1ff; border-radius:14px; padding:12px 16px; font-size:15px; }
+  code { background:#fff; padding:1px 6px; border-radius:6px; font-size:.88em; }
+  .play { display:grid; grid-template-columns:1fr 230px; gap:20px; }
+  #board { width:100%; height:420px; border-radius:18px; cursor:crosshair; display:block; border:3px solid var(--line); }
+  .side { display:flex; flex-direction:column; gap:14px; }
+  .box { background:var(--bg); border-radius:16px; padding:12px 14px; }
+  .box label { display:block; font-weight:800; font-size:13px; color:var(--muted); margin-bottom:6px; }
+  .big { font-size:36px; font-weight:900; line-height:1; }
+  input[type=range] { width:100%; accent-color:var(--a); }
+  .btns { display:flex; flex-wrap:wrap; gap:6px; }
+  .b { border:2px solid var(--line); background:#fff; border-radius:10px; padding:4px 10px; font:inherit; font-weight:700; font-size:13.5px; cursor:pointer; color:var(--ink); }
+  .b.on { border-color:var(--ink); }
+  .dot { display:inline-block; width:10px; height:10px; border-radius:50%; margin-inline-end:5px; }
+  #khint { font-size:13px; font-weight:700; color:var(--b); min-height:20px; margin-top:4px; }
+  #hover { font-size:14px; min-height:22px; margin-top:10px; color:var(--muted); }
+  .c0 { color:var(--a); } .c1 { color:var(--b); }
+  .ans { display:block; width:100%; text-align:start; border:3px solid var(--line); background:#fff; border-radius:16px; padding:14px 18px; margin:10px 0; font:inherit; font-weight:700; cursor:pointer; color:var(--ink); box-shadow:0 3px 0 var(--line); transition:.12s; }
+  .ans:hover { transform:translateY(-2px); }
+  .ans.right { border-color:var(--mint); background:#e9fbf4; box-shadow:0 3px 0 var(--mint); }
+  .ans.wrong { border-color:var(--b); background:#fff0f2; box-shadow:0 3px 0 var(--b); animation:shake .3s; }
+  @keyframes shake { 25% { transform:translateX(-6px); } 75% { transform:translateX(6px); } }
+  .fb { font-weight:700; } .fb.right { color:#11946b; } .fb.wrong { color:#d63a52; }
+  .colab { display:inline-flex; align-items:center; gap:12px; background:var(--sun); color:var(--ink); text-decoration:none; font-weight:900; font-size:18px; padding:14px 24px; border-radius:16px; box-shadow:0 5px 0 #e0a92a; transition:.12s; margin:8px 0 14px; }
+  .colab:hover { transform:translateY(-2px); }
+  pre { background:#2b2340; color:#efeaff; border-radius:16px; padding:16px 18px; font-size:14px; overflow:auto; direction:ltr; text-align:left; }
+  .navrow { display:flex; justify-content:space-between; margin-top:22px; }
+  .go { border:0; background:var(--a); color:#fff; font:inherit; font-weight:900; padding:10px 22px; border-radius:14px; cursor:pointer; box-shadow:0 4px 0 #3448c7; }
+  .go.ghost { background:#fff; color:var(--ink); box-shadow:0 4px 0 var(--line); }
+  #confetti { position:fixed; inset:0; pointer-events:none; }
+  #toast { position:fixed; bottom:22px; left:50%; transform:translate(-50%,20px); background:var(--ink); color:#fff; padding:10px 18px; border-radius:12px; font-size:14px; font-weight:700; opacity:0; transition:.25s; pointer-events:none; }
+  #toast.show { opacity:1; transform:translate(-50%,0); }
+  @media (max-width:800px) { .play { grid-template-columns:1fr; } .steps { grid-template-columns:1fr 1fr; } h1 { font-size:32px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">ML</div>
+    <div class="prog"><small data-i18n="progress"></small><div class="bar"><i id="pbar"></i></div></div>
+    <div class="lang"><button data-lang="en">EN</button><button data-lang="ar">ع</button></div>
+  </header>
+
+  <div class="hero">
+    <div class="badge">🏘️</div>
+    <div><div class="kicker" data-i18n="part"></div><h1 data-i18n="title"></h1><div class="lede" data-i18n="lede"></div></div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab on" data-step="0"><span class="n">1</span><span data-i18n="s1"></span></button>
+    <button class="tab" data-step="1"><span class="n">2</span><span data-i18n="s2"></span></button>
+    <button class="tab" data-step="2"><span class="n">3</span><span data-i18n="s3"></span></button>
+    <button class="tab" data-step="3"><span class="n">4</span><span data-i18n="s4"></span></button>
+  </div>
+
+  <section class="card on">
+    <h2 data-i18n="idea_h"></h2>
+    <p data-i18n="idea_p"></p>
+    <div class="steps">
+      <div class="step"><b class="num">1</b><span data-i18n="step1"></span></div>
+      <div class="step"><b class="num">2</b><span data-i18n="step2"></span></div>
+      <div class="step"><b class="num">3</b><span data-i18n="step3"></span></div>
+      <div class="step"><b class="num">4</b><span data-i18n="step4"></span></div>
+    </div>
+    <div class="note"><b data-i18n="scaling_h"></b><br><span data-i18n="scaling_p"></span></div>
+    <div class="navrow"><span></span><button class="go" data-goto="1"><span data-i18n="s2"></span> →</button></div>
+  </section>
+
+  <section class="card">
+    <h2 data-i18n="play_h"></h2>
+    <p data-i18n="play_hint" style="color:var(--muted);font-size:15px"></p>
+    <div class="play">
+      <div><canvas id="board"></canvas><div id="hover">&nbsp;</div></div>
+      <div class="side">
+        <div class="box"><label data-i18n="acc"></label><div class="big" id="acc">–</div><small><b id="npts">0</b> <span data-i18n="pts"></span></small></div>
+        <div class="box"><label><span data-i18n="k_label"></span>: <b id="kval">5</b></label><input id="k" type="range" min="1" max="25" value="5"><div id="khint"></div></div>
+        <div class="box"><label data-i18n="cls_label"></label><div class="btns">
+          <button class="b on" data-cls="0"><span class="dot" style="background:var(--a)"></span><span data-i18n="cls_a"></span></button>
+          <button class="b" data-cls="1"><span class="dot" style="background:var(--b)"></span><span data-i18n="cls_b"></span></button></div></div>
+        <div class="box"><label data-i18n="presets"></label><div class="btns">
+          <button class="b on" data-preset="blobs" data-i18n="p_blobs"></button><button class="b" data-preset="moons" data-i18n="p_moons"></button>
+          <button class="b" data-preset="circles" data-i18n="p_circles"></button><button class="b" data-preset="xor" data-i18n="p_xor"></button>
+          <button class="b" id="clear" data-i18n="clear"></button></div></div>
+      </div>
+    </div>
+    <div class="navrow"><button class="go ghost" data-goto="0">← <span data-i18n="s1"></span></button><button class="go" data-goto="2"><span data-i18n="s3"></span> →</button></div>
+  </section>
+
+  <section class="card">
+    <h2 data-i18n="quiz_h"></h2>
+    <p data-i18n="q1" style="font-weight:800;font-size:19px"></p>
+    <button class="ans" data-ans="a1" data-i18n="a1"></button>
+    <button class="ans" data-ans="a2" data-i18n="a2"></button>
+    <button class="ans" data-ans="a3" data-i18n="a3"></button>
+    <p id="feedback" class="fb"></p>
+    <div class="navrow"><button class="go ghost" data-goto="1">← <span data-i18n="s2"></span></button><button class="go" data-goto="3"><span data-i18n="s4"></span> →</button></div>
+  </section>
+
+  <section class="card">
+    <h2 data-i18n="toc4"></h2>
+<pre>from sklearn.neighbors import KNeighborsClassifier
+classifier = KNeighborsClassifier(n_neighbors=5)
+classifier.fit(X_train, y_train)</pre>
+    <p style="margin-top:16px" data-i18n="colab_sub"></p>
+    <a class="colab" href="#colab">📓 <span data-i18n="colab"></span></a>
+    <div class="navrow"><button class="go ghost" data-goto="2">← <span data-i18n="s3"></span></button><button class="go" data-i18n="next"></button></div>
+  </section>
+</div>
+<canvas id="confetti"></canvas>
+<div id="toast">On the real site this opens the notebook in Google Colab.</div>
+<script src="../shared/knn-playground.js"></script>
+<script src="../shared/content.js"></script>
+<script src="../shared/wire.js"></script>
+<script>
+  const tabs = document.querySelectorAll('.tab'), cards = document.querySelectorAll('.card');
+  function go(i) {
+    tabs.forEach((t, j) => { t.classList.toggle('on', j === i); if (j < i) t.classList.add('done'); });
+    cards.forEach((c, j) => c.classList.toggle('on', j === i));
+    document.getElementById('pbar').style.width = (28 + i * 4) + '%';
+  }
+  tabs.forEach(t => t.addEventListener('click', () => go(+t.dataset.step)));
+  document.querySelectorAll('[data-goto]').forEach(b => b.addEventListener('click', () => go(+b.dataset.goto)));
+
+  function confetti() {
+    const c = document.getElementById('confetti'), x = c.getContext('2d');
+    c.width = innerWidth; c.height = innerHeight;
+    const cols = ['#4f6bff', '#ff5d73', '#2fd3a1', '#ffc94d'];
+    const bits = Array.from({ length: 90 }, () => ({ x: innerWidth / 2, y: innerHeight / 2, vx: (Math.random() - .5) * 14, vy: -Math.random() * 14 - 4, c: cols[Math.random() * 4 | 0], r: Math.random() * 6 + 3 }));
+    let f = 0; (function tick() {
+      x.clearRect(0, 0, c.width, c.height);
+      bits.forEach(b => { b.x += b.vx; b.y += b.vy; b.vy += .45; x.fillStyle = b.c; x.fillRect(b.x, b.y, b.r, b.r * 1.6); });
+      if (++f < 90) requestAnimationFrame(tick); else x.clearRect(0, 0, c.width, c.height);
+    })();
+  }
+  wireLesson({ colors:[[79,107,255],[255,93,115]], background:'#ffffff', tint:.2, onAnswer: ok => ok && confetti() });
+</script>
+</body>
+</html>

@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>K-NN · Lab split</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root { --bg:#0d1117; --panel:#151b24; --panel2:#1b2330; --line:#263042; --ink:#e6edf3; --muted:#8b98a9; --a:#3b82f6; --b:#f43f5e; --accent:#22d3ee; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:var(--bg); color:var(--ink); font:15px/1.6 Inter, system-ui, sans-serif; height:100vh; display:grid; grid-template-rows:auto 1fr; }
+  html[dir=rtl] body { font-family:"IBM Plex Sans Arabic", Inter, sans-serif; }
+  .top { display:flex; align-items:center; gap:18px; padding:10px 18px; border-bottom:1px solid var(--line); background:var(--panel); }
+  .brand { font-family:"JetBrains Mono", monospace; font-weight:600; font-size:14px; } .brand span { color:var(--accent); }
+  .crumbs { color:var(--muted); font-size:13px; }
+  .spacer { flex:1; }
+  .seg { display:flex; background:var(--bg); border:1px solid var(--line); border-radius:7px; padding:2px; }
+  .seg button { background:none; border:0; color:var(--muted); font:inherit; font-size:12px; padding:4px 10px; border-radius:5px; cursor:pointer; }
+  .seg button.on { background:var(--panel2); color:var(--ink); }
+  main { display:grid; grid-template-columns:200px minmax(320px, 440px) 1fr; min-height:0; }
+  nav { border-inline-end:1px solid var(--line); padding:16px 10px; overflow:auto; font-size:13px; }
+  nav h4 { font-size:11px; text-transform:uppercase; letter-spacing:.1em; color:var(--muted); margin:14px 8px 6px; }
+  nav a { display:flex; justify-content:space-between; color:var(--muted); text-decoration:none; padding:5px 8px; border-radius:6px; }
+  nav a:hover { background:var(--panel); color:var(--ink); } nav a.cur { background:var(--panel2); color:var(--ink); }
+  nav a .ok { color:#22c55e; }
+  .lesson { overflow:auto; padding:26px 26px 60px; border-inline-end:1px solid var(--line); }
+  .kicker { font-family:"JetBrains Mono", monospace; font-size:12px; color:var(--accent); }
+  h1 { font-size:30px; font-weight:700; letter-spacing:-.02em; margin:6px 0 8px; }
+  .lede { color:var(--muted); margin-bottom:22px; }
+  h2 { font-size:16px; font-weight:600; margin:26px 0 8px; }
+  p { color:#c3cdd9; margin-bottom:10px; } b { color:var(--ink); }
+  ol { padding-inline-start:20px; color:#c3cdd9; } li { margin:4px 0; }
+  code, pre { font-family:"JetBrains Mono", monospace; font-size:12.5px; }
+  p code { background:var(--panel2); padding:1px 5px; border-radius:4px; color:var(--accent); }
+  pre { background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:12px 14px; overflow:auto; direction:ltr; text-align:left; color:#c3cdd9; }
+  pre .k { color:#c084fc; } pre .s { color:#86efac; } pre .n { color:#fbbf24; }
+  .colab { display:flex; align-items:center; gap:10px; margin-top:10px; background:#f9ab00; color:#1b1300; font-weight:600; text-decoration:none; padding:9px 14px; border-radius:7px; font-size:14px; width:max-content; }
+  .colab:hover { filter:brightness(1.08); }
+  .sub { font-size:13px; color:var(--muted); margin-top:6px; }
+  .q { font-weight:600; color:var(--ink); }
+  .ans { display:block; width:100%; text-align:start; background:var(--panel); border:1px solid var(--line); color:var(--ink); border-radius:8px; padding:10px 12px; margin:7px 0; font:inherit; font-size:14px; cursor:pointer; }
+  .ans:hover { border-color:#3a475d; } .ans.right { border-color:#22c55e; background:#0f2a1a; } .ans.wrong { border-color:var(--b); background:#2a1018; }
+  .fb { font-size:13.5px; } .fb.right { color:#4ade80; } .fb.wrong { color:#fb7185; }
+  .lab { display:grid; grid-template-rows:auto 1fr auto; min-height:0; }
+  .toolbar { display:flex; flex-wrap:wrap; gap:14px; align-items:center; padding:10px 16px; border-bottom:1px solid var(--line); font-size:12.5px; color:var(--muted); }
+  .chip { background:var(--panel); border:1px solid var(--line); color:var(--ink); border-radius:6px; padding:4px 10px; font:inherit; font-size:12.5px; cursor:pointer; }
+  .chip:hover { border-color:#3a475d; } .chip.on { border-color:var(--accent); color:var(--accent); }
+  .dot { display:inline-block; width:8px; height:8px; border-radius:50%; margin-inline-end:6px; }
+  .stage { position:relative; padding:14px; min-height:0; }
+  #board { width:100%; height:100%; border-radius:10px; border:1px solid var(--line); cursor:crosshair; display:block; }
+  .hud { position:absolute; top:26px; inset-inline-end:26px; background:rgba(13,17,23,.85); border:1px solid var(--line); border-radius:8px; padding:10px 14px; font-family:"JetBrains Mono", monospace; font-size:12px; min-width:170px; backdrop-filter:blur(6px); }
+  .hud div { display:flex; justify-content:space-between; gap:16px; } .hud b { font-size:14px; }
+  .c0 { color:var(--a); } .c1 { color:var(--b); }
+  .dock { display:grid; grid-template-columns:auto 1fr; gap:6px 18px; align-items:center; padding:12px 18px 16px; border-top:1px solid var(--line); background:var(--panel); font-size:13px; }
+  .dock label { color:var(--muted); font-family:"JetBrains Mono", monospace; font-size:12px; }
+  input[type=range] { width:100%; accent-color:var(--accent); }
+  #khint { grid-column:2; color:var(--accent); font-size:12px; min-height:18px; }
+  #hover { font-size:12.5px; color:var(--muted); }
+  #toast { position:fixed; bottom:20px; left:50%; transform:translate(-50%,20px); background:var(--accent); color:#00151a; padding:9px 16px; border-radius:7px; font-size:13px; font-weight:600; opacity:0; transition:.25s; pointer-events:none; }
+  #toast.show { opacity:1; transform:translate(-50%,0); }
+  @media (max-width:1000px) { main { grid-template-columns:1fr; } nav { display:none; } body { height:auto; } .lab { min-height:560px; } }
+</style>
+</head>
+<body>
+<div class="top">
+  <div class="brand">ml<span>.lab</span></div>
+  <div class="crumbs" data-i18n="part"></div>
+  <div class="spacer"></div>
+  <div class="seg"><button data-lang="en">EN</button><button data-lang="ar">ع</button></div>
+</div>
+<main>
+  <nav>
+    <h4>Regression</h4>
+    <a href="#">Simple Linear <span class="ok">✓</span></a><a href="#">Multiple Linear <span class="ok">✓</span></a><a href="#">Polynomial</a><a href="#">SVR</a><a href="#">Decision Tree</a><a href="#">Random Forest</a>
+    <h4>Classification</h4>
+    <a href="#">Logistic Regression <span class="ok">✓</span></a><a href="#" class="cur">K-NN</a><a href="#">SVM</a><a href="#">Kernel SVM</a><a href="#">Naive Bayes</a><a href="#">Decision Tree</a><a href="#">Random Forest</a>
+    <h4>Model Selection</h4>
+    <a href="#">k-Fold CV</a><a href="#">Grid Search</a><a href="#">Model Arena</a>
+  </nav>
+
+  <section class="lesson">
+    <div class="kicker">03.02</div>
+    <h1 data-i18n="title"></h1>
+    <p class="lede" data-i18n="lede"></p>
+    <h2 data-i18n="idea_h"></h2>
+    <p data-i18n="idea_p"></p>
+    <h2 data-i18n="steps_h"></h2>
+    <ol><li data-i18n="step1"></li><li data-i18n="step2"></li><li data-i18n="step3"></li><li data-i18n="step4"></li></ol>
+    <h2 data-i18n="scaling_h"></h2>
+    <p data-i18n="scaling_p"></p>
+    <h2 data-i18n="toc4"></h2>
+<pre><span class="k">from</span> sklearn.neighbors <span class="k">import</span> KNeighborsClassifier
+classifier = KNeighborsClassifier(n_neighbors=<span class="n">5</span>)
+classifier.fit(X_train, y_train)
+y_pred = classifier.predict(X_test)</pre>
+    <a class="colab" href="#colab">▶ <span data-i18n="colab"></span></a>
+    <div class="sub" data-i18n="colab_sub"></div>
+    <h2 data-i18n="quiz_h"></h2>
+    <p class="q" data-i18n="q1"></p>
+    <button class="ans" data-ans="a1" data-i18n="a1"></button>
+    <button class="ans" data-ans="a2" data-i18n="a2"></button>
+    <button class="ans" data-ans="a3" data-i18n="a3"></button>
+    <p id="feedback" class="fb"></p>
+  </section>
+
+  <section class="lab">
+    <div class="toolbar">
+      <span data-i18n="presets"></span>
+      <button class="chip on" data-preset="blobs" data-i18n="p_blobs"></button>
+      <button class="chip" data-preset="moons" data-i18n="p_moons"></button>
+      <button class="chip" data-preset="circles" data-i18n="p_circles"></button>
+      <button class="chip" data-preset="xor" data-i18n="p_xor"></button>
+      <button class="chip" id="clear" data-i18n="clear"></button>
+      <span class="spacer" style="flex:1"></span>
+      <span data-i18n="cls_label"></span>
+      <button class="chip on" data-cls="0"><span class="dot" style="background:var(--a)"></span><span data-i18n="cls_a"></span></button>
+      <button class="chip" data-cls="1"><span class="dot" style="background:var(--b)"></span><span data-i18n="cls_b"></span></button>
+    </div>
+    <div class="stage">
+      <canvas id="board"></canvas>
+      <div class="hud">
+        <div><span data-i18n="acc"></span><b id="acc">–</b></div>
+        <div><span>K</span><b id="kval">5</b></div>
+        <div><span data-i18n="pts"></span><b id="npts">0</b></div>
+      </div>
+    </div>
+    <div class="dock">
+      <label for="k">n_neighbors</label><input id="k" type="range" min="1" max="25" value="5">
+      <span></span><div id="khint"></div>
+      <span></span><div id="hover">&nbsp;</div>
+    </div>
+  </section>
+</main>
+<div id="toast">On the real site this opens the notebook in Google Colab.</div>
+<script src="../shared/knn-playground.js"></script>
+<script src="../shared/content.js"></script>
+<script src="../shared/wire.js"></script>
+<script>wireLesson({ colors:[[59,130,246],[244,63,94]], background:'#0f141c', tint:.32 });</script>
+</body>
+</html>

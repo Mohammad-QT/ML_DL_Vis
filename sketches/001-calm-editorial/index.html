@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>K-NN · Calm editorial</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,650&family=Inter:wght@400;500;600&family=IBM+Plex+Sans+Arabic:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root { --paper:#f7f4ee; --ink:#1f1d1a; --muted:#6d675e; --line:#e3ddd2; --a:#2563eb; --b:#dc2626; --accent:#b45309; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body { background:var(--paper); color:var(--ink); font:17px/1.7 Inter, system-ui, sans-serif; -webkit-font-smoothing:antialiased; }
+  html[dir=rtl] body { font-family:"IBM Plex Sans Arabic", Inter, sans-serif; }
+  header { max-width:1040px; margin:0 auto; padding:22px 24px; display:flex; justify-content:space-between; align-items:center; }
+  .brand { font-family:Fraunces, serif; font-weight:650; font-size:19px; letter-spacing:-.01em; }
+  .brand span { color:var(--accent); }
+  .lang { display:flex; border:1px solid var(--line); border-radius:999px; overflow:hidden; }
+  .lang button { border:0; background:none; padding:5px 13px; font:inherit; font-size:13px; color:var(--muted); cursor:pointer; }
+  .lang button.on { background:var(--ink); color:var(--paper); }
+  article { max-width:680px; margin:0 auto; padding:24px 24px 120px; }
+  .kicker { font-size:13px; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); font-weight:600; }
+  h1 { font-family:Fraunces, serif; font-weight:650; font-size:52px; line-height:1.05; letter-spacing:-.02em; margin:10px 0 14px; }
+  html[dir=rtl] h1, html[dir=rtl] h2 { font-family:"IBM Plex Sans Arabic", sans-serif; letter-spacing:0; }
+  .lede { font-size:21px; color:var(--muted); margin-bottom:44px; }
+  h2 { font-family:Fraunces, serif; font-weight:650; font-size:27px; margin:52px 0 12px; letter-spacing:-.01em; }
+  p { margin-bottom:14px; }
+  ol { padding-inline-start:22px; } li { margin:6px 0; }
+  code { background:#ebe5d9; padding:1px 6px; border-radius:4px; font-size:.88em; }
+  figure { margin:28px -120px; background:#fff; border:1px solid var(--line); border-radius:14px; padding:18px; box-shadow:0 1px 0 rgba(0,0,0,.02), 0 14px 40px -24px rgba(60,40,10,.25); }
+  #board { width:100%; height:400px; border-radius:8px; cursor:crosshair; display:block; }
+  .controls { display:flex; flex-wrap:wrap; gap:18px 26px; align-items:center; margin-top:16px; font-size:14px; }
+  .group { display:flex; gap:6px; align-items:center; }
+  .group label { color:var(--muted); margin-inline-end:4px; }
+  .pill { border:1px solid var(--line); background:#fff; border-radius:999px; padding:4px 12px; font:inherit; font-size:13px; cursor:pointer; color:var(--ink); }
+  .pill:hover { border-color:#c9c0b0; } .pill.on { background:var(--ink); color:#fff; border-color:var(--ink); }
+  .dot { display:inline-block; width:9px; height:9px; border-radius:50%; margin-inline-end:6px; vertical-align:middle; }
+  input[type=range] { accent-color:var(--accent); width:140px; }
+  figcaption { display:flex; justify-content:space-between; gap:12px; font-size:13px; color:var(--muted); margin-top:12px; border-top:1px solid var(--line); padding-top:10px; }
+  .stat b { color:var(--ink); font-size:15px; }
+  .c0 { color:var(--a); } .c1 { color:var(--b); }
+  #khint { font-size:13px; color:var(--accent); min-height:20px; margin-top:6px; }
+  .colab { display:flex; gap:18px; align-items:center; text-decoration:none; color:inherit; border:1px solid var(--line); background:#fff; border-radius:12px; padding:18px 20px; margin:26px 0; transition:.15s; }
+  .colab:hover { border-color:var(--accent); transform:translateY(-1px); }
+  .colab .ico { width:44px; height:44px; border-radius:10px; background:#fdf2e3; display:grid; place-items:center; font-size:22px; flex:none; }
+  .colab strong { display:block; } .colab small { color:var(--muted); font-size:14px; }
+  .colab .arr { margin-inline-start:auto; color:var(--accent); font-size:20px; }
+  html[dir=rtl] .colab .arr { transform:scaleX(-1); }
+  .quiz { border-top:2px solid var(--ink); padding-top:18px; }
+  .q { font-weight:600; margin-bottom:12px; }
+  .ans { display:block; width:100%; text-align:start; background:none; border:1px solid var(--line); border-radius:10px; padding:12px 16px; margin:8px 0; font:inherit; cursor:pointer; color:var(--ink); }
+  .ans:hover { background:#fff; } .ans.right { border-color:#16a34a; background:#f0fdf4; } .ans.wrong { border-color:var(--b); background:#fef2f2; }
+  .fb { margin-top:10px; font-size:15px; } .fb.right { color:#15803d; } .fb.wrong { color:#b91c1c; }
+  .next { display:inline-block; margin-top:48px; color:var(--accent); font-weight:600; text-decoration:none; border-bottom:1px solid; }
+  #toast { position:fixed; bottom:24px; left:50%; transform:translate(-50%,20px); background:var(--ink); color:#fff; padding:10px 18px; border-radius:8px; font-size:14px; opacity:0; transition:.25s; pointer-events:none; }
+  #toast.show { opacity:1; transform:translate(-50%,0); }
+  @media (max-width:960px) { figure { margin:28px 0; } h1 { font-size:40px; } }
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">ML <span>Visual</span></div>
+  <div class="lang"><button data-lang="en">EN</button><button data-lang="ar">ع</button></div>
+</header>
+<article>
+  <div class="kicker" data-i18n="part"></div>
+  <h1 data-i18n="title"></h1>
+  <p class="lede" data-i18n="lede"></p>
+
+  <h2 data-i18n="idea_h"></h2>
+  <p data-i18n="idea_p"></p>
+
+  <figure>
+    <canvas id="board"></canvas>
+    <div id="khint"></div>
+    <div class="controls">
+      <div class="group"><label data-i18n="k_label"></label><input id="k" type="range" min="1" max="25" value="5"><b id="kval">5</b></div>
+      <div class="group"><label data-i18n="cls_label"></label>
+        <button class="pill on" data-cls="0"><span class="dot" style="background:var(--a)"></span><span data-i18n="cls_a"></span></button>
+        <button class="pill" data-cls="1"><span class="dot" style="background:var(--b)"></span><span data-i18n="cls_b"></span></button>
+      </div>
+      <div class="group"><label data-i18n="presets"></label>
+        <button class="pill on" data-preset="blobs" data-i18n="p_blobs"></button>
+        <button class="pill" data-preset="moons" data-i18n="p_moons"></button>
+        <button class="pill" data-preset="circles" data-i18n="p_circles"></button>
+        <button class="pill" data-preset="xor" data-i18n="p_xor"></button>
+        <button class="pill" id="clear" data-i18n="clear"></button>
+      </div>
+    </div>
+    <figcaption>
+      <span data-i18n="play_hint"></span>
+      <span class="stat"><span data-i18n="acc"></span> <b id="acc">–</b> · <b id="npts">0</b> <span data-i18n="pts"></span></span>
+    </figcaption>
+    <figcaption style="border:0;padding-top:0"><span id="hover">&nbsp;</span></figcaption>
+  </figure>
+
+  <h2 data-i18n="steps_h"></h2>
+  <ol><li data-i18n="step1"></li><li data-i18n="step2"></li><li data-i18n="step3"></li><li data-i18n="step4"></li></ol>
+
+  <h2 data-i18n="scaling_h"></h2>
+  <p data-i18n="scaling_p"></p>
+
+  <a class="colab" href="#colab">
+    <span class="ico">📓</span>
+    <span><strong data-i18n="colab"></strong><small data-i18n="colab_sub"></small></span>
+    <span class="arr">→</span>
+  </a>
+
+  <h2 data-i18n="quiz_h"></h2>
+  <div class="quiz">
+    <p class="q" data-i18n="q1"></p>
+    <button class="ans" data-ans="a1" data-i18n="a1"></button>
+    <button class="ans" data-ans="a2" data-i18n="a2"></button>
+    <button class="ans" data-ans="a3" data-i18n="a3"></button>
+    <p id="feedback" class="fb"></p>
+  </div>
+
+  <a class="next" href="#" data-i18n="next"></a>
+</article>
+<div id="toast">On the real site this opens the notebook in Google Colab.</div>
+<script src="../shared/knn-playground.js"></script>
+<script src="../shared/content.js"></script>
+<script src="../shared/wire.js"></script>
+<script>wireLesson({ background:'#ffffff', tint:.17 });</script>
+</body>
+</html>

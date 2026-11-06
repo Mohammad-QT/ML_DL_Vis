@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>K-NN · Calm + playful</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Nunito:wght@500;700;800&family=Tajawal:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root { --paper:#f7f4ee; --card:#fff; --ink:#1f1d1a; --muted:#6d675e; --line:#e6dfd2; --a:#3b5bdb; --b:#e0435a; --accent:#c2620c; --mint:#1fb488; --sun:#f6c453; }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  html { scroll-behavior:smooth; scroll-padding-top:90px; }
+  body { background:var(--paper); color:var(--ink); font:17px/1.7 Nunito, system-ui, sans-serif; -webkit-font-smoothing:antialiased; }
+  html[dir=rtl] body { font-family:Tajawal, Nunito, sans-serif; }
+  .serif { font-family:Fraunces, serif; letter-spacing:-.015em; }
+  html[dir=rtl] .serif { font-family:Tajawal, sans-serif; letter-spacing:0; font-weight:800; }
+
+  /* top bar: calm brand + playful progress */
+  .top { max-width:1040px; margin:0 auto; padding:18px 24px; display:flex; align-items:center; gap:18px; }
+  .brand { font-weight:700; font-size:19px; } .brand span { color:var(--accent); }
+  .prog { flex:1; max-width:300px; margin-inline-start:auto; font-size:12.5px; color:var(--muted); font-weight:700; }
+  .bar { height:7px; background:#ebe4d6; border-radius:99px; overflow:hidden; margin-top:3px; }
+  .bar i { display:block; height:100%; width:28%; background:linear-gradient(90deg,var(--mint),#6fdcb8); border-radius:99px; transition:width .5s; }
+  .lang { display:flex; border:1px solid var(--line); border-radius:999px; overflow:hidden; background:#fff; }
+  .lang button { border:0; background:none; padding:5px 13px; font:inherit; font-size:13px; font-weight:700; color:var(--muted); cursor:pointer; }
+  .lang button.on { background:var(--ink); color:var(--paper); }
+
+  /* sticky step rail (playful), scrolls through one calm article */
+  .rail { position:sticky; top:0; z-index:5; background:rgba(247,244,238,.88); backdrop-filter:blur(8px); border-bottom:1px solid transparent; transition:border-color .2s; }
+  .rail.stuck { border-color:var(--line); }
+  .rail .in { max-width:760px; margin:0 auto; padding:10px 24px; display:flex; gap:8px; }
+  .step { display:flex; align-items:center; gap:8px; text-decoration:none; color:var(--muted); font-weight:800; font-size:14px; padding:6px 14px 6px 6px; border-radius:999px; transition:.15s; }
+  html[dir=rtl] .step { padding:6px 6px 6px 14px; }
+  .step .n { width:26px; height:26px; border-radius:50%; background:#ebe4d6; display:grid; place-items:center; font-size:13px; transition:.2s; }
+  .step:hover { background:#fff; }
+  .step.on { background:var(--ink); color:#fff; } .step.on .n { background:var(--sun); color:var(--ink); }
+  .step.done .n { background:var(--mint); color:#fff; }
+
+  article { max-width:760px; margin:0 auto; padding:18px 24px 120px; }
+  .hero { display:flex; gap:20px; align-items:center; margin:18px 0 8px; }
+  .badge { width:76px; height:76px; border-radius:22px; background:var(--sun); display:grid; place-items:center; font-size:36px; transform:rotate(-6deg); box-shadow:0 5px 0 #dcaa3a; flex:none; }
+  .kicker { font-size:13px; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); font-weight:800; }
+  h1 { font-size:50px; line-height:1.05; font-weight:700; margin:4px 0 6px; }
+  .lede { font-size:20px; color:var(--muted); }
+  section { padding-top:44px; }
+  h2 { font-size:28px; font-weight:700; margin-bottom:12px; }
+  p { margin-bottom:14px; }
+  code { background:#ece6da; padding:1px 6px; border-radius:5px; font-size:.86em; }
+
+  .cards { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin:8px 0 18px; }
+  .card4 { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:14px; font-size:15px; line-height:1.5; }
+  .card4 b.num { display:block; font-size:24px; color:var(--accent); font-family:Fraunces, serif; }
+  .note { background:#fff8ea; border:1px solid #f1e0bd; border-radius:14px; padding:14px 16px; font-size:15.5px; }
+
+  /* playground: calm figure frame + playful side panel */
+  .figure { background:var(--card); border:1px solid var(--line); border-radius:20px; padding:16px; margin:0 -110px; box-shadow:0 18px 44px -28px rgba(60,40,10,.3); display:grid; grid-template-columns:1fr 220px; gap:16px; }
+  #board { width:100%; height:420px; border-radius:12px; cursor:crosshair; display:block; }
+  .hint { grid-column:1/-1; font-size:13.5px; color:var(--muted); display:flex; justify-content:space-between; gap:12px; border-top:1px solid var(--line); padding-top:10px; }
+  .side { display:flex; flex-direction:column; gap:10px; }
+  .box { background:var(--paper); border-radius:14px; padding:10px 12px; }
+  .box label { display:block; font-weight:800; font-size:12.5px; color:var(--muted); margin-bottom:4px; }
+  .big { font-size:34px; font-weight:800; line-height:1; transition:color .3s; }
+  input[type=range] { width:100%; accent-color:var(--accent); }
+  #khint { font-size:12.5px; font-weight:700; color:var(--accent); min-height:18px; line-height:1.35; margin-top:4px; }
+  .btns { display:flex; flex-wrap:wrap; gap:5px; }
+  .pill { border:1.5px solid var(--line); background:#fff; border-radius:999px; padding:3px 11px; font:inherit; font-size:13px; font-weight:700; cursor:pointer; color:var(--ink); transition:.12s; }
+  .pill:hover { border-color:#cfc5b3; } .pill.on { background:var(--ink); color:#fff; border-color:var(--ink); }
+  .dot { display:inline-block; width:9px; height:9px; border-radius:50%; margin-inline-end:5px; }
+  .c0 { color:var(--a); } .c1 { color:var(--b); }
+
+  /* quiz: playful buttons on calm paper */
+  .ans { display:block; width:100%; text-align:start; background:var(--card); border:2px solid var(--line); border-radius:14px; padding:13px 18px; margin:9px 0; font:inherit; font-weight:700; cursor:pointer; color:var(--ink); box-shadow:0 3px 0 var(--line); transition:.12s; }
+  .ans:hover { transform:translateY(-2px); }
+  .ans.right { border-color:var(--mint); background:#ecfaf4; box-shadow:0 3px 0 var(--mint); }
+  .ans.wrong { border-color:var(--b); background:#fdf0f2; box-shadow:0 3px 0 var(--b); animation:shake .3s; }
+  @keyframes shake { 25% { transform:translateX(-6px); } 75% { transform:translateX(6px); } }
+  .fb { font-weight:700; margin-top:6px; } .fb.right { color:#11865f; } .fb.wrong { color:#c42f46; }
+
+  pre { background:#24211c; color:#f1ece2; border-radius:14px; padding:16px 18px; font-size:14px; overflow:auto; direction:ltr; text-align:left; margin-bottom:16px; }
+  pre .k { color:#f6c453; } pre .n { color:#8fd3ff; }
+  .colab { display:inline-flex; align-items:center; gap:12px; background:var(--sun); color:var(--ink); text-decoration:none; font-weight:800; font-size:17px; padding:13px 22px; border-radius:14px; box-shadow:0 5px 0 #dcaa3a; transition:.12s; }
+  .colab:hover { transform:translateY(-2px); }
+  .sub { color:var(--muted); font-size:15px; margin-top:12px; }
+  .next { display:flex; justify-content:space-between; align-items:center; margin-top:56px; padding-top:20px; border-top:1px solid var(--line); }
+  .next a { color:var(--accent); font-weight:800; text-decoration:none; font-size:18px; }
+  .arr { display:inline-block; } html[dir=rtl] .arr { transform:scaleX(-1); }
+
+  #confetti { position:fixed; inset:0; pointer-events:none; z-index:20; }
+  #toast { position:fixed; bottom:24px; left:50%; transform:translate(-50%,20px); background:var(--ink); color:#fff; padding:10px 18px; border-radius:12px; font-size:14px; font-weight:700; opacity:0; transition:.25s; pointer-events:none; z-index:21; }
+  #toast.show { opacity:1; transform:translate(-50%,0); }
+  @media (max-width:1000px) { .figure { margin:0; grid-template-columns:1fr; } .cards { grid-template-columns:1fr 1fr; } h1 { font-size:38px; } .prog { display:none; } }
+</style>
+</head>
+<body>
+<div class="top">
+  <div class="brand serif">ML <span>Visual</span></div>
+  <div class="prog"><span data-i18n="progress"></span><div class="bar"><i id="pbar"></i></div></div>
+  <div class="lang"><button data-lang="en">EN</button><button data-lang="ar">ع</button></div>
+</div>
+
+<nav class="rail" id="rail"><div class="in">
+  <a class="step on" href="#learn"><span class="n">1</span><span data-i18n="s1"></span></a>
+  <a class="step" href="#play"><span class="n">2</span><span data-i18n="s2"></span></a>
+  <a class="step" href="#check"><span class="n">3</span><span data-i18n="s3"></span></a>
+  <a class="step" href="#code"><span class="n">4</span><span data-i18n="s4"></span></a>
+</div></nav>
+
+<article>
+  <div class="hero">
+    <div class="badge">🏘️</div>
+    <div><div class="kicker" data-i18n="part"></div><h1 class="serif" data-i18n="title"></h1></div>
+  </div>
+  <p class="lede" data-i18n="lede"></p>
+
+  <section id="learn">
+    <h2 class="serif" data-i18n="idea_h"></h2>
+    <p data-i18n="idea_p"></p>
+    <div class="cards">
+      <div class="card4"><b class="num">1</b><span data-i18n="step1"></span></div>
+      <div class="card4"><b class="num">2</b><span data-i18n="step2"></span></div>
+      <div class="card4"><b class="num">3</b><span data-i18n="step3"></span></div>
+      <div class="card4"><b class="num">4</b><span data-i18n="step4"></span></div>
+    </div>
+    <div class="note"><b data-i18n="scaling_h"></b><br><span data-i18n="scaling_p"></span></div>
+  </section>
+
+  <section id="play">
+    <h2 class="serif" data-i18n="play_h"></h2>
+    <div class="figure">
+      <canvas id="board"></canvas>
+      <div class="side">
+        <div class="box"><label data-i18n="acc"></label><div class="big" id="acc">–</div><small><b id="npts">0</b> <span data-i18n="pts"></span></small></div>
+        <div class="box"><label><span data-i18n="k_label"></span>: <b id="kval">5</b></label><input id="k" type="range" min="1" max="25" value="5"><div id="khint"></div></div>
+        <div class="box"><label data-i18n="cls_label"></label><div class="btns">
+          <button class="pill on" data-cls="0"><span class="dot" style="background:var(--a)"></span><span data-i18n="cls_a"></span></button>
+          <button class="pill" data-cls="1"><span class="dot" style="background:var(--b)"></span><span data-i18n="cls_b"></span></button></div></div>
+        <div class="box"><label data-i18n="presets"></label><div class="btns">
+          <button class="pill on" data-preset="blobs" data-i18n="p_blobs"></button><button class="pill" data-preset="moons" data-i18n="p_moons"></button>
+          <button class="pill" data-preset="circles" data-i18n="p_circles"></button><button class="pill" data-preset="xor" data-i18n="p_xor"></button>
+          <button class="pill" id="clear" data-i18n="clear"></button></div></div>
+      </div>
+      <div class="hint"><span data-i18n="play_hint"></span><span id="hover">&nbsp;</span></div>
+    </div>
+  </section>
+
+  <section id="check">
+    <h2 class="serif" data-i18n="quiz_h"></h2>
+    <p data-i18n="q1" style="font-weight:800;font-size:19px"></p>
+    <button class="ans" data-ans="a1" data-i18n="a1"></button>
+    <button class="ans" data-ans="a2" data-i18n="a2"></button>
+    <button class="ans" data-ans="a3" data-i18n="a3"></button>
+    <p id="feedback" class="fb"></p>
+  </section>
+
+  <section id="code">
+    <h2 class="serif" data-i18n="toc4"></h2>
+<pre><span class="k">from</span> sklearn.neighbors <span class="k">import</span> KNeighborsClassifier
+classifier = KNeighborsClassifier(n_neighbors=<span class="n">5</span>)
+classifier.fit(X_train, y_train)
+y_pred = classifier.predict(X_test)</pre>
+    <a class="colab" href="#colab">📓 <span data-i18n="colab"></span></a>
+    <p class="sub" data-i18n="colab_sub"></p>
+  </section>
+
+  <div class="next"><span></span><a href="#"><span data-i18n="next"></span> <span class="arr">→</span></a></div>
+</article>
+
+<canvas id="confetti"></canvas>
+<div id="toast">On the real site this opens the notebook in Google Colab.</div>
+<script src="../shared/knn-playground.js"></script>
+<script src="../shared/content.js"></script>
+<script src="../shared/wire.js"></script>
+<script>
+  // Step rail follows the scroll; steps you've passed get a green check.
+  const steps = [...document.querySelectorAll('.step')];
+  const secs = steps.map(s => document.querySelector(s.getAttribute('href')));
+  const rail = document.getElementById('rail');
+  function onScroll() {
+    rail.classList.toggle('stuck', rail.getBoundingClientRect().top <= 0 && scrollY > 10);
+    let cur = 0;
+    secs.forEach((s, i) => { if (s.getBoundingClientRect().top < innerHeight * 0.45) cur = i; });
+    if (innerHeight + scrollY >= document.body.scrollHeight - 4) cur = secs.length - 1;
+    steps.forEach((s, i) => { s.classList.toggle('on', i === cur); s.classList.toggle('done', i < cur); });
+    document.getElementById('pbar').style.width = (28 + cur * 4) + '%';
+  }
+  addEventListener('scroll', onScroll, { passive: true }); onScroll();
+
+  function confetti() {
+    const c = document.getElementById('confetti'), x = c.getContext('2d');
+    c.width = innerWidth; c.height = innerHeight;
+    const cols = ['#3b5bdb', '#e0435a', '#1fb488', '#f6c453', '#c2620c'];
+    const bits = Array.from({ length: 70 }, () => ({ x: innerWidth / 2, y: innerHeight * .6, vx: (Math.random() - .5) * 12, vy: -Math.random() * 13 - 4, c: cols[Math.random() * 5 | 0], r: Math.random() * 5 + 3 }));
+    let f = 0; (function tick() {
+      x.clearRect(0, 0, c.width, c.height);
+      bits.forEach(b => { b.x += b.vx; b.y += b.vy; b.vy += .45; x.fillStyle = b.c; x.fillRect(b.x, b.y, b.r, b.r * 1.6); });
+      if (++f < 80) requestAnimationFrame(tick); else x.clearRect(0, 0, c.width, c.height);
+    })();
+  }
+  // Accuracy number flashes green/red so changes to K feel alive.
+  let lastAcc = null;
+  wireLesson({
+    colors: [[59,91,219],[224,67,90]], background: '#ffffff', tint: .18,
+    onAnswer: ok => ok && confetti(),
+    onUpdate: s => {
+      const el = document.getElementById('acc');
+      if (lastAcc != null && s.accuracy != null && s.accuracy !== lastAcc) {
+        el.style.color = s.accuracy > lastAcc ? 'var(--mint)' : 'var(--b)';
+        clearTimeout(el._t); el._t = setTimeout(() => el.style.color = '', 600);
+      }
+      lastAcc = s.accuracy;
+    },
+  });
+</script>
+</body>
+</html>
