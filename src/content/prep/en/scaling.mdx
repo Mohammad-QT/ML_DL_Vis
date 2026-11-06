@@ -1,0 +1,57 @@
+---
+id: scaling
+short: Feature scaling
+title: Feature scaling
+lede: Age is in tens, salary is in tens of thousands. Without scaling, the big numbers win every distance contest.
+figure: { preset: circles, seed: 6, caption: Put every feature on the same scale }
+steps_h: What StandardScaler does
+steps:
+  - Find each column's mean and spread (standard deviation) on the training set.
+  - Subtract the mean from every value.
+  - Divide by the spread.
+  - Apply the same two numbers to the test set.
+caution:
+  h: Never fit the scaler on test data
+  p: 'Call <code>fit_transform</code> on the training set, then only <code>transform</code> on the test set. The test set must be scaled with the <mark>training set''s numbers</mark>.'
+play:
+  p: 'Click any point. The green line joins it to its nearest neighbour. Compare the two panels: scaling can change who the nearest neighbour is.'
+ui:
+  age: age
+  salary: salary
+  raw: Raw
+  scaled: Standardised
+  scaled_cap: both axes in standard units
+  you: 'Selected: age {age}, salary {salary}'
+  raw_line: 'Raw: nearest is age {age}, salary {salary} (age gap {da}, salary gap {ds}).'
+  scaled_line: 'Scaled: nearest is age {age}, salary {salary} (age gap {da}, salary gap {ds}).'
+  same: Same neighbour this time. Pick other points to find one where scaling changes the answer.
+  differs: 'Different neighbours. In raw units only the salary gap matters. After scaling, age counts too. This is why K-NN and SVM need scaling.'
+quiz:
+  - q: Which of these does NOT need feature scaling?
+    a:
+      - K-NN
+      - Random forest
+      - Kernel SVM
+    correct: 1
+    right: 'Right. A tree only asks "is this above a number?", so the scale of a column does not matter.'
+    wrong: 'Not this one. K-NN and SVM work with distances, so they do need scaling.'
+  - q: Why does salary dominate a raw K-NN distance?
+    a:
+      - Its numbers are far larger than age, so its gaps are too
+      - Salary matters most in every problem
+      - Distance ignores age
+    correct: 0
+    right: 'Right. A gap of 1,000 in salary swamps a gap of 10 in age, even if age matters just as much.'
+    wrong: 'Not quite. Click a point in Play and compare the age gap with the salary gap in raw units.'
+code: |
+  from sklearn.preprocessing import StandardScaler
+
+  sc = StandardScaler()
+  X_train = sc.fit_transform(X_train)   # learn mean and spread from training rows
+  X_test = sc.transform(X_test)         # reuse the same numbers on the test rows
+---
+K-NN and SVM measure **distance** between points. If one feature has much bigger numbers, it dominates the distance and the other feature hardly counts. A salary gap of 10,000 swamps an age gap of 30 years.
+
+<mark>Standardising</mark> fixes this. For each column, subtract its mean and divide by its spread. Every column ends up centred on 0 with a spread of 1, so each feature gets a fair say.
+
+Which models need it? Anything built on distances or on gradient steps: K-NN, SVM, kernel SVM and logistic regression. Decision trees and random forests don't, because they only ask whether a value is above a number.

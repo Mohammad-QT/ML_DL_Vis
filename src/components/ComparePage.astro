@@ -1,0 +1,203 @@
+---
+// Two algorithms on one dataset, ported from sketches/compare. `?a=&b=` picks the algorithms.
+import Base from '../layouts/Base.astro';
+import NavLinks from './NavLinks.astro';
+import { common, type Lang } from '../i18n/ui';
+import { compare } from '../i18n/pages';
+import { MODEL_NAMES } from '../engine';
+
+interface Props { lang: Lang }
+const { lang } = Astro.props;
+const t = { ...common[lang], ...compare[lang] };
+const m = (n: string) => t[`m_${n}` as keyof typeof t];
+const strings = Object.fromEntries(Object.keys(t).filter(k => /^(m_|s_|p_|v_)/.test(k)).map(k => [k, t[k as keyof typeof t]]));
+const json = JSON.stringify(strings).replace(/</g, '\\u003c');
+const presets = ['moons', 'blobs', 'circles', 'xor'] as const;
+const sides = [{ key: 'a', label: t.algo_a, def: 'knn' }, { key: 'b', label: t.algo_b, def: 'tree' }];
+---
+<Base lang={lang} title={t.page_title} description={t.lede}>
+  <NavLinks slot="crumbs" lang={lang} cur="compare" />
+
+  <section class="head" id="head">
+    <h1 class="display" set:html={t.h1} />
+    <p class="lede"><span class="on-mouse">{t.lede}</span><span class="on-touch">{t.lede_touch}</span></p>
+  </section>
+
+  <div class="sheet toolbar">
+    <div class="grp"><span class="label">{t.data}</span>
+      {presets.map(p => <button class:list={['chip', { on: p === 'moons' }]} data-preset={p}>{t[`d_${p}`]}</button>)}
+      <button class="chip" id="resplit">{t.resplit}</button><button class="chip" id="clear">{t.clear}</button></div>
+    <div class="grp"><span class="label">{t.adding}</span>
+      <button class="chip on" data-cls="0"><span class="swatch a"></span><span>{t.cls_a}</span></button>
+      <button class="chip" data-cls="1"><span class="swatch b"></span><span>{t.cls_b}</span></button></div>
+    <span class="legend"><span class="swatch ring"></span><span>{t.legend_test}</span></span>
+  </div>
+
+  <div class="duel">
+    {sides.map((s, i) => (
+      <Fragment>
+        {i === 1 && <div class="mid"><span class="vs">vs</span><button class="iconbtn" id="swap" aria-label={t.swap} title={t.swap}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 7h13l-4-4M17 17H4l4 4"/></svg></button></div>}
+        <section class="sheet side" data-side={s.key}>
+          <header><span class="tagAB">{s.key.toUpperCase()}</span>
+            <select aria-label={s.label}>{MODEL_NAMES.map(n => <option value={n} selected={n === s.def}>{m(n)}</option>)}</select></header>
+          <div class="shape"></div>
+          <div class="param"></div>
+          <canvas class="board"></canvas>
+          <div class="scores" aria-live="polite"><div><small>{t.train}</small><span class="num tr">–</span></div><div><small>{t.test}</small><span class="num te">–</span></div><span class="bar"><i></i></span></div>
+        </section>
+      </Fragment>
+    ))}
+  </div>
+
+  <div class="sheet verdict"><span class="vmark"></span><div id="verdict" aria-live="polite"></div></div>
+  <p class="hint muted"><span class="on-mouse">{t.hint_add}</span><span class="on-touch">{t.hint_tap}</span></p>
+  <script type="application/json" id="strings" set:html={json} />
+</Base>
+
+<style>
+  .head { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: end; padding: 26px 0 24px; }
+  h1 { font-size: 58px; line-height: 1; }
+  .lede { color: var(--muted); font-size: 18px; }
+  .toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 22px; padding: 14px 18px; margin-bottom: 18px; }
+  .toolbar .grp { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+  .toolbar .label { margin: 0 6px 0 0; }
+  :global(html[dir="rtl"]) .toolbar .label { margin: 0 0 0 6px; }
+  .legend { font-size: 13.5px; color: var(--muted); margin-inline-start: auto; }
+  .duel { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 14px; align-items: start; }
+  .side { padding: 14px; }
+  .side header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .tagAB { width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center; font: 600 15px var(--mono); background: var(--ink); color: var(--sheet); flex: none; }
+  select { flex: 1; min-width: 0; appearance: none; border: 1.5px solid var(--rule); background: var(--paper); color: var(--ink); font: 750 19px var(--display); letter-spacing: -.01em; padding: 7px 34px 7px 12px; border-radius: 11px; cursor: pointer;
+    background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%); background-position: calc(100% - 18px) 55%, calc(100% - 13px) 55%; background-size: 5px 5px; background-repeat: no-repeat; }
+  :global(html[dir="rtl"]) select { padding: 7px 12px 7px 34px; background-position: 18px 55%, 13px 55%; }
+  .param { min-height: 58px; padding: 2px 4px 8px; }
+  .param :global(.label b) { color: var(--ink); }
+  .param :global(p) { font-size: 14px; color: var(--muted); padding-top: 8px; }
+  .shape { font: 500 13px var(--mono); color: var(--muted); padding: 0 4px 8px; }
+  .side canvas { height: 400px; }
+  .scores { display: flex; gap: 22px; padding: 12px 6px 2px; align-items: baseline; }
+  .scores div { display: flex; gap: 8px; align-items: baseline; }
+  .scores small { font: 500 12px var(--mono); color: var(--muted); text-transform: uppercase; }
+  .scores .num { font: 600 28px/1 var(--mono); }
+  .scores .bar { flex: 1; height: 8px; background: var(--paper); border-radius: 9px; overflow: hidden; align-self: center; }
+  .scores .bar i { display: block; height: 100%; background: var(--ink); border-radius: 9px; transition: width .35s; width: 0; }
+  .side:global(.lead) { border-color: var(--ink); }
+  .mid { display: flex; flex-direction: column; align-items: center; gap: 10px; padding-top: 220px; }
+  .vs { font: 750 22px var(--display); color: var(--muted); }
+  .verdict { margin-top: 18px; padding: 18px 22px; font-size: 18px; display: flex; gap: 14px; align-items: flex-start; }
+  .vmark { width: 10px; align-self: stretch; border-radius: 9px; background: var(--hl); flex: none; }
+  #verdict :global(p + p) { margin-top: 6px; color: var(--muted); font-size: 16px; }
+  .hint { font-size: 14px; margin-top: 12px; }
+  @media (max-width: 900px) {
+    .head { grid-template-columns: 1fr; gap: 10px; } h1 { font-size: 42px; }
+    .duel { grid-template-columns: minmax(0, 1fr); } .mid { flex-direction: row; padding: 0; justify-content: center; }
+    .side canvas { height: 320px; } .legend { margin-inline-start: 0; }
+    .scores { gap: 14px; } .scores .num { font-size: 24px; }
+  }
+</style>
+
+<script>
+  import { Board } from '../engine/board';
+  import { Store, MODELS, defaults, fitModel, score, pct, isModel, isPreset, type Label, type Model, type ModelName, type ParamSpec, type Params } from '../engine';
+
+  const S: Record<string, string> = JSON.parse(document.getElementById('strings')!.textContent!);
+  const $ = <T extends Element = HTMLElement>(s: string, root: ParentNode = document) => root.querySelector<T>(s)!;
+  const $$ = (s: string) => [...document.querySelectorAll<HTMLElement>(s)];
+
+  interface Side { key: 'a' | 'b'; el: HTMLElement; name: ModelName; params: Params; board: Board; model?: Model; tr: number | null; te: number | null }
+  const q = new URLSearchParams(location.search);
+  const pickOr = (v: string | null, d: ModelName): ModelName => (v && isModel(v) ? v : d);
+  const store = new Store({ testFrac: 0.25 });
+  let cls: Label = 0;
+
+  const make = (key: 'a' | 'b', name: ModelName): Side => {
+    const el = $(`.side[data-side="${key}"]`);
+    const s: Side = {
+      key, el, name, params: defaults(name), tr: null, te: null,
+      board: new Board($<HTMLCanvasElement>('canvas', el), store, {
+        onAdd: (p, e) => store.add(p.x, p.y, (e.shiftKey ? 1 - cls : cls) as Label),
+        onHover: g => (key === 'a' ? sides.b : sides.a).board.setGhost(g),
+      }),
+    };
+    $<HTMLSelectElement>('select', el).addEventListener('change', e => {
+      s.name = (e.target as HTMLSelectElement).value as ModelName;
+      s.params = defaults(s.name);
+      buildParam(s); refit(); syncUrl();
+    });
+    return s;
+  };
+  const sides = { a: make('a', pickOr(q.get('a'), 'knn')), b: make('b', pickOr(q.get('b'), 'tree')) };
+
+  const fmt = (spec: ParamSpec, v: number) => (spec.log ? String(+Math.pow(10, v).toPrecision(2)) : String(v));
+  function buildParam(s: Side) {
+    const box = $('.param', s.el), specs = Object.entries(MODELS[s.name].params as Record<string, ParamSpec>);
+    $<HTMLSelectElement>('select', s.el).value = s.name;
+    $('.shape', s.el).textContent = '→ ' + S[`s_${s.name}`];
+    if (!specs.length) { box.innerHTML = `<p>${S.p_none}</p>`; return; }
+    const [k, spec] = specs[0];
+    box.innerHTML = `<label><span class="label">${S[`p_${k}`]} · <b>${fmt(spec, s.params[k])}</b></span><input type="range" min="${spec.min}" max="${spec.max}" step="${spec.step}" value="${s.params[k]}"></label>`;
+    $<HTMLInputElement>('input', box).addEventListener('input', e => {
+      s.params[k] = Number((e.target as HTMLInputElement).value);
+      $('b', box).textContent = fmt(spec, s.params[k]);
+      refit();
+    });
+  }
+
+  function refit() {
+    const tr = store.train(), te = store.test();
+    for (const s of [sides.a, sides.b]) {
+      s.model = fitModel(s.name, s.params, tr);
+      s.board.setModel(s.model);
+      s.tr = score(s.model, tr); s.te = score(s.model, te);
+      $('.tr', s.el).textContent = pct(s.tr);
+      $('.te', s.el).textContent = pct(s.te);
+      $<HTMLElement>('.bar i', s.el).style.width = `${(s.te ?? 0) * 100}%`;
+    }
+    verdict();
+  }
+
+  function verdict() {
+    const A = sides.a, B = sides.b, n = store.test().length, out: string[] = [];
+    A.el.classList.remove('lead'); B.el.classList.remove('lead');
+    if (n < 4 || A.te == null || B.te == null) out.push(S.v_more);
+    else {
+      const d = Math.round((A.te - B.te) * n);
+      if (d === 0) out.push(S.v_tie);
+      else {
+        const w = d > 0 ? A : B;
+        w.el.classList.add('lead');
+        out.push(S.v_win.replace('{m}', `<b>${S[`m_${w.name}`]}</b>`).replace('{d}', String(Math.abs(d))).replace('{n}', String(n)));
+      }
+      for (const s of [A, B]) {
+        if (s.tr != null && s.te != null && s.tr - s.te > 0.12)
+          out.push(S.v_over.replace('{m}', S[`m_${s.name}`]).replace('{tr}', String(Math.round(s.tr * 100))).replace('{te}', String(Math.round(s.te * 100))));
+      }
+    }
+    $('#verdict').innerHTML = out.map(t => `<p>${t}</p>`).join('');
+  }
+
+  function syncUrl() { history.replaceState(null, '', `?a=${sides.a.name}&b=${sides.b.name}`); }
+
+  store.subscribe(refit);
+  $$('[data-cls]').forEach(b => b.addEventListener('click', () => {
+    cls = Number(b.dataset.cls) as Label;
+    $$('[data-cls]').forEach(x => x.classList.toggle('on', x === b));
+  }));
+  $$('[data-preset]').forEach(b => b.addEventListener('click', () => {
+    const name = b.dataset.preset!;
+    if (!isPreset(name)) return;
+    store.preset(name);
+    $$('[data-preset]').forEach(x => x.classList.toggle('on', x === b));
+  }));
+  $('#resplit').addEventListener('click', () => store.resplit());
+  $('#clear').addEventListener('click', () => { store.clear(); $$('[data-preset]').forEach(x => x.classList.remove('on')); });
+  $('#swap').addEventListener('click', () => {
+    [sides.a.name, sides.b.name] = [sides.b.name, sides.a.name];
+    [sides.a.params, sides.b.params] = [sides.b.params, sides.a.params];
+    buildParam(sides.a); buildParam(sides.b); refit(); syncUrl();
+  });
+
+  buildParam(sides.a); buildParam(sides.b);
+  store.preset('moons', 5);
+  requestAnimationFrame(() => requestAnimationFrame(() => $('#head').classList.add('lit')));
+</script>

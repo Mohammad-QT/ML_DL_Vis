@@ -116,3 +116,7 @@ pre .k { color: #ffd84d; } pre .n { color: #8fd3ff; } pre .c { color: #7f93a3; }
 #toast.show { opacity: 1; transform: translate(-50%, 0); }
 
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } }
+
+/* input-specific copy: mouse wording by default, touch wording on devices without hover */
+.on-touch { display: none; }
+@media (hover: none) { .on-touch { display: revert; } .on-mouse { display: none; } }

@@ -1,0 +1,13 @@
+---
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+import PrepLesson from '../../../../components/PrepLesson.astro';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('prep', e => e.id.startsWith('ar/') && e.data.id !== 'start');
+  return entries.map(entry => ({ params: { slug: entry.data.id }, props: { entry } }));
+}
+interface Props { entry: CollectionEntry<'prep'> }
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+---
+<PrepLesson lang="ar" entry={entry}><Content /></PrepLesson>

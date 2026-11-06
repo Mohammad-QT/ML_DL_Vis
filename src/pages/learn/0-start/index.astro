@@ -1,0 +1,8 @@
+---
+import { getEntry, render } from 'astro:content';
+import PrepLesson from '../../../components/PrepLesson.astro';
+
+const entry = (await getEntry('prep', 'en/start'))!;
+const { Content } = await render(entry);
+---
+<PrepLesson lang="en" entry={entry}><Content /></PrepLesson>

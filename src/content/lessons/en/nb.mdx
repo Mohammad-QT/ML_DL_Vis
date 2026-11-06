@@ -1,0 +1,50 @@
+---
+model: nb
+short: Naive Bayes
+title: Naive Bayes
+lede: Learn what a typical point of each class looks like, then ask which class a new point looks more like.
+figure: { preset: circles, seed: 12, cell: 4, dot: 3.6, tint: 0.24 }
+steps:
+  - For each class, learn the average and the spread of every feature.
+  - For a new point, work out how likely it is under each class, one feature at a time.
+  - Multiply those chances together (the “naive” part), and weigh by how common each class is.
+  - The class with the higher score wins.
+caution:
+  h: The features are not really independent
+  p: 'Naive Bayes <mark>pretends</mark> each feature tells you something separate. If two features move together, like height and weight, it counts the same clue twice and becomes overconfident. It still often works well.'
+play:
+  p: 'There is no slider here: the model has nothing to tune. Add points and watch the soft oval shapes appear around each class. Then try Moons or XOR to see where they stop working.'
+  preset: blobs
+  seed: 3
+  hints: {}
+quiz:
+  - q: 'What is “naive” about Naive Bayes?'
+    a:
+      - It treats the features as if they do not affect each other
+      - It ignores the training data
+      - It only works with two points
+    correct: 0
+    right: 'Right. It assumes each feature gives independent evidence. That is rarely true, but it keeps the maths simple and fast.'
+    wrong: 'Not quite. Look at step 3: it multiplies the chances of each feature as if they were unrelated.'
+  - q: 'Naive Bayes learns an average and a spread for each class. Which line shape does that give?'
+    a:
+      - A staircase of boxes
+      - Jagged blobs around single points
+      - A smooth, rounded edge between the groups
+    correct: 2
+    right: 'Right. Smooth ovals around each class give a smooth, rounded boundary.'
+    wrong: 'Not quite. Go to Play and look at the line: it is smooth, with no steps and no tiny islands.'
+predict:
+  preset: circles
+  seed: 11
+  options: [tree, nb, logistic]
+  answer: 1
+  why: 'Naive Bayes wraps a smooth oval around the inner class. A straight-line model cannot do this, and a tree uses boxes instead.'
+code: |
+  from sklearn.naive_bayes import GaussianNB
+  classifier = GaussianNB()
+  classifier.fit(X_train, y_train)
+  y_pred = classifier.predict(X_test)
+compare: logistic
+---
+Naive Bayes asks a simple question: <mark>which class does this point look like more?</mark> It learns the typical value and the spread of each feature in each class, and picks the class that explains the new point best. It is fast and needs very little data.

@@ -1,27 +1,41 @@
 ---
-// Placeholder K-NN lesson (Milestone 1). Milestone 3 turns this into the MDX-driven lesson template.
+// Lesson template for Part 0 and Part 1: same tabs and look as Lesson.astro, but the Play tab is a board (Part 0) or a small interactive.
+import type { CollectionEntry } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import Board from './Board.astro';
-import { href, knnLesson, common, type Lang } from '../i18n/ui';
+import PrepDemo from './PrepDemo.astro';
+import { href, common, lesson, prep as prepText, type Lang } from '../i18n/ui';
+import { PREP, lessonPath, prepNotebookUrl, prepPath } from '../lessons';
 
-interface Props { lang: Lang }
-const { lang } = Astro.props;
-const t = { ...common[lang], ...knnLesson[lang] };
+interface Props { lang: Lang; entry: CollectionEntry<'prep'> }
+const { lang, entry } = Astro.props;
+const d = entry.data;
+const c = common[lang];
+const t = lesson[lang];
+const pt = prepText[lang];
+const fill = (s: string, vars: Record<string, string | number>) => s.replace(/\{(\w+)\}/g, (_, k) => String(vars[k]));
+const name = (id: string) => pt[`n_${id}` as keyof typeof pt];
+const i = PREP.indexOf(d.id);
+const prev = PREP[i - 1], next = PREP[i + 1];
+const part0 = d.id === 'start';
 const steps = [t.s1, t.s2, t.s3, t.s4];
+const hl = (code: string) => code.replace(/&/g, '&amp;').replace(/</g, '&lt;')
+  .replace(/\b(from|import)\b|\b\d+(?:\.\d+)?\b/g, (m, kw) => `<span class="${kw ? 'k' : 'n'}">${m}</span>`);
+const play = d.play;
 ---
-<Base lang={lang} title={t.page_title} description={t.lede}>
-  <nav class="crumbs" slot="crumbs"><a href={href(lang)}>{t.nav_course}</a> / <span>{t.crumb_part}</span></nav>
-  <div class="progress" slot="bar"><span>{t.progress}</span><span class="track"><i data-pbar></i></span></div>
+<Base lang={lang} title={d.short} description={d.lede}>
+  <nav class="crumbs" slot="crumbs"><a href={href(lang)}>{c.nav_course}</a> / <span>{part0 ? pt.part0 : pt.part1}</span></nav>
+  <div class="progress" slot="bar"><span>{part0 ? pt.progress0 : fill(pt.progress1, { n: i })}</span><span class="track"><i data-pbar data-base={Math.round(i / 4 * 100)}></i></span></div>
 
   <section class="hero">
     <div>
-      <div class="kicker">{t.kicker}</div>
-      <h1 class="display" set:html={t.title} />
-      <p class="lede">{t.lede}</p>
+      <div class="kicker">{part0 ? pt.kicker0 : fill(pt.kicker1, { n: i })}</div>
+      <h1 class="display" set:html={d.title} />
+      <p class="lede">{d.lede}</p>
     </div>
     <figure class="sheet fp">
-      <Board lang={lang} model="knn" variant="figure" preset="moons" seed={11} cell={4} dot={3.6} tint={0.24} />
-      <figcaption><span>{t.fp_cap}</span> <b>{t.s_knn}</b></figcaption>
+      <Board lang={lang} model={d.figure.model as never} variant="figure" preset={d.figure.preset} seed={d.figure.seed} cell={4} dot={3.6} tint={0.24} />
+      <figcaption><b>{d.figure.caption}</b></figcaption>
     </figure>
   </section>
 
@@ -34,30 +48,36 @@ const steps = [t.s1, t.s2, t.s3, t.s4];
   <section class="sheet card on" role="tabpanel">
     <div class="read">
       <h2 class="display">{t.idea_h}</h2>
-      <p set:html={t.idea_p} />
+      <slot />
     </div>
-    <h3 class="display">{t.steps_h}</h3>
-    <ol class="how"><li set:html={t.step1} /><li>{t.step2}</li><li>{t.step3}</li><li>{t.step4}</li></ol>
-    <div class="note read"><h3 class="display" style="margin-top:0">{t.scaling_h}</h3><p set:html={t.scaling_p} /></div>
-    <div class="navrow"><span></span><button class="btn" data-goto="1"><span>{t.s2}</span> <span class="arr">→</span></button></div>
+    <h3 class="display">{d.steps_h}</h3>
+    <ol class="how" style={`--cols:${d.steps.length}`}>{d.steps.map(s => <li set:html={s} />)}</ol>
+    <div class="note read"><h3 class="display" style="margin-top:0">{d.caution.h}</h3><p set:html={d.caution.p} /></div>
+    <div class="navrow">
+      {prev ? <a class="btn ghost" href={href(lang, prepPath(prev))}><span class="arr">←</span> <span>{fill(t.prev, { m: name(prev) })}</span></a> : <span></span>}
+      <button class="btn" data-goto="1"><span>{t.s2}</span> <span class="arr">→</span></button>
+    </div>
   </section>
 
   <section class="sheet card" role="tabpanel">
     <h2 class="display">{t.play_h}</h2>
-    <p class="muted read">{t.play_p}</p>
-    <Board lang={lang} model="knn" params={{ k: 5 }} preset="blobs" seed={3} paramLabel={t.p_k}
-      hints={{ low: { max: 3, text: t.k_small }, high: { min: 15, text: t.k_big } }} />
+    <p class="muted read"><span class="on-mouse">{play.p}</span><span class="on-touch">{play.p_touch ?? play.p}</span></p>
+    {part0
+      ? <Board lang={lang} model="logistic" preset="blobs" seed={5} height="340px" />
+      : <PrepDemo demo={d.id as never} ui={d.ui} />}
     <div class="navrow"><button class="btn ghost" data-goto="0"><span class="arr">←</span> <span>{t.s1}</span></button><button class="btn" data-goto="2"><span>{t.s3}</span> <span class="arr">→</span></button></div>
   </section>
 
   <section class="sheet card" role="tabpanel">
     <div class="read">
       <h2 class="display">{t.quiz_h}</h2>
-      <p class="q">{t.q1}</p>
-      <button class="ans" data-ans="a1"><span>{t.a1}</span><span class="tag"></span></button>
-      <button class="ans" data-ans="a2"><span>{t.a2}</span><span class="tag"></span></button>
-      <button class="ans" data-ans="a3"><span>{t.a3}</span><span class="tag"></span></button>
-      <p class="fb" aria-live="polite" data-fb data-right={t.right} data-wrong={t.wrong}></p>
+      {d.quiz.map(q => (
+        <div class="qz" data-correct={q.correct}>
+          <p class="q">{q.q}</p>
+          {q.a.map((a, i) => <button class="ans" data-ans={i}><span>{a}</span><span class="tag"></span></button>)}
+          <p class="fb" aria-live="polite" data-fb data-right={q.right} data-wrong={q.wrong}></p>
+        </div>
+      ))}
     </div>
     <div class="navrow"><button class="btn ghost" data-goto="1"><span class="arr">←</span> <span>{t.s2}</span></button><button class="btn" data-goto="3"><span>{t.s4}</span> <span class="arr">→</span></button></div>
   </section>
@@ -65,20 +85,19 @@ const steps = [t.s1, t.s2, t.s3, t.s4];
   <section class="sheet card" role="tabpanel">
     <div class="read">
       <h2 class="display">{t.code_h}</h2>
-      <p class="muted">{t.code_p}</p>
-<pre><span class="k">from</span> sklearn.neighbors <span class="k">import</span> KNeighborsClassifier
-classifier = KNeighborsClassifier(n_neighbors=<span class="n">5</span>)
-classifier.fit(X_train, y_train)
-y_pred = classifier.predict(X_test)</pre>
+      <p class="muted">{pt.code_p}</p>
+<pre set:html={hl(d.code)} />
       <div class="codecta">
-        <a class="btn hl" href="#colab" data-colab><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M7 7h10v10M7 17 17 7"/></svg><span>{t.colab}</span></a>
-        <a class="btn ghost" href={href(lang, 'compare/?a=knn&b=ksvm')}><span>{t.compare_cta}</span> <span class="arr">→</span></a>
+        <a class="btn hl" href={prepNotebookUrl(d.id)} target="_blank" rel="noopener"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M7 7h10v10M7 17 17 7"/></svg><span>{t.colab}</span></a>
       </div>
     </div>
-    <div class="navrow"><button class="btn ghost" data-goto="2"><span class="arr">←</span> <span>{t.s3}</span></button><button class="btn"><span>{t.next}</span> <span class="arr">→</span></button></div>
+    <div class="navrow">
+      <button class="btn ghost" data-goto="2"><span class="arr">←</span> <span>{t.s3}</span></button>
+      {next
+        ? <a class="btn" href={href(lang, prepPath(next))}><span>{fill(t.next, { m: name(next) })}</span> <span class="arr">→</span></a>
+        : <a class="btn" href={href(lang, lessonPath('logistic'))}><span>{fill(t.next, { m: lang === 'ar' ? 'الانحدار اللوجستي' : 'Logistic Regression' })}</span> <span class="arr">→</span></a>}
+    </div>
   </section>
-
-  <div id="toast" slot="after" role="status">{t.colab_toast}</div>
 </Base>
 
 <style>
@@ -110,9 +129,12 @@ y_pred = classifier.predict(X_test)</pre>
   .card h2 { font-size: 34px; line-height: 1.1; margin-bottom: 12px; }
   .card h3 { font-size: 21px; margin: 26px 0 10px; }
   .read { max-width: 640px; }
-  .read p { margin-bottom: 12px; }
+  .read p, .read :global(ul) { margin-bottom: 12px; }
+  .read :global(ul) { padding-inline-start: 22px; }
+  .read :global(li) { margin-bottom: 6px; }
+  .read :global(h3.display) { font-size: 21px; margin: 26px 0 10px; }
   .card :global(code) { font: 500 .86em var(--mono); background: var(--paper); padding: 1px 6px; border-radius: 5px; }
-  .how { list-style: none; display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; counter-reset: s; }
+  .how { list-style: none; display: grid; grid-template-columns: repeat(var(--cols, 4), 1fr); gap: 12px; counter-reset: s; }
   .how li { counter-increment: s; background: var(--paper); border-radius: 14px; padding: 14px; font-size: 15.5px; line-height: 1.45; }
   .how li::before { content: counter(s); display: block; font: 600 13px var(--mono); color: var(--muted); margin-bottom: 6px; }
   .note { margin-top: 22px; border-inline-start: 4px solid var(--hl); padding: 4px 0 4px 16px; }
@@ -126,6 +148,8 @@ y_pred = classifier.predict(X_test)</pre>
   .ans .tag { float: inline-end; font: 600 12px var(--mono); }
   .ans.right .tag { color: var(--ok); } .ans.wrong .tag { color: var(--bad); }
   .fb { margin-top: 8px; font-size: 16.5px; }
+  .qz { margin-bottom: 18px; }
+
 
   .codecta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 18px; }
   .navrow { display: flex; justify-content: space-between; margin-top: 28px; }
@@ -142,33 +166,30 @@ y_pred = classifier.predict(X_test)</pre>
   const $$ = (s: string) => [...document.querySelectorAll<HTMLElement>(s)];
   const tabs = $$('.tab'), cards = $$('.card');
   const pbar = document.querySelector<HTMLElement>('[data-pbar]');
+  const base = Number(pbar?.dataset.base ?? 0);
   const lit = (el: HTMLElement) => { el.classList.remove('lit'); requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('lit'))); };
 
   function go(i: number) {
     tabs.forEach((t, j) => { t.classList.toggle('on', j === i); t.setAttribute('aria-selected', String(j === i)); if (j < i) t.classList.add('done'); });
     cards.forEach((c, j) => c.classList.toggle('on', j === i));
     lit(cards[i]);
-    if (pbar) pbar.style.width = `${28 + i * 4}%`;
+    if (pbar) pbar.style.width = `${Math.min(100, base + i * 4)}%`;
   }
   tabs.forEach(t => t.addEventListener('click', () => go(Number(t.dataset.step))));
   $$('[data-goto]').forEach(b => b.addEventListener('click', () => go(Number(b.dataset.goto))));
 
-  const fb = document.querySelector<HTMLElement>('[data-fb]')!;
-  $$('.ans').forEach(b => b.addEventListener('click', () => {
-    const ok = b.dataset.ans === 'a1';
-    $$('.ans').forEach(x => { x.classList.remove('right', 'wrong'); x.querySelector('.tag')!.textContent = ''; });
-    b.classList.add(ok ? 'right' : 'wrong');
-    b.querySelector('.tag')!.textContent = ok ? '✓' : '✗';
-    fb.innerHTML = (ok ? fb.dataset.right : fb.dataset.wrong) ?? '';
-    lit(fb);
-  }));
-
-  const toast = document.getElementById('toast');
-  $$('[data-colab]').forEach(a => a.addEventListener('click', e => {
-    e.preventDefault();
-    toast?.classList.add('show');
-    setTimeout(() => toast?.classList.remove('show'), 2200);
-  }));
+  // multiple choice: each .qz block is one question
+  $$('.qz').forEach(qz => {
+    const fb = qz.querySelector<HTMLElement>('[data-fb]')!;
+    qz.querySelectorAll<HTMLElement>('.ans').forEach(b => b.addEventListener('click', () => {
+      const ok = Number(b.dataset.ans) === Number(qz.dataset.correct);
+      qz.querySelectorAll<HTMLElement>('.ans').forEach(x => { x.classList.remove('right', 'wrong'); x.querySelector('.tag')!.textContent = ''; });
+      b.classList.add(ok ? 'right' : 'wrong');
+      b.querySelector('.tag')!.textContent = ok ? '✓' : '✗';
+      fb.innerHTML = (ok ? fb.dataset.right : fb.dataset.wrong) ?? '';
+      lit(fb);
+    }));
+  });
 
   go(0);
 </script>

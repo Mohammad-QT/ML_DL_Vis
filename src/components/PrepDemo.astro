@@ -1,0 +1,54 @@
+---
+// Mount point for one Part 1 interactive. The markup is built in src/prep/demos.ts.
+interface Props { demo: 'missing' | 'categories' | 'split' | 'scaling'; ui: Record<string, string> }
+const { demo, ui } = Astro.props;
+---
+<div class="demo" data-demo={demo} data-ui={JSON.stringify(ui)}></div>
+
+<style is:global>
+  .demo { margin-top: 16px; }
+  .demo .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+  .demo .dwrap { display: grid; grid-template-columns: minmax(0, 1fr) 220px; gap: 18px; align-items: start; }
+  .demo .dt { width: 100%; border-collapse: collapse; background: var(--sheet); border: 1.5px solid var(--rule); border-radius: 14px; overflow: hidden; font: 500 15px var(--mono); }
+  .demo .dt th { text-align: start; font: 600 12px var(--mono); text-transform: uppercase; letter-spacing: .05em; color: var(--muted); background: var(--paper); padding: 8px 12px; }
+  html[dir="rtl"] .demo .dt th { letter-spacing: 0; font-family: var(--body); }
+  .demo .dt td { padding: 6px 12px; border-top: 1px solid var(--rule); }
+  .demo .dt td.fill { background: var(--hl-mark); }
+  .demo .dt td.blank { color: var(--bad); font-style: italic; }
+  .demo .dt td.zero { color: var(--muted); }
+  .demo .dt tr.gone td { opacity: .3; text-decoration: line-through; }
+  .demo .dstats { display: flex; flex-direction: column; gap: 8px; }
+  .demo .stat { background: var(--paper); border-radius: 14px; padding: 10px 14px; }
+  .demo .stat small { display: block; font: 500 12px var(--mono); color: var(--muted); }
+  .demo .stat b { font: 600 26px/1.2 var(--mono); }
+  .demo .stat b.ord { font-size: 16px; line-height: 1.6; }
+  .demo .dnote { margin-top: 14px; max-width: 640px; border-inline-start: 4px solid var(--hl); padding: 2px 14px; }
+  .demo .dsplit { display: grid; grid-template-columns: minmax(0, 1fr) 250px; gap: 20px; }
+  .demo .dside { display: flex; flex-direction: column; gap: 12px; }
+  .demo .box { display: block; background: var(--paper); border-radius: 14px; padding: 12px 14px; }
+  .demo .box.dstats { flex-direction: row; gap: 18px; }
+  .demo .box .stat { padding: 0; background: none; }
+  .demo .box input[type="range"] { width: 100%; }
+  .demo .box input.num { width: 90px; font: 600 16px var(--mono); padding: 4px 8px; margin-inline-end: 8px; border: 1.5px solid var(--rule); border-radius: 9px; background: var(--sheet); color: var(--ink); }
+  .demo .legend { font-size: 13px; color: var(--muted); line-height: 1.5; }
+  .demo .plot { display: block; width: 100%; height: auto; background: var(--sheet); border: 1.5px solid var(--rule); border-radius: 16px; }
+  .demo .dscale { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .demo .pane { margin: 0; padding: 10px; min-width: 0; }
+  .demo .pane figcaption { display: flex; flex-direction: column; padding: 2px 4px 8px; font-size: 13px; color: var(--muted); }
+  .demo .pane figcaption b { font: 700 17px var(--body); color: var(--ink); }
+  .demo .pane .plot { border: 0; }
+  .demo .pt { cursor: pointer; }
+  .demo .dreadout { margin-top: 14px; max-width: 700px; }
+  .demo .dreadout p { margin-bottom: 6px; }
+  .demo .verdict { border-inline-start: 4px solid var(--ok); padding: 2px 14px; margin-top: 10px; }
+  .demo .verdict.diff { border-color: var(--hl); }
+  @media (max-width: 860px) {
+    .demo .dwrap, .demo .dsplit, .demo .dscale { grid-template-columns: 1fr; }
+    .demo .dt { font-size: 14px; } .demo .dt td, .demo .dt th { padding: 6px 8px; }
+  }
+</style>
+
+<script>
+  import { mountDemos } from '../prep/demos';
+  mountDemos();
+</script>

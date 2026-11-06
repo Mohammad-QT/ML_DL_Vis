@@ -1,0 +1,50 @@
+---
+model: tree
+short: Decision tree
+title: Decision Tree
+lede: Ask a series of yes/no questions about the features until the answer is clear.
+figure: { preset: xor, seed: 12, cell: 4, dot: 3.6, tint: 0.24 }
+steps:
+  - Try every question of the form “is this feature below this value?”.
+  - Pick the question that splits the points into the purest groups.
+  - Repeat inside each group until it is pure or the tree reaches its <b>max depth</b>.
+  - A new point follows the answers down to a leaf, and the leaf’s majority class wins.
+caution:
+  h: A deep tree memorises
+  p: 'Left to grow, a tree keeps asking questions until it has <mark>memorised every training point</mark>, noise included. Limit the depth, then check the test score. Trees do not need feature scaling.'
+play:
+  p: 'Start with depth 1: one question, one straight cut. Then raise the depth one step at a time and watch the boxes appear.'
+  preset: moons
+  seed: 3
+  param_label: Max depth
+  hints:
+    low: { max: 2, text: 'Shallow tree: only a couple of questions, so the boxes are big and crude.' }
+    high: { min: 8, text: 'Deep tree: it keeps splitting until it has memorised the points, noise included.' }
+quiz:
+  - q: 'You raise the max depth from 2 to 12 on noisy data. What usually happens?'
+    a:
+      - Train and test scores both always go up
+      - Train score goes up, but test score stops improving or drops
+      - Both scores go down
+    correct: 1
+    right: 'Right. A deeper tree fits the training points better, but past a point it only learns the noise. That is <mark>overfitting</mark>.'
+    wrong: 'Not quite. Go to Play, raise the depth and compare the Train and Test numbers.'
+predict:
+  preset: xor
+  seed: 11
+  options: [ksvm, logistic, tree]
+  answer: 2
+  why: 'A tree can only cut along the axes, so its line is made of horizontal and vertical steps. Corners like these are its signature.'
+beat:
+  preset: circles
+  seed: 32
+  start: 1
+  target: 95
+code: |
+  from sklearn.tree import DecisionTreeClassifier
+  classifier = DecisionTreeClassifier(criterion='entropy', max_depth=4, random_state=0)
+  classifier.fit(X_train, y_train)
+  y_pred = classifier.predict(X_test)
+compare: forest
+---
+A decision tree plays <mark>twenty questions</mark> with your data. Each question cuts the board in two, along one feature, so the result is a staircase of boxes. It is easy to read like a flowchart, which makes it one of the easiest models to explain.

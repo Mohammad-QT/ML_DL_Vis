@@ -1,0 +1,51 @@
+---
+model: knn
+short: K-NN
+title: K-Nearest Neighbors
+lede: To classify a new point, look at the points closest to it and go with the majority.
+figure: { preset: moons, seed: 11, cell: 4, dot: 3.6, tint: 0.24 }
+steps:
+  - 'Pick a number <b>K</b>. The course uses 5.'
+  - Measure the distance from the new point to every training point.
+  - Keep the K closest and count their classes.
+  - The majority wins.
+caution:
+  h: Scale your features first
+  p: 'Distance mixes every feature. Salary runs into the tens of thousands while age stays under 100, so without <code>StandardScaler</code> salary would <mark>decide everything</mark>.'
+play:
+  p: Move your mouse over the board to see which neighbours vote. Then drag K down to 1 and watch the line.
+  p_touch: Touch and hold the board to see which neighbours vote. Then drag K down to 1 and watch the line.
+  preset: blobs
+  seed: 3
+  param_label: Neighbours (K)
+  hints:
+    low: { max: 3, text: 'Small K: the line chases every point. Train score climbs, test score usually drops.' }
+    high: { min: 15, text: 'Big K: the line smooths out and can swallow small groups.' }
+quiz:
+  - q: 'You set K = 1. What happens to the line?'
+    a:
+      - It gets jagged and wraps around every single point
+      - It becomes a straight line
+      - Nothing changes. K only affects speed
+    correct: 0
+    right: "Right. With K = 1 every point gets its own territory, noisy ones included. That's <mark>overfitting</mark>."
+    wrong: Not quite. Go back to Play, drag K to 1, and watch the line.
+predict:
+  preset: moons
+  seed: 11
+  options: [knn, logistic, tree]
+  answer: 0
+  why: K-NN follows the data. Its line bends around the moons, with no straight edges and no boxes.
+beat:
+  preset: moons
+  seed: 26
+  start: 25
+  target: 95
+code: |
+  from sklearn.neighbors import KNeighborsClassifier
+  classifier = KNeighborsClassifier(n_neighbors=5)
+  classifier.fit(X_train, y_train)
+  y_pred = classifier.predict(X_test)
+compare: ksvm
+---
+K-NN doesn't learn a formula. It keeps every training point, and when a new one arrives it finds the <mark>K closest points</mark> and goes with the majority. If 4 of your 5 nearest neighbours bought the product, K-NN bets you will too.

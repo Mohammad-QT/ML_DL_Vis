@@ -1,0 +1,245 @@
+---
+// The lesson template: one page per classification lesson, filled from the MDX entry in src/content/lessons/.
+import type { CollectionEntry } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import Board from './Board.astro';
+import { href, common, lesson, prep as prepText, type Lang } from '../i18n/ui';
+import { MODELS, type ModelName } from '../engine';
+import { CLASSIFICATION, lessonPath, notebookUrl, prepPath } from '../lessons';
+
+interface Props { lang: Lang; entry: CollectionEntry<'lessons'> }
+const { lang, entry } = Astro.props;
+const d = entry.data;
+const c = common[lang];
+const t = lesson[lang];
+const pt = prepText[lang];
+const name = (id: string) => c[`m_${id}` as keyof typeof c];
+const fill = (s: string, vars: Record<string, string | number>) => s.replace(/\{(\w+)\}/g, (_, k) => String(vars[k]));
+const n = CLASSIFICATION.indexOf(d.model as never) + 1;
+const prev = CLASSIFICATION[n - 2], next = CLASSIFICATION[n];
+const paramName = Object.keys(MODELS[d.model as ModelName].params)[0] ?? '';
+const steps = [t.s1, t.s2, t.s3, t.s4];
+const shape = c[`s_${d.model}` as keyof typeof c];
+const play = d.play;
+const hl = (code: string) => code.replace(/&/g, '&amp;').replace(/</g, '&lt;')
+  .replace(/\b(from|import)\b|\b\d+(?:\.\d+)?\b/g, (m, kw) => `<span class="${kw ? 'k' : 'n'}">${m}</span>`);
+---
+<Base lang={lang} title={d.short} description={d.lede}>
+  <nav class="crumbs" slot="crumbs"><a href={href(lang)}>{c.nav_course}</a> / <span>{t.crumb_part}</span></nav>
+  <div class="progress" slot="bar"><span>{fill(t.progress, { n })}</span><span class="track"><i data-pbar data-base={Math.round(n / 7 * 100)}></i></span></div>
+
+  <section class="hero">
+    <div>
+      <div class="kicker">{fill(t.kicker, { n })}</div>
+      <h1 class="display" set:html={d.title} />
+      <p class="lede">{d.lede}</p>
+    </div>
+    <figure class="sheet fp">
+      <Board lang={lang} model={d.model as never} variant="figure" preset={d.figure.preset} seed={d.figure.seed} cell={d.figure.cell} dot={d.figure.dot} tint={d.figure.tint} />
+      <figcaption><span>{t.fp_cap}</span> <b>{shape}</b></figcaption>
+    </figure>
+  </section>
+
+  <div class="tabs" role="tablist">
+    {steps.map((s, i) => (
+      <button class:list={['tab', { on: i === 0 }]} role="tab" aria-selected={i === 0 ? 'true' : 'false'} data-step={i}><span class="n">{i + 1}</span><span>{s}</span></button>
+    ))}
+  </div>
+
+  <section class="sheet card on" role="tabpanel">
+    <div class="read">
+      <h2 class="display">{t.idea_h}</h2>
+      <slot />
+    </div>
+    <h3 class="display">{t.steps_h}</h3>
+    <ol class="how" style={`--cols:${d.steps.length}`}>{d.steps.map(s => <li set:html={s} />)}</ol>
+    <div class="note read"><h3 class="display" style="margin-top:0">{d.caution.h}</h3><p set:html={d.caution.p} /></div>
+    <div class="navrow">
+      {prev
+        ? <a class="btn ghost" href={href(lang, lessonPath(prev))}><span class="arr">←</span> <span>{fill(t.prev, { m: name(prev) })}</span></a>
+        : <a class="btn ghost" href={href(lang, prepPath('scaling'))}><span class="arr">←</span> <span>{fill(t.prev, { m: pt.n_scaling })}</span></a>}
+      <button class="btn" data-goto="1"><span>{t.s2}</span> <span class="arr">→</span></button>
+    </div>
+  </section>
+
+  <section class="sheet card" role="tabpanel">
+    <h2 class="display">{t.play_h}</h2>
+    <p class="muted read"><span class="on-mouse">{play.p}</span><span class="on-touch">{play.p_touch ?? play.p}</span></p>
+    <Board lang={lang} model={d.model as never} preset={play.preset} seed={play.seed} paramLabel={play.param_label}
+      hints={{ low: play.hints.low && { max: play.hints.low.max, text: play.hints.low.text }, high: play.hints.high && { min: play.hints.high.min, text: play.hints.high.text } }} />
+    <div class="navrow"><button class="btn ghost" data-goto="0"><span class="arr">←</span> <span>{t.s1}</span></button><button class="btn" data-goto="2"><span>{t.s3}</span> <span class="arr">→</span></button></div>
+  </section>
+
+  <section class="sheet card" role="tabpanel">
+    <div class="read">
+      <h2 class="display">{t.quiz_h}</h2>
+      {d.quiz.map(q => (
+        <div class="qz" data-correct={q.correct}>
+          <p class="q">{q.q}</p>
+          {q.a.map((a, i) => <button class="ans" data-ans={i}><span>{a}</span><span class="tag"></span></button>)}
+          <p class="fb" aria-live="polite" data-fb data-right={q.right} data-wrong={q.wrong}></p>
+        </div>
+      ))}
+    </div>
+
+    <h3 class="display">{t.predict_h}</h3>
+    <p class="muted read">{t.predict_p}</p>
+    <div class="predict" data-correct={d.predict.answer}>
+      <div class="pdata"><Board lang={lang} variant="figure" preset={d.predict.preset} seed={d.predict.seed} height="230px" /></div>
+      <div class="opts">{d.predict.options.map((o, i) => (
+        <button class="opt" data-opt={i} aria-label={name(o)}>
+          <Board lang={lang} model={o as never} variant="figure" preset={d.predict.preset} seed={d.predict.seed} height="150px" cell={4} dot={3} tint={0.22} />
+          <span class="nm"><span class="tag"></span><b>{name(o)}</b></span>
+        </button>
+      ))}</div>
+      <p class="fb" aria-live="polite" data-pfb data-why={d.predict.why}></p>
+    </div>
+
+    {d.beat && <>
+      <h3 class="display">{t.beat_h}</h3>
+      <p class="muted read">{t.beat_p}</p>
+      <Board lang={lang} model={d.model as never} preset={d.beat.preset} seed={d.beat.seed} params={{ [paramName]: d.beat.start }} challenge={{ target: d.beat.target }} paramLabel={play.param_label} />
+    </>}
+
+    <div class="navrow"><button class="btn ghost" data-goto="1"><span class="arr">←</span> <span>{t.s2}</span></button><button class="btn" data-goto="3"><span>{t.s4}</span> <span class="arr">→</span></button></div>
+  </section>
+
+  <section class="sheet card" role="tabpanel">
+    <div class="read">
+      <h2 class="display">{t.code_h}</h2>
+      <p class="muted">{t.code_p}</p>
+<pre set:html={hl(d.code)} />
+      <div class="codecta">
+        <a class="btn hl" href={notebookUrl(d.model as never)} target="_blank" rel="noopener"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M7 7h10v10M7 17 17 7"/></svg><span>{t.colab}</span></a>
+        <a class="btn ghost" href={href(lang, `compare/?a=${d.model}&b=${d.compare}`)}><span>{fill(t.compare_cta, { m: d.short })}</span> <span class="arr">→</span></a>
+      </div>
+    </div>
+    <div class="navrow">
+      <button class="btn ghost" data-goto="2"><span class="arr">←</span> <span>{t.s3}</span></button>
+      {next
+        ? <a class="btn" href={href(lang, lessonPath(next))}><span>{fill(t.next, { m: name(next) })}</span> <span class="arr">→</span></a>
+        : <a class="btn" href={href(lang) + '#route'}><span>{t.route}</span> <span class="arr">→</span></a>}
+    </div>
+  </section>
+</Base>
+
+<style>
+  .hero { display: grid; grid-template-columns: 1.3fr 1fr; gap: 40px; align-items: end; padding: 26px 0 30px; }
+  .kicker { font: 600 13px var(--mono); color: var(--muted); }
+  h1 { font-size: 68px; line-height: .98; margin: 12px 0 14px; }
+  .lede { font-size: 20px; color: var(--muted); max-width: 30em; }
+  .fp { padding: 12px; transform: rotate(1.2deg); }
+  :global(html[dir="rtl"]) .fp { transform: rotate(-1.2deg); }
+  .fp figcaption { font: 500 13px var(--mono); color: var(--muted); padding: 10px 4px 2px; }
+  .fp figcaption b { color: var(--ink); font-family: var(--body); font-size: 15px; }
+
+  .progress { display: flex; align-items: center; gap: 10px; font: 500 12px var(--mono); color: var(--muted); }
+  .progress .track { width: 120px; height: 6px; border-radius: 9px; background: var(--rule); overflow: hidden; }
+  .progress .track i { display: block; height: 100%; width: 28%; background: var(--ok); border-radius: 9px; transition: width .4s; }
+
+  .tabs { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+  .tab { display: flex; align-items: center; gap: 9px; border: 1.5px solid var(--rule); background: var(--sheet); color: var(--muted); font: 700 16px var(--body); padding: 8px 18px 8px 9px; border-radius: 13px; cursor: pointer; box-shadow: 0 3px 0 var(--lift); transition: transform .12s; }
+  :global(html[dir="rtl"]) .tab { padding: 8px 9px 8px 18px; }
+  .tab:hover { transform: translateY(-2px); }
+  .tab .n { width: 25px; height: 25px; border-radius: 8px; display: grid; place-items: center; font: 600 13px var(--mono); background: var(--paper); }
+  .tab.on { background: var(--ink); color: var(--sheet); border-color: var(--ink); }
+  .tab.on .n { background: var(--hl); color: #15202b; }
+  .tab.done .n { background: var(--ok); color: #fff; }
+
+  .card { display: none; padding: 34px 36px; }
+  .card.on { display: block; animation: rise .3s ease; }
+  @keyframes rise { from { opacity: 0; transform: translateY(6px); } }
+  .card h2 { font-size: 34px; line-height: 1.1; margin-bottom: 12px; }
+  .card h3 { font-size: 21px; margin: 26px 0 10px; }
+  .read { max-width: 640px; }
+  .read p { margin-bottom: 12px; }
+  .card :global(code) { font: 500 .86em var(--mono); background: var(--paper); padding: 1px 6px; border-radius: 5px; }
+  .how { list-style: none; display: grid; grid-template-columns: repeat(var(--cols, 4), 1fr); gap: 12px; counter-reset: s; }
+  .how li { counter-increment: s; background: var(--paper); border-radius: 14px; padding: 14px; font-size: 15.5px; line-height: 1.45; }
+  .how li::before { content: counter(s); display: block; font: 600 13px var(--mono); color: var(--muted); margin-bottom: 6px; }
+  .note { margin-top: 22px; border-inline-start: 4px solid var(--hl); padding: 4px 0 4px 16px; }
+  :global(html[dir="rtl"]) .note { padding: 4px 16px 4px 0; }
+
+  .q { font: 700 21px/1.35 var(--body); margin-bottom: 8px; }
+  .ans { display: block; width: 100%; text-align: start; border: 1.5px solid var(--rule); background: var(--sheet); color: var(--ink); border-radius: 14px; padding: 14px 18px; margin: 10px 0; font: 700 16.5px var(--body); cursor: pointer; box-shadow: 0 3px 0 var(--lift); transition: transform .12s; }
+  .ans:hover { transform: translateY(-2px); }
+  .ans.right { border-color: var(--ok); box-shadow: 0 3px 0 var(--ok); }
+  .ans.wrong { border-color: var(--bad); box-shadow: 0 3px 0 var(--bad); }
+  .ans .tag { float: inline-end; font: 600 12px var(--mono); }
+  .ans.right .tag { color: var(--ok); } .ans.wrong .tag { color: var(--bad); }
+  .fb { margin-top: 8px; font-size: 16.5px; }
+  .qz { margin-bottom: 18px; }
+
+  .predict { margin-top: 14px; }
+  .pdata { border: 1.5px solid var(--rule); border-radius: 16px; padding: 8px; background: var(--sheet); max-width: 420px; }
+  .opts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 14px; }
+  .opt { text-align: start; border: 1.5px solid var(--rule); background: var(--sheet); color: var(--ink); border-radius: 14px; padding: 8px; font: 700 15px var(--body); cursor: pointer; box-shadow: 0 3px 0 var(--lift); transition: transform .12s; }
+  .opt:hover { transform: translateY(-2px); }
+  .opt .nm { display: block; min-height: 22px; padding: 8px 4px 0; visibility: hidden; }
+  .opt .tag { font: 600 12px var(--mono); margin-inline-end: 6px; }
+  .predict.done .opt { cursor: default; transform: none; }
+  .predict.done .opt .nm { visibility: visible; }
+  .opt.right { border-color: var(--ok); box-shadow: 0 3px 0 var(--ok); }
+  .opt.wrong { border-color: var(--bad); box-shadow: 0 3px 0 var(--bad); }
+  .opt.right .tag { color: var(--ok); } .opt.wrong .tag { color: var(--bad); }
+
+  .codecta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 18px; }
+  .navrow { display: flex; justify-content: space-between; margin-top: 28px; }
+
+  @media (max-width: 860px) {
+    .hero { grid-template-columns: 1fr; } h1 { font-size: 46px; }
+    .how { grid-template-columns: 1fr 1fr; }
+    .opts { grid-template-columns: 1fr; }
+    .opt :global(canvas) { height: 130px !important; }
+    .card { padding: 22px; } .progress { display: none; }
+    :global(.crumbs) { display: none; }
+  }
+</style>
+
+<script>
+  const $$ = (s: string) => [...document.querySelectorAll<HTMLElement>(s)];
+  const tabs = $$('.tab'), cards = $$('.card');
+  const pbar = document.querySelector<HTMLElement>('[data-pbar]');
+  const base = Number(pbar?.dataset.base ?? 0);
+  const lit = (el: HTMLElement) => { el.classList.remove('lit'); requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('lit'))); };
+
+  function go(i: number) {
+    tabs.forEach((t, j) => { t.classList.toggle('on', j === i); t.setAttribute('aria-selected', String(j === i)); if (j < i) t.classList.add('done'); });
+    cards.forEach((c, j) => c.classList.toggle('on', j === i));
+    lit(cards[i]);
+    if (pbar) pbar.style.width = `${Math.min(100, base + i * 4)}%`;
+  }
+  tabs.forEach(t => t.addEventListener('click', () => go(Number(t.dataset.step))));
+  $$('[data-goto]').forEach(b => b.addEventListener('click', () => go(Number(b.dataset.goto))));
+
+  // multiple choice: each .qz block is one question
+  $$('.qz').forEach(qz => {
+    const fb = qz.querySelector<HTMLElement>('[data-fb]')!;
+    qz.querySelectorAll<HTMLElement>('.ans').forEach(b => b.addEventListener('click', () => {
+      const ok = Number(b.dataset.ans) === Number(qz.dataset.correct);
+      qz.querySelectorAll<HTMLElement>('.ans').forEach(x => { x.classList.remove('right', 'wrong'); x.querySelector('.tag')!.textContent = ''; });
+      b.classList.add(ok ? 'right' : 'wrong');
+      b.querySelector('.tag')!.textContent = ok ? '✓' : '✗';
+      fb.innerHTML = (ok ? fb.dataset.right : fb.dataset.wrong) ?? '';
+      lit(fb);
+    }));
+  });
+
+  // predict the line: the first pick reveals the answer
+  $$('.predict').forEach(box => {
+    const fb = box.querySelector<HTMLElement>('[data-pfb]')!;
+    box.querySelectorAll<HTMLElement>('.opt').forEach(b => b.addEventListener('click', () => {
+      if (box.classList.contains('done')) return;
+      box.classList.add('done');
+      box.querySelectorAll<HTMLElement>('.opt').forEach(o => {
+        const right = Number(o.dataset.opt) === Number(box.dataset.correct);
+        o.classList.add(right ? 'right' : 'wrong');
+        o.querySelector('.tag')!.textContent = right ? '✓' : '✗';
+      });
+      fb.textContent = fb.dataset.why ?? '';
+      lit(fb);
+    }));
+  });
+
+  go(0);
+</script>
