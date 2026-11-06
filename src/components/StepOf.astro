@@ -1,0 +1,13 @@
+---
+// "Step 2 of 4" beside the lesson tabs. CourseNav's script keeps the number in sync with the open tab.
+import { fill, nav, type Lang } from '../i18n/ui';
+interface Props { lang: Lang }
+const t = nav[Astro.props.lang];
+---
+<span class="stepof" data-stepnum data-tpl={t.step} aria-live="polite">{fill(t.step, { n: 1 })}</span>
+
+<style>
+  .stepof { margin-inline-start: auto; align-self: center; font: 600 13px var(--mono); color: var(--muted); background: var(--sheet); border: 1.5px dashed var(--rule); border-radius: 10px; padding: 5px 11px; }
+  :global(html[dir="rtl"]) .stepof { font-family: var(--body); }
+  @media (max-width: 600px) { .stepof { margin-inline-start: 0; order: -1; flex-basis: 100%; text-align: center; } }
+</style>

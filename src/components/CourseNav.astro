@@ -1,0 +1,227 @@
+---
+// Course sidebar for lesson pages: a sticky rail on wide screens, a drawer opened by the top bar's "Course" button below 1100px.
+// Also records progress for the current lesson (steps opened, quiz passed) and fills the step indicator.
+import { href, fill, nav, type Lang } from '../i18n/ui';
+import { PARTS, KEYS, lessonName, partName } from '../course';
+
+interface Props { lang: Lang; current: string }
+const { lang, current } = Astro.props;
+const t = nav[lang];
+const later = PARTS.findIndex(p => p.id === '10');
+---
+<aside class="rail" id="rail" data-current={current} aria-label={t.toc}
+  data-st-none={t.st_none} data-st-started={t.st_started} data-st-done={t.st_done}>
+  <div class="head">
+    <a class="title display" href={href(lang) + '#route'}>{t.course}</a>
+    <button class="x" type="button" data-rail-close aria-label={t.close}><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+  </div>
+  <p class="overall"><span data-count data-keys={KEYS.join(',')} data-tpl={t.overall}>{fill(t.overall, { d: 0, n: KEYS.length })}</span></p>
+  <span class="track all"><i data-bar data-keys={KEYS.join(',')}></i></span>
+
+  <ol class="parts">
+    {PARTS.map((p, i) => {
+      const keys = p.lessons.map(l => l.key).join(',');
+      const mine = p.lessons.some(l => l.key === current);
+      return <>
+        {i === later && <li class="part later"><div class="ph"><span class="pt">4–9</span><span class="pn">{t.later}</span><small>{t.later_d}</small></div></li>}
+        <li class:list={['part', { mine }]}>
+          <div class="ph">
+            <span class="pt">{p.id}</span>
+            <span class="pn">{partName(lang, p.id)}</span>
+            <small data-count data-keys={keys} data-tpl={t.count}>{fill(t.count, { d: 0, n: p.lessons.length })}</small>
+          </div>
+          <span class="track"><i data-bar data-keys={keys}></i></span>
+          <ol class="lessons">
+            {p.lessons.map(l => (
+              <li><a href={href(lang, l.path)} data-lesson={l.key} aria-current={l.key === current ? 'page' : undefined}>
+                <span class="dot" aria-hidden="true"></span>
+                <span class="ln">{lessonName(lang, l)}{l.key === current && <small class="here">{t.here}</small>}</span>
+                <span class="sr" data-st></span>
+              </a></li>
+            ))}
+          </ol>
+        </li>
+      </>;
+    })}
+  </ol>
+
+  <div class="foot">
+    <button class="install" type="button" data-install hidden><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg><span><b>{t.install}</b><small>{t.install_d}</small></span></button>
+    <p class="saved">{t.saved}</p>
+    <div class="reset" data-reset>
+      <button class="linkbtn" type="button" data-reset-ask>{t.reset}</button>
+      <div class="confirm" data-reset-confirm hidden>
+        <p>{t.reset_q}</p>
+        <div class="row"><button class="btn small" type="button" data-reset-yes>{t.reset_yes}</button><button class="btn ghost small" type="button" data-reset-no>{t.cancel}</button></div>
+      </div>
+      <p class="done" data-reset-done role="status" hidden>{t.reset_done}</p>
+    </div>
+  </div>
+</aside>
+<div class="scrim" data-rail-close hidden></div>
+
+<style>
+  .rail { position: sticky; top: 14px; align-self: start; max-height: calc(100vh - 28px); overflow-y: auto; overscroll-behavior: contain;
+    background: var(--sheet); border: 1.5px solid var(--rule); border-radius: 20px; box-shadow: 0 5px 0 var(--lift); padding: 18px 16px 16px; margin-bottom: 6px;
+    scrollbar-width: thin; scrollbar-color: var(--rule) transparent; transition: background-color .25s, border-color .25s; }
+  .head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .title { font-size: 22px; text-decoration: none; }
+  .title:hover { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 4px; }
+  .x { display: none; width: 34px; height: 32px; border: 1.5px solid var(--rule); background: var(--sheet); color: var(--ink); border-radius: 10px; place-items: center; cursor: pointer; }
+  .overall { font: 500 12px var(--mono); color: var(--muted); margin: 4px 0 6px; }
+  .track { display: block; height: 6px; border-radius: 9px; background: var(--rule); overflow: hidden; }
+  .track i { display: block; height: 100%; width: 0; background: var(--ok); border-radius: 9px; transition: width .4s; }
+
+  .parts { list-style: none; margin-top: 14px; display: grid; gap: 14px; }
+  .ph { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .pt { min-width: 28px; height: 26px; padding: 0 5px; border-radius: 8px; display: grid; place-items: center; font: 600 12px var(--mono); background: var(--paper); border: 1.5px solid var(--rule); }
+  .mine .pt { background: var(--hl); color: #15202b; border-color: #d9b928; }
+  .pn { font: 700 15px/1.25 var(--body); }
+  .ph small { font: 500 11.5px var(--mono); color: var(--muted); white-space: nowrap; }
+  .part > .track { height: 4px; margin: 0 0 6px; }
+  .later .pt { border-style: dashed; background: transparent; color: var(--muted); }
+  .later .pn { color: var(--muted); font-weight: 400; }
+
+  .lessons { list-style: none; display: grid; gap: 1px; }
+  .lessons a { display: grid; grid-template-columns: 14px minmax(0, 1fr); align-items: start; gap: 9px; padding: 5px 8px; border-radius: 10px; text-decoration: none; font-size: 14.5px; line-height: 1.3; color: var(--muted); border: 1.5px solid transparent; }
+  .lessons a:hover { color: var(--ink); background: var(--paper); }
+  .lessons a[aria-current="page"] { color: var(--ink); background: var(--paper); border-color: var(--ink); font-weight: 700; box-shadow: 0 3px 0 var(--lift); }
+  .ln { display: block; }
+  .here { display: block; font: 600 11px var(--mono); color: var(--muted); margin-top: 2px; text-transform: uppercase; letter-spacing: .05em; }
+  :global(html[dir="rtl"]) .here { letter-spacing: 0; font-family: var(--body); }
+  /* state dots: empty ring = not started, half = in progress, filled with a tick = done */
+  .dot { width: 14px; height: 14px; margin-top: 2px; border-radius: 50%; border: 2px solid var(--rule); box-sizing: border-box; position: relative; }
+  a[data-state="started"] .dot { border-color: var(--ok); background: linear-gradient(90deg, var(--ok) 50%, transparent 50%); }
+  :global(html[dir="rtl"]) a[data-state="started"] .dot { background: linear-gradient(270deg, var(--ok) 50%, transparent 50%); }
+  a[data-state="done"] .dot { border-color: var(--ok); background: var(--ok); }
+  a[data-state="done"] .dot::after { content: ""; position: absolute; left: 3px; top: 0.5px; width: 3px; height: 6px; border: solid var(--sheet); border-width: 0 2px 2px 0; transform: rotate(45deg); }
+  a[data-state="done"]:not([aria-current]) { color: var(--ink); }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+  .foot { margin-top: 18px; padding-top: 14px; border-top: 1.5px dashed var(--rule); display: grid; gap: 10px; }
+  .install { display: flex; gap: 9px; align-items: flex-start; text-align: start; width: 100%; border: 1.5px solid var(--rule); background: var(--paper); color: var(--ink); border-radius: 12px; padding: 8px 10px; cursor: pointer; font: 14px/1.3 var(--body); }
+  .install[hidden] { display: none; }
+  .install:hover { border-color: var(--muted); }
+  .install svg { flex: none; margin-top: 2px; }
+  .install b { display: block; } .install small { color: var(--muted); font-size: 12.5px; }
+  .saved { font-size: 12.5px; color: var(--muted); line-height: 1.4; }
+  .linkbtn { border: 0; background: none; padding: 0; font: 600 13px var(--body); color: var(--muted); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+  .linkbtn:hover { color: var(--bad); }
+  .confirm p { font-size: 14px; font-weight: 700; margin-bottom: 8px; line-height: 1.35; }
+  .confirm .row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .btn.small { font-size: 13.5px; padding: 6px 12px; border-radius: 10px; box-shadow: 0 3px 0 var(--lift); }
+  [data-reset-yes] { background: var(--bad); border-color: var(--bad); color: #fff; }
+  .done { font-size: 13px; color: var(--ok); font-weight: 700; }
+  [hidden] { display: none !important; }
+
+  .scrim { display: none; }
+
+  @media (max-width: 1099px) {
+    .rail { position: fixed; z-index: 40; top: 0; bottom: 0; inset-inline-start: 0; width: min(330px, 88vw); max-height: none; margin: 0;
+      border-radius: 0 20px 20px 0; border-block: 0; border-inline-start: 0; box-shadow: 0 0 0 100vmax transparent;
+      transform: translateX(-104%); visibility: hidden; transition: transform .25s ease, visibility 0s .25s; }
+    :global(html[dir="rtl"]) .rail { transform: translateX(104%); border-radius: 20px 0 0 20px; }
+    :global(body.rail-open) .rail { transform: none; visibility: visible; transition: transform .25s ease; }
+    .x { display: grid; }
+    .scrim:not([hidden]) { display: block; position: fixed; inset: 0; z-index: 39; background: rgba(8, 14, 20, .45); }
+  }
+</style>
+
+<script>
+  import { load, save, reset, openStep, passQuiz } from '../progress';
+  import { paint, watch, changed } from '../progressui';
+
+  const rail = document.getElementById('rail')!;
+  const key = rail.dataset.current!;
+  const scrim = document.querySelector<HTMLElement>('.scrim')!;
+  const opener = document.querySelector<HTMLButtonElement>('[data-rail-open]');
+
+  // ---- progress for this lesson ----
+  const cards = [...document.querySelectorAll<HTMLElement>('main .card[role="tabpanel"]')];
+  const record = (step: number) => { save(openStep(load(), key, step)); changed(); };
+  const stepEl = document.querySelector<HTMLElement>('[data-stepnum]');
+  let shown = -1;
+  const onStep = () => {
+    const i = cards.findIndex(c => c.classList.contains('on'));
+    if (i < 0 || i === shown) return;
+    shown = i;
+    if (stepEl) stepEl.textContent = (stepEl.dataset.tpl ?? '').replace('{n}', String(i + 1));
+    record(i);
+  };
+  new MutationObserver(onStep).observe(document.querySelector('main')!, { attributes: true, attributeFilter: ['class'], subtree: true });
+  onStep();
+
+  // quiz: passed once every question on the page shows its right answer picked
+  document.addEventListener('click', e => {
+    if (!(e.target as Element).closest?.('.ans')) return;
+    const qs = [...document.querySelectorAll('.qz')];
+    if (qs.length && qs.every(q => q.querySelector('.ans.right'))) { save(passQuiz(load(), key)); changed(); }
+  });
+
+  paint();
+  watch();
+
+  // ---- drawer (below 1100px) ----
+  const narrow = matchMedia('(max-width: 1099px)');
+  function setOpen(open: boolean) {
+    document.body.classList.toggle('rail-open', open);
+    scrim.hidden = !open;
+    opener?.setAttribute('aria-expanded', String(open));
+    if (open) {
+      rail.setAttribute('role', 'dialog'); rail.setAttribute('aria-modal', 'true');
+      (rail.querySelector<HTMLElement>('[aria-current="page"]') ?? rail.querySelector<HTMLElement>('a'))?.focus({ preventScroll: true });
+      rail.querySelector('[aria-current="page"]')?.scrollIntoView({ block: 'center' });
+    } else {
+      rail.removeAttribute('role'); rail.removeAttribute('aria-modal');
+    }
+  }
+  opener?.addEventListener('click', () => setOpen(true));
+  document.querySelectorAll('[data-rail-close]').forEach(b => b.addEventListener('click', () => { setOpen(false); opener?.focus(); }));
+  document.addEventListener('keydown', e => {
+    if (!document.body.classList.contains('rail-open')) return;
+    if (e.key === 'Escape') { setOpen(false); opener?.focus(); }
+    if (e.key === 'Tab') { // keep focus inside the drawer
+      const f = [...rail.querySelectorAll<HTMLElement>('a, button:not([hidden])')].filter(x => x.offsetParent);
+      const first = f[0], last = f[f.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
+  });
+  narrow.addEventListener('change', () => setOpen(false));
+  // on wide screens keep the current lesson in view inside the rail
+  if (!narrow.matches) {
+    const cur = rail.querySelector<HTMLElement>('[aria-current="page"]');
+    if (cur && cur.offsetTop > rail.clientHeight - 80) rail.scrollTop = cur.offsetTop - rail.clientHeight / 2;
+  }
+
+  // ---- reset ----
+  const $r = (s: string) => rail.querySelector<HTMLElement>(s)!;
+  const ask = $r('[data-reset-ask]'), confirmBox = $r('[data-reset-confirm]'), done = $r('[data-reset-done]');
+  ask.addEventListener('click', () => { ask.hidden = true; done.hidden = true; confirmBox.hidden = false; $r('[data-reset-no]').focus(); });
+  $r('[data-reset-no]').addEventListener('click', () => { confirmBox.hidden = true; ask.hidden = false; ask.focus(); });
+  $r('[data-reset-yes]').addEventListener('click', () => {
+    reset();
+    shown = -1; // this page is open, so it counts as started again
+    onStep();
+    confirmBox.hidden = true; ask.hidden = false; done.hidden = false;
+    changed();
+    ask.focus();
+  });
+
+  // ---- install hint: only where the browser offers installing (Chromium's beforeinstallprompt) ----
+  type BIP = Event & { prompt(): Promise<void>; userChoice: Promise<{ outcome: string }> };
+  const w = window as unknown as { __mlvInstall?: BIP | null };
+  const install = $r('[data-install]') as HTMLButtonElement;
+  const offer = () => { install.hidden = !w.__mlvInstall; };
+  addEventListener('mlv:installable', offer);
+  addEventListener('appinstalled', () => { w.__mlvInstall = null; offer(); });
+  install.addEventListener('click', async () => {
+    const ev = w.__mlvInstall;
+    if (!ev) return;
+    await ev.prompt();
+    await ev.userChoice.catch(() => null);
+    w.__mlvInstall = null;
+    offer();
+  });
+  offer();
+</script>

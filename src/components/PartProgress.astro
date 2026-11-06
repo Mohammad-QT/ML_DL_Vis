@@ -1,0 +1,20 @@
+---
+// Top-bar progress for the current part: real "done" counts from the learner's saved progress.
+import { fill, nav, type Lang } from '../i18n/ui';
+import { PARTS, partName, type PartId } from '../course';
+interface Props { lang: Lang; part: PartId }
+const { lang, part } = Astro.props;
+const t = nav[lang];
+const p = PARTS.find(x => x.id === part)!;
+const keys = p.lessons.map(l => l.key).join(',');
+const tpl = fill(t.bar, { p: partName(lang, part), d: '{d}', n: '{n}' });
+---
+<div class="progress"><span data-count data-keys={keys} data-tpl={tpl}>{fill(tpl, { d: 0, n: p.lessons.length })}</span><span class="track"><i data-bar data-keys={keys}></i></span></div>
+
+<style>
+  .progress { display: flex; align-items: center; gap: 10px; font: 500 12px var(--mono); color: var(--muted); }
+  :global(html[dir="rtl"]) .progress { font-family: var(--body); }
+  .track { width: 120px; height: 6px; border-radius: 9px; background: var(--rule); overflow: hidden; }
+  .track i { display: block; height: 100%; width: 0; background: var(--ok); border-radius: 9px; transition: width .4s; }
+  @media (max-width: 860px) { .progress { display: none; } }
+</style>
