@@ -1,0 +1,13 @@
+---
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+import RegLesson from '../../../../components/RegLesson.astro';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('regression', e => e.id.startsWith('ar/'));
+  return entries.map(entry => ({ params: { slug: entry.data.id }, props: { entry } }));
+}
+interface Props { entry: CollectionEntry<'regression'> }
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+---
+<RegLesson lang="ar" entry={entry}><Content /></RegLesson>

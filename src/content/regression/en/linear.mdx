@@ -1,0 +1,40 @@
+---
+id: linear
+model: linear
+short: Simple linear
+title: Simple Linear Regression
+lede: Draw the one straight line that sits closest to all the points, then use it to predict a number.
+figure: { preset: line, seed: 4 }
+steps:
+  - Try a line through the points. Measure each point's miss, the vertical gap between the point and the line.
+  - Square each miss so that gaps above and below cannot cancel, then add them up.
+  - Tilt and shift the line until that total is as small as it can be. This is “least squares”.
+  - Predict a new point by reading the line at its x.
+caution:
+  h: A high R² does not mean the line is right
+  p: 'R² says how much of the ups and downs the line explains: 1 is perfect, 0 is no better than guessing the average. A line can score well and still be the wrong shape. Look at the curve and the <mark>residuals</mark> too, and always read the <mark>test</mark> R².'
+play:
+  p: 'Pick a shape and watch the line. On “Straight line” it fits well. On “Curve” or “Steps” it cannot bend, so R² drops. Switch on residuals to see each miss. Add an outlier far from the rest and see how hard it pulls.'
+  p_touch: 'Pick a shape and watch the line. On “Straight line” it fits well. On “Curve” or “Steps” it cannot bend, so R² drops. Tap to add a point far from the rest and see how hard it pulls.'
+  preset: line
+  seed: 4
+quiz:
+  - q: 'The line fits your training points with R² of 0.95 but the test R² is 0.30. What is the most likely cause?'
+    a:
+      - The line is overfitting, or the test points come from a different pattern
+      - R² cannot go below 0.95 once it is that high
+      - Test points are always scored lower
+    correct: 0
+    right: 'Right. A big gap between train and test R² means the model learned something the new points do not share. With only a slope and an intercept, check for outliers or a changed pattern.'
+    wrong: 'Not quite. Train and test R² should be close. When they are not, the model is not carrying over to new points.'
+code: |
+  from sklearn.linear_model import LinearRegression
+  regressor = LinearRegression()
+  regressor.fit(X_train, y_train)
+  y_pred = regressor.predict(X_test)
+  print(regressor.coef_, regressor.intercept_)
+compare: polynomial
+---
+Simple linear regression finds the <mark>best straight line</mark> through your points. The line has just two numbers: a <b>slope</b> (how much y changes when x goes up by one) and an <b>intercept</b> (where the line starts). Once you have them, predicting is a lookup: put in x, read off y.
+
+Regression boards work like the classification boards, with one change: instead of a colour, each point has a number to predict. The filled points train the line. The ringed points are held back as the test, and <b>R²</b> scores both.

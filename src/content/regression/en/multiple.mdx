@@ -1,0 +1,67 @@
+---
+id: multiple
+model: linear
+short: Multiple linear
+title: Multiple Linear Regression
+lede: Use several inputs at once. Each one gets its own weight, and the prediction is the sum.
+figure: { preset: line, seed: 9, caption: 'With one input you can draw it. With three you read the weights.' }
+steps:
+  - 'Turn every input into a number. A category such as a state becomes a 0/1 column, one per state.'
+  - Give each column a weight and add a starting value, the intercept.
+  - 'The prediction is: intercept + weight₁ × input₁ + weight₂ × input₂ + …'
+  - 'Least squares picks all the weights together so that the total squared miss is as small as possible.'
+caution:
+  h: 'The dummy variable trap'
+  p: 'If you keep one 0/1 column for <b>every</b> state, the columns always add up to 1, which is the intercept column again. The weights are no longer unique. <mark>Drop one column.</mark> The dropped state becomes the baseline that the others are compared with.'
+play:
+  p: 'Move the sliders and pick a state. Each row shows an input, its weight and how much it adds to the profit. Then tick the trap box and slide the shift: the weights change but every prediction stays the same.'
+  preset: line
+  seed: 9
+ui:
+  rd: R&D spend
+  mk: Marketing spend
+  state: State
+  ca: California
+  ny: New York
+  fl: Florida
+  term: Input
+  value: Value
+  weight: Weight
+  adds: Adds
+  intercept: Intercept
+  profit: Predicted profit
+  trap_label: Keep a column for every state (the trap)
+  shift: Shift
+  note_ca: 'California is the baseline: it has no column. Its profit is just the intercept plus the two spends.'
+  note_other: '{s} has its own 0/1 column. When it is on, it adds its weight ({w}) on top of the baseline.'
+  trap_note: 'Slide the shift. Every state weight goes up by the same amount and the intercept goes down by it, so the prediction never moves. The computer cannot tell these answers apart, so the weights mean nothing. Untick the box to drop one column.'
+quiz:
+  - q: 'You have a “city” column with 3 values. How many 0/1 columns should the regression get?'
+    a:
+      - 3, one per city
+      - 2, one city is the baseline
+      - 1, the city number
+    correct: 1
+    right: 'Right. Two columns are enough: when both are 0, the city is the baseline. A third column would repeat the intercept.'
+    wrong: 'Not quite. Three columns always add up to 1, the same as the intercept. Keep two, and let the third city be the baseline.'
+  - q: 'In a fitted model the R&D weight is 0.75 and the marketing weight is 0.06. What does that say?'
+    a:
+      - R&D matters more than marketing, whatever the units
+      - 'Each extra $1k of R&D adds $0.75k of profit, other inputs held fixed'
+      - 'Marketing is useless'
+    correct: 1
+    right: 'Right. A weight is the change in the prediction for one more unit of that input, with the others held fixed. Compare weights only when inputs are on the same scale.'
+    wrong: 'Not quite. A weight is “per one unit of that input”. A small weight on a big number can still matter a lot.'
+code: |
+  import pandas as pd
+  from sklearn.linear_model import LinearRegression
+
+  X = pd.get_dummies(dataset[['weight', 'horsepower', 'origin']], drop_first=True)   # drop one dummy column
+  regressor = LinearRegression()
+  regressor.fit(X_train, y_train)
+  print(dict(zip(X.columns, regressor.coef_.round(2))))
+compare: polynomial
+---
+Real answers rarely depend on one thing. A startup's profit depends on how much it spends on research, on marketing, and maybe where it is based. <mark>Multiple linear regression</mark> gives every input its own weight and adds the pieces up.
+
+You cannot draw this on a flat board, because every input needs its own axis. So instead of a line, you read the <b>weights</b>: each one says how much the prediction moves when that input goes up by one, with the others held fixed.

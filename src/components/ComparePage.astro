@@ -4,16 +4,15 @@ import Base from '../layouts/Base.astro';
 import NavLinks from './NavLinks.astro';
 import { common, type Lang } from '../i18n/ui';
 import { compare } from '../i18n/pages';
-import { MODEL_NAMES } from '../engine';
 
 interface Props { lang: Lang }
 const { lang } = Astro.props;
 const t = { ...common[lang], ...compare[lang] };
-const m = (n: string) => t[`m_${n}` as keyof typeof t];
-const strings = Object.fromEntries(Object.keys(t).filter(k => /^(m_|s_|p_|v_)/.test(k)).map(k => [k, t[k as keyof typeof t]]));
+const strings = Object.fromEntries(Object.keys(t).filter(k => /^(m_|s_|rs_|p_|v_|train|test)/.test(k)).map(k => [k, t[k as keyof typeof t]]));
 const json = JSON.stringify(strings).replace(/</g, '\\u003c');
 const presets = ['moons', 'blobs', 'circles', 'xor'] as const;
-const sides = [{ key: 'a', label: t.algo_a, def: 'knn' }, { key: 'b', label: t.algo_b, def: 'tree' }];
+const regPresets = ['curve', 'line', 'steps', 'sine', 'outliers'] as const;
+const sides = [{ key: 'a', label: t.algo_a }, { key: 'b', label: t.algo_b }];
 ---
 <Base lang={lang} title={t.page_title} description={t.lede}>
   <NavLinks slot="crumbs" lang={lang} cur="compare" />
@@ -24,10 +23,14 @@ const sides = [{ key: 'a', label: t.algo_a, def: 'knn' }, { key: 'b', label: t.a
   </section>
 
   <div class="sheet toolbar">
-    <div class="grp"><span class="label">{t.data}</span>
-      {presets.map(p => <button class:list={['chip', { on: p === 'moons' }]} data-preset={p}>{t[`d_${p}`]}</button>)}
-      <button class="chip" id="resplit">{t.resplit}</button><button class="chip" id="clear">{t.clear}</button></div>
-    <div class="grp"><span class="label">{t.adding}</span>
+    <div class="grp"><span class="label">{t.task}</span>
+      <button class="chip on" data-task-btn="cls">{t.task_cls}</button><button class="chip" data-task-btn="reg">{t.task_reg}</button></div>
+    <div class="grp" data-task="cls"><span class="label">{t.data}</span>
+      {presets.map(p => <button class:list={['chip', { on: p === 'moons' }]} data-preset={p}>{t[`d_${p}`]}</button>)}</div>
+    <div class="grp" data-task="reg" hidden><span class="label">{t.data}</span>
+      {regPresets.map(p => <button class:list={['chip', { on: p === 'curve' }]} data-rpreset={p}>{t[`d_${p}`]}</button>)}</div>
+    <div class="grp"><button class="chip" id="resplit">{t.resplit}</button><button class="chip" id="clear">{t.clear}</button></div>
+    <div class="grp" data-task="cls"><span class="label">{t.adding}</span>
       <button class="chip on" data-cls="0"><span class="swatch a"></span><span>{t.cls_a}</span></button>
       <button class="chip" data-cls="1"><span class="swatch b"></span><span>{t.cls_b}</span></button></div>
     <span class="legend"><span class="swatch ring"></span><span>{t.legend_test}</span></span>
@@ -39,18 +42,19 @@ const sides = [{ key: 'a', label: t.algo_a, def: 'knn' }, { key: 'b', label: t.a
         {i === 1 && <div class="mid"><span class="vs">vs</span><button class="iconbtn" id="swap" aria-label={t.swap} title={t.swap}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 7h13l-4-4M17 17H4l4 4"/></svg></button></div>}
         <section class="sheet side" data-side={s.key}>
           <header><span class="tagAB">{s.key.toUpperCase()}</span>
-            <select aria-label={s.label}>{MODEL_NAMES.map(n => <option value={n} selected={n === s.def}>{m(n)}</option>)}</select></header>
+            <select aria-label={s.label}></select></header>
           <div class="shape"></div>
           <div class="param"></div>
           <canvas class="board"></canvas>
-          <div class="scores" aria-live="polite"><div><small>{t.train}</small><span class="num tr">–</span></div><div><small>{t.test}</small><span class="num te">–</span></div><span class="bar"><i></i></span></div>
+          <div class="scores" aria-live="polite"><div><small data-l="train">{t.train}</small><span class="num tr">–</span></div><div><small data-l="test">{t.test}</small><span class="num te">–</span></div><span class="bar"><i></i></span></div>
         </section>
       </Fragment>
     ))}
   </div>
 
   <div class="sheet verdict"><span class="vmark"></span><div id="verdict" aria-live="polite"></div></div>
-  <p class="hint muted"><span class="on-mouse">{t.hint_add}</span><span class="on-touch">{t.hint_tap}</span></p>
+  <p class="hint muted" data-task="cls"><span class="on-mouse">{t.hint_add}</span><span class="on-touch">{t.hint_tap}</span></p>
+  <p class="hint muted" data-task="reg" hidden><span class="on-mouse">{t.hint_add_reg}</span><span class="on-touch">{t.hint_tap_reg}</span></p>
   <script type="application/json" id="strings" set:html={json} />
 </Base>
 
@@ -60,6 +64,7 @@ const sides = [{ key: 'a', label: t.algo_a, def: 'knn' }, { key: 'b', label: t.a
   .lede { color: var(--muted); font-size: 18px; }
   .toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 22px; padding: 14px 18px; margin-bottom: 18px; }
   .toolbar .grp { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+  .toolbar .grp[hidden], .hint[hidden] { display: none; }
   .toolbar .label { margin: 0 6px 0 0; }
   :global(html[dir="rtl"]) .toolbar .label { margin: 0 0 0 6px; }
   .legend { font-size: 13.5px; color: var(--muted); margin-inline-start: auto; }
@@ -72,6 +77,7 @@ const sides = [{ key: 'a', label: t.algo_a, def: 'knn' }, { key: 'b', label: t.a
   :global(html[dir="rtl"]) select { padding: 7px 12px 7px 34px; background-position: 18px 55%, 13px 55%; }
   .param { min-height: 58px; padding: 2px 4px 8px; }
   .param :global(.label b) { color: var(--ink); }
+  .param :global(label) { display: block; margin-bottom: 6px; }
   .param :global(p) { font-size: 14px; color: var(--muted); padding-top: 8px; }
   .shape { font: 500 13px var(--mono); color: var(--muted); padding: 0 4px 8px; }
   .side canvas { height: 400px; }
@@ -98,106 +104,161 @@ const sides = [{ key: 'a', label: t.algo_a, def: 'knn' }, { key: 'b', label: t.a
 
 <script>
   import { Board } from '../engine/board';
-  import { Store, MODELS, defaults, fitModel, score, pct, isModel, isPreset, type Label, type Model, type ModelName, type ParamSpec, type Params } from '../engine';
+  import { RegBoard } from '../engine/regboard';
+  import {
+    Store, RegStore, MODELS, REG_MODELS, MODEL_NAMES, REG_NAMES, defaults, regDefaults, fitModel, fitReg, score, r2, pct, fmtR2,
+    isModel, isRegModel, isPreset, isRegPreset, type Label, type ParamSpec, type Params,
+  } from '../engine';
 
   const S: Record<string, string> = JSON.parse(document.getElementById('strings')!.textContent!);
   const $ = <T extends Element = HTMLElement>(s: string, root: ParentNode = document) => root.querySelector<T>(s)!;
   const $$ = (s: string) => [...document.querySelectorAll<HTMLElement>(s)];
 
-  interface Side { key: 'a' | 'b'; el: HTMLElement; name: ModelName; params: Params; board: Board; model?: Model; tr: number | null; te: number | null }
+  type Task = 'cls' | 'reg';
+  interface Side { key: 'a' | 'b'; el: HTMLElement; name: string; params: Params; board: Board | RegBoard; tr: number | null; te: number | null }
   const q = new URLSearchParams(location.search);
-  const pickOr = (v: string | null, d: ModelName): ModelName => (v && isModel(v) ? v : d);
-  const store = new Store({ testFrac: 0.25 });
+  let task: Task = q.get('task') === 'reg' ? 'reg' : 'cls';
+  let store: Store | RegStore;
   let cls: Label = 0;
+  const names = () => (task === 'reg' ? REG_NAMES : MODEL_NAMES) as string[];
+  const valid = (n: string | null) => !!n && (task === 'reg' ? isRegModel(n) : isModel(n));
+  const defaultsOf = (n: string): Params => (task === 'reg' ? regDefaults(n as never) : defaults(n as never));
+  const specsOf = (n: string) => Object.entries((task === 'reg' ? REG_MODELS[n as keyof typeof REG_MODELS] : MODELS[n as keyof typeof MODELS]).params as Record<string, ParamSpec>);
+  const DEF = { cls: ['knn', 'tree'], reg: ['linear', 'polynomial'] };
 
-  const make = (key: 'a' | 'b', name: ModelName): Side => {
+  const sides = {} as Record<'a' | 'b', Side>;
+  for (const key of ['a', 'b'] as const) {
     const el = $(`.side[data-side="${key}"]`);
-    const s: Side = {
-      key, el, name, params: defaults(name), tr: null, te: null,
-      board: new Board($<HTMLCanvasElement>('canvas', el), store, {
-        onAdd: (p, e) => store.add(p.x, p.y, (e.shiftKey ? 1 - cls : cls) as Label),
-        onHover: g => (key === 'a' ? sides.b : sides.a).board.setGhost(g),
-      }),
-    };
+    sides[key] = { key, el, name: '', params: {}, board: undefined as never, tr: null, te: null };
     $<HTMLSelectElement>('select', el).addEventListener('change', e => {
-      s.name = (e.target as HTMLSelectElement).value as ModelName;
-      s.params = defaults(s.name);
+      const s = sides[key];
+      s.name = (e.target as HTMLSelectElement).value;
+      s.params = defaultsOf(s.name);
       buildParam(s); refit(); syncUrl();
     });
-    return s;
-  };
-  const sides = { a: make('a', pickOr(q.get('a'), 'knn')), b: make('b', pickOr(q.get('b'), 'tree')) };
+  }
+
+  /** Each task has its own store and board class, so the canvases are swapped for fresh ones. */
+  function mountBoard(s: Side) {
+    const old = $<HTMLCanvasElement>('canvas', s.el), c = old.cloneNode(false) as HTMLCanvasElement;
+    old.replaceWith(c);
+    const other = () => (s.key === 'a' ? sides.b : sides.a).board;
+    const onHover = (g: { x: number; y: number } | null) => other()?.setGhost(g);
+    s.board = task === 'reg'
+      ? new RegBoard(c, store, { onAdd: p => (store as RegStore).add(p.x, p.y), onHover })
+      : new Board(c, store, { onAdd: (p, e) => (store as Store).add(p.x, p.y, (e.shiftKey ? 1 - cls : cls) as Label), onHover });
+  }
 
   const fmt = (spec: ParamSpec, v: number) => (spec.log ? String(+Math.pow(10, v).toPrecision(2)) : String(v));
   function buildParam(s: Side) {
-    const box = $('.param', s.el), specs = Object.entries(MODELS[s.name].params as Record<string, ParamSpec>);
-    $<HTMLSelectElement>('select', s.el).value = s.name;
-    $('.shape', s.el).textContent = '→ ' + S[`s_${s.name}`];
-    if (!specs.length) { box.innerHTML = `<p>${S.p_none}</p>`; return; }
-    const [k, spec] = specs[0];
-    box.innerHTML = `<label><span class="label">${S[`p_${k}`]} · <b>${fmt(spec, s.params[k])}</b></span><input type="range" min="${spec.min}" max="${spec.max}" step="${spec.step}" value="${s.params[k]}"></label>`;
-    $<HTMLInputElement>('input', box).addEventListener('input', e => {
-      s.params[k] = Number((e.target as HTMLInputElement).value);
-      $('b', box).textContent = fmt(spec, s.params[k]);
+    const box = $('.param', s.el), specs = specsOf(s.name);
+    const sel = $<HTMLSelectElement>('select', s.el);
+    sel.innerHTML = names().map(n => `<option value="${n}">${S[`m_${n}`]}</option>`).join('');
+    sel.value = s.name;
+    $('.shape', s.el).textContent = '→ ' + S[`${task === 'reg' ? 'rs' : 's'}_${s.name}`];
+    if (!specs.length) { box.innerHTML = `<p>${task === 'reg' ? S.p_none_reg : S.p_none}</p>`; return; }
+    box.innerHTML = specs.map(([k, spec]) => `<label><span class="label">${S[`p_${k}`]} · <b>${fmt(spec, s.params[k])}</b></span><input type="range" min="${spec.min}" max="${spec.max}" step="${spec.step}" value="${s.params[k]}"></label>`).join('');
+    box.querySelectorAll<HTMLInputElement>('input').forEach((inp, i) => inp.addEventListener('input', () => {
+      const [k, spec] = specs[i];
+      s.params[k] = Number(inp.value);
+      inp.previousElementSibling!.querySelector('b')!.textContent = fmt(spec, s.params[k]);
       refit();
-    });
+    }));
   }
 
   function refit() {
     const tr = store.train(), te = store.test();
     for (const s of [sides.a, sides.b]) {
-      s.model = fitModel(s.name, s.params, tr);
-      s.board.setModel(s.model);
-      s.tr = score(s.model, tr); s.te = score(s.model, te);
-      $('.tr', s.el).textContent = pct(s.tr);
-      $('.te', s.el).textContent = pct(s.te);
-      $<HTMLElement>('.bar i', s.el).style.width = `${(s.te ?? 0) * 100}%`;
+      if (task === 'reg') {
+        const m = fitReg(s.name as never, s.params, tr);
+        (s.board as RegBoard).setReg(m);
+        s.tr = r2(m, tr); s.te = r2(m, te);
+        $('.tr', s.el).textContent = fmtR2(s.tr);
+        $('.te', s.el).textContent = fmtR2(s.te);
+      } else {
+        const m = fitModel(s.name as never, s.params, tr);
+        (s.board as Board).setModel(m);
+        s.tr = score(m, tr); s.te = score(m, te);
+        $('.tr', s.el).textContent = pct(s.tr);
+        $('.te', s.el).textContent = pct(s.te);
+      }
+      $<HTMLElement>('.bar i', s.el).style.width = `${Math.max(0, s.te ?? 0) * 100}%`;
     }
     verdict();
   }
 
   function verdict() {
-    const A = sides.a, B = sides.b, n = store.test().length, out: string[] = [];
+    const A = sides.a, B = sides.b, n = store.test().length, out: string[] = [], reg = task === 'reg';
     A.el.classList.remove('lead'); B.el.classList.remove('lead');
     if (n < 4 || A.te == null || B.te == null) out.push(S.v_more);
     else {
-      const d = Math.round((A.te - B.te) * n);
-      if (d === 0) out.push(S.v_tie);
+      const d = reg ? A.te - B.te : Math.round((A.te - B.te) * n);
+      if (Math.abs(d) < (reg ? 0.005 : 1)) out.push(reg ? S.v_tie_r2 : S.v_tie);
       else {
-        const w = d > 0 ? A : B;
+        const w = d > 0 ? A : B, l = d > 0 ? B : A;
         w.el.classList.add('lead');
-        out.push(S.v_win.replace('{m}', `<b>${S[`m_${w.name}`]}</b>`).replace('{d}', String(Math.abs(d))).replace('{n}', String(n)));
+        out.push(reg
+          ? S.v_win_r2.replace('{m}', `<b>${S[`m_${w.name}`]}</b>`).replace('{a}', fmtR2(w.te)).replace('{b}', fmtR2(l.te))
+          : S.v_win.replace('{m}', `<b>${S[`m_${w.name}`]}</b>`).replace('{d}', String(Math.abs(d))).replace('{n}', String(n)));
       }
       for (const s of [A, B]) {
-        if (s.tr != null && s.te != null && s.tr - s.te > 0.12)
-          out.push(S.v_over.replace('{m}', S[`m_${s.name}`]).replace('{tr}', String(Math.round(s.tr * 100))).replace('{te}', String(Math.round(s.te * 100))));
+        if (s.tr == null || s.te == null) continue;
+        if (reg ? s.tr - s.te > 0.15 && s.tr > 0.5 : s.tr - s.te > 0.12)
+          out.push((reg ? S.v_over_r2 : S.v_over).replace('{m}', S[`m_${s.name}`])
+            .replace('{tr}', reg ? fmtR2(s.tr) : String(Math.round(s.tr * 100))).replace('{te}', reg ? fmtR2(s.te) : String(Math.round(s.te * 100))));
       }
     }
     $('#verdict').innerHTML = out.map(t => `<p>${t}</p>`).join('');
   }
 
-  function syncUrl() { history.replaceState(null, '', `?a=${sides.a.name}&b=${sides.b.name}`); }
+  function syncUrl() { history.replaceState(null, '', `?a=${sides.a.name}&b=${sides.b.name}${task === 'reg' ? '&task=reg' : ''}`); }
 
-  store.subscribe(refit);
+  /** Switch task: new store, new boards, default algorithms (or the ones in the URL on first load). */
+  function setTask(next: Task, fromUrl = false) {
+    task = next;
+    store = task === 'reg' ? new RegStore({ testFrac: 0.25 }) : new Store({ testFrac: 0.25 });
+    store.subscribe(refit);
+    $$('[data-task-btn]').forEach(b => b.classList.toggle('on', b.dataset.taskBtn === task));
+    $$('[data-task]').forEach(el => (el.hidden = el.dataset.task !== task));
+    $$('.scores [data-l]').forEach(l => (l.textContent = S[task === 'reg' ? `${l.dataset.l}_r2` : l.dataset.l!]));
+    (['a', 'b'] as const).forEach((key, i) => {
+      const s = sides[key], fromQ = fromUrl && valid(q.get(key)) ? q.get(key)! : null;
+      s.name = fromQ ?? DEF[task][i];
+      s.params = defaultsOf(s.name);
+      mountBoard(s);
+      buildParam(s);
+    });
+    if (task === 'reg') (store as RegStore).preset('curve', 5); else (store as Store).preset('moons', 5);
+    $$('[data-preset]').forEach(x => x.classList.toggle('on', x.dataset.preset === 'moons'));
+    $$('[data-rpreset]').forEach(x => x.classList.toggle('on', x.dataset.rpreset === 'curve'));
+    if (!fromUrl) syncUrl();
+  }
+
+  $$('[data-task-btn]').forEach(b => b.addEventListener('click', () => { if (b.dataset.taskBtn !== task) setTask(b.dataset.taskBtn as Task); }));
   $$('[data-cls]').forEach(b => b.addEventListener('click', () => {
     cls = Number(b.dataset.cls) as Label;
     $$('[data-cls]').forEach(x => x.classList.toggle('on', x === b));
   }));
   $$('[data-preset]').forEach(b => b.addEventListener('click', () => {
     const name = b.dataset.preset!;
-    if (!isPreset(name)) return;
-    store.preset(name);
+    if (task !== 'cls' || !isPreset(name)) return;
+    (store as Store).preset(name);
     $$('[data-preset]').forEach(x => x.classList.toggle('on', x === b));
   }));
+  $$('[data-rpreset]').forEach(b => b.addEventListener('click', () => {
+    const name = b.dataset.rpreset!;
+    if (task !== 'reg' || !isRegPreset(name)) return;
+    (store as RegStore).preset(name);
+    $$('[data-rpreset]').forEach(x => x.classList.toggle('on', x === b));
+  }));
   $('#resplit').addEventListener('click', () => store.resplit());
-  $('#clear').addEventListener('click', () => { store.clear(); $$('[data-preset]').forEach(x => x.classList.remove('on')); });
+  $('#clear').addEventListener('click', () => { store.clear(); $$('[data-preset],[data-rpreset]').forEach(x => x.classList.remove('on')); });
   $('#swap').addEventListener('click', () => {
     [sides.a.name, sides.b.name] = [sides.b.name, sides.a.name];
     [sides.a.params, sides.b.params] = [sides.b.params, sides.a.params];
     buildParam(sides.a); buildParam(sides.b); refit(); syncUrl();
   });
 
-  buildParam(sides.a); buildParam(sides.b);
-  store.preset('moons', 5);
+  setTask(task, true);
   requestAnimationFrame(() => requestAnimationFrame(() => $('#head').classList.add('lit')));
 </script>

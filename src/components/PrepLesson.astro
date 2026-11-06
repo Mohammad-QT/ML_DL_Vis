@@ -5,7 +5,7 @@ import Base from '../layouts/Base.astro';
 import Board from './Board.astro';
 import PrepDemo from './PrepDemo.astro';
 import { href, common, lesson, prep as prepText, type Lang } from '../i18n/ui';
-import { PREP, lessonPath, prepNotebookUrl, prepPath } from '../lessons';
+import { PREP, regPath, prepNotebookUrl, prepPath } from '../lessons';
 
 interface Props { lang: Lang; entry: CollectionEntry<'prep'> }
 const { lang, entry } = Astro.props;
@@ -95,7 +95,7 @@ const play = d.play;
       <button class="btn ghost" data-goto="2"><span class="arr">←</span> <span>{t.s3}</span></button>
       {next
         ? <a class="btn" href={href(lang, prepPath(next))}><span>{fill(t.next, { m: name(next) })}</span> <span class="arr">→</span></a>
-        : <a class="btn" href={href(lang, lessonPath('logistic'))}><span>{fill(t.next, { m: lang === 'ar' ? 'الانحدار اللوجستي' : 'Logistic Regression' })}</span> <span class="arr">→</span></a>}
+        : <a class="btn" href={href(lang, regPath('linear'))}><span>{fill(t.next, { m: c.m_linear })}</span> <span class="arr">→</span></a>}
     </div>
   </section>
 </Base>

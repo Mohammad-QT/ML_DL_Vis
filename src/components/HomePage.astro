@@ -5,7 +5,7 @@ import NavLinks from './NavLinks.astro';
 import { common, href, prep, type Lang } from '../i18n/ui';
 import { home } from '../i18n/pages';
 import { MODEL_NAMES } from '../engine';
-import { CLASSIFICATION, lessonPath, prepPath, type PrepId } from '../lessons';
+import { CLASSIFICATION, REGRESSION, lessonPath, prepPath, regPath, type PrepId } from '../lessons';
 
 interface Props { lang: Lang }
 const { lang } = Astro.props;
@@ -61,8 +61,8 @@ const REG: Array<[keyof typeof t, string]> = [
       <li class="stop"><div class="pt">1</div><div class="sheet body"><h3 class="display"><a href={href(lang, prepPath('missing'))}>{t.p1}</a><small>4 {t.lessons}</small></h3><p>{t.p1_d}</p>
         <div class="links">{PART1.map(id => <a class="chip" href={href(lang, prepPath(id))}>{pn[`n_${id}` as keyof typeof pn]}</a>)}</div></div></li>
       <li class="stop"><div class="pt">2</div><div class="sheet body"><h3 class="display"><span>{t.p2}</span><small>6 {t.lessons}</small></h3><p>{t.p2_d}</p>
-        <div class="minis">{REG.map(([k, path]) => (
-          <div class="mini soon"><svg viewBox="0 0 80 48" preserveAspectRatio="none" aria-hidden="true"><g fill="none" stroke="var(--ink)" stroke-width="1.8" stroke-linecap="round" set:html={path} /><g fill="var(--a)">{dots.map(([x, y]) => <circle cx={x} cy={y} r="2.2" />)}</g></svg><span>{t[k]}</span><small>{t.soon}</small></div>
+        <div class="minis">{REG.map(([k, path], i) => (
+          <a class="mini" href={href(lang, regPath(REGRESSION[i]))}><svg viewBox="0 0 80 48" preserveAspectRatio="none" aria-hidden="true"><g fill="none" stroke="var(--ink)" stroke-width="1.8" stroke-linecap="round" set:html={path} /><g fill="var(--a)">{dots.map(([x, y]) => <circle cx={x} cy={y} r="2.2" />)}</g></svg><span>{t[k]}</span></a>
         ))}</div>
       </div></li>
       <li class="stop"><div class="pt">3</div><div class="sheet body"><h3 class="display"><span>{t.p3}</span><small>7 {t.lessons}</small></h3><p>{t.p3_d}</p>
@@ -133,7 +133,7 @@ const REG: Array<[keyof typeof t, string]> = [
   .mini { text-decoration: none; border: 1.5px solid var(--rule); border-radius: 12px; padding: 6px; background: var(--paper); transition: border-color .12s, transform .12s; }
   a.mini:hover { border-color: var(--ink); transform: translateY(-2px); }
   .mini canvas, .mini svg { width: 100%; height: 62px; display: block; border-radius: 7px; background: var(--sheet); }
-  a.mini canvas { cursor: pointer; }
+  a.mini canvas, a.mini svg { cursor: pointer; }
   .mini.soon canvas, .mini.soon svg { cursor: default; opacity: .7; }
   .mini span { display: block; font-size: 13px; font-weight: 700; padding: 6px 2px 1px; line-height: 1.25; }
   .mini small { display: block; font: 500 11px var(--mono); color: var(--muted); padding: 0 2px; }
@@ -172,7 +172,8 @@ const REG: Array<[keyof typeof t, string]> = [
 
 <script>
   import { Board } from '../engine/board';
-  import { Store, fitModel, MODEL_NAMES, type Model, type ModelName } from '../engine';
+  import { RegBoard } from '../engine/regboard';
+  import { Store, RegStore, fitModel, fitReg, MODEL_NAMES, type Model, type ModelName, type RegModelName } from '../engine';
 
   const S: Record<string, string> = JSON.parse(document.getElementById('strings')!.textContent!);
   const $ = <T extends HTMLElement = HTMLElement>(s: string) => document.querySelector<T>(s)!;
@@ -203,6 +204,12 @@ const REG: Array<[keyof typeof t, string]> = [
   $('#stage').addEventListener('mouseenter', stop);
   $('#stage').addEventListener('mouseleave', play);
 
+  // regression picks share one curved dataset
+  const regData = new RegStore();
+  regData.preset('curve', 7);
+  regData.points.forEach(p => (p.test = false));
+  const regThumb = (c: HTMLCanvasElement) => new RegBoard(c, regData, { static: true, dot: 1.8 }).setReg(fitReg(c.dataset.r as RegModelName, {}, regData.points));
+
   // route thumbnails
   $$('.minis canvas[data-m]').forEach(c => thumb(c as HTMLCanvasElement));
 
@@ -213,8 +220,9 @@ const REG: Array<[keyof typeof t, string]> = [
     'yes-clean': ['logistic', 'tree'], 'yes-curvy': ['tree', 'knn'], 'yes-unsure': ['tree', 'logistic', 'knn'],
     'no-clean': ['svm', 'logistic'], 'no-curvy': ['ksvm', 'forest', 'knn'], 'no-unsure': ['forest', 'ksvm', 'knn'],
   };
-  function recommend(): { plain: string } | { list: ModelName[] } | null {
-    if (ans[1] === 'num') return { plain: 'res_reg' };
+  const REG_PICKS = ['linear', 'polynomial', 'forest'];
+  function recommend(): { plain: string } | { list: string[]; reg?: boolean } | null {
+    if (ans[1] === 'num') return { list: REG_PICKS, reg: true };
     if (ans[1] === 'grp') return { plain: 'res_clu' };
     if (!ans[2] || !ans[3]) return null;
     return { list: TABLE[`${ans[2]}-${ans[3]}`] };
@@ -227,10 +235,11 @@ const REG: Array<[keyof typeof t, string]> = [
     if ('plain' in r) {
       el.innerHTML = `<p class="plain">${S[r.plain]}</p><div class="resrow">${restartBtn}</div>`;
     } else {
-      const picks = r.list.map((n, i) => `<div class="pick"><canvas class="board" data-m="${n}" aria-hidden="true"></canvas><div><span class="rank">#${i + 1}</span><b>${S[`m_${n}`]}</b><small>${S[`why_${n}`]}</small></div></div>`).join('');
-      el.innerHTML = `<h3 class="display">${S.res_h}</h3><div class="picks">${picks}</div>
-        <div class="resrow"><a class="btn" href="${S.compareUrl}?a=${r.list[0]}&b=${r.list[1]}">${S.res_compare} <span class="arr">→</span></a>${restartBtn}</div>`;
-      el.querySelectorAll('canvas').forEach(c => thumb(c));
+      const attr = r.reg ? 'data-r' : 'data-m';
+      const picks = r.list.map((n, i) => `<div class="pick"><canvas class="board" ${attr}="${n}" aria-hidden="true"></canvas><div><span class="rank">#${i + 1}</span><b>${S[`m_${n}`]}</b><small>${S[`why_${n}`]}</small></div></div>`).join('');
+      el.innerHTML = `<h3 class="display">${S.res_h}</h3>${r.reg ? `<p class="plain">${S.res_reg_p}</p>` : ''}<div class="picks">${picks}</div>
+        <div class="resrow"><a class="btn" href="${S.compareUrl}?a=${r.list[0]}&b=${r.list[1]}${r.reg ? '&task=reg' : ''}">${S.res_compare} <span class="arr">→</span></a>${restartBtn}</div>`;
+      el.querySelectorAll('canvas').forEach(c => (r.reg ? regThumb(c) : thumb(c)));
     }
     el.querySelector('[data-restart]')!.addEventListener('click', () => {
       delete ans[1]; delete ans[2]; delete ans[3];

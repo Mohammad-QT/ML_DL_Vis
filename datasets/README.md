@@ -32,3 +32,19 @@ why feature scaling matters for K-NN and SVM.
 No real person is in this file. Age is the stronger signal for `purchased`, and salary is about a thousand times larger
 than age in raw units, so K-NN gets clearly better after scaling.
 
+## `mpg.csv`
+
+| | |
+|---|---|
+| Used by | `notebooks/2-regression/*.ipynb` |
+| Rows | 398 cars (6 have no `horsepower`; the notebooks drop those rows) |
+| Columns | `mpg`, `cylinders`, `displacement`, `horsepower`, `weight`, `acceleration`, `model_year`, `origin` (usa, japan, europe) |
+| Source | Auto MPG data set, UCI Machine Learning Repository, [archive.ics.uci.edu/dataset/9/auto+mpg](https://archive.ics.uci.edu/dataset/9/auto+mpg) (DOI 10.24432/C5859H). Copied from the [`mwaskom/seaborn-data`](https://github.com/mwaskom/seaborn-data) mirror (`mpg.csv`) |
+| Original authors | Donated by R. Quinlan (1993). Revised from the StatLib library at Carnegie Mellon University, used in the 1983 American Statistical Association Data Exposition |
+| License | CC BY 4.0, as listed for UCI repository data sets. Attribution is given in the notebooks and here. Owner: please confirm on the UCI page before the site goes public |
+| Changes | Dropped the car `name` column. Nothing else: the missing horsepower values are left blank on purpose |
+
+Why this data: weight and horsepower both relate to fuel economy, but the horsepower curve bends, so the same
+file shows a straight line, a bend, a staircase and a smooth curve. `origin` is a text category for the one-hot encoding
+and dummy-variable trap in the multiple linear regression notebook.
+

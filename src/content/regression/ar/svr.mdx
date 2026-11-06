@@ -1,0 +1,52 @@
+---
+id: svr
+model: svr
+short: SVR
+title: 'انحدار المتجهات الداعمة <bdi style="white-space:nowrap">(SVR)</bdi>'
+lede: ركّب منحنى ناعمًا داخل أنبوب. النقاط داخل الأنبوب لا تكلّف شيئًا.
+figure: { preset: sine, seed: 2 }
+steps:
+  - 'ارسم أنبوبًا نصف عرضه <b>epsilon</b> حول المنحنى. النقطة داخل الأنبوب «قريبة بما يكفي» وتُهمَل.'
+  - 'فقط النقاط خارج الأنبوب تسحب المنحنى. هذه هي <b>المتجهات الداعمة</b>.'
+  - 'يحدّد <b>C</b> مدى قوة سحب النقطة الواقعة خارج الأنبوب. فالـ C الكبير يلاحق كل خطأ.'
+  - 'يحدّد <b>gamma</b> مدى انحناء المنحنى. فالـ gamma الكبير يعطي منحنى متعرّجًا.'
+caution:
+  h: ثلاثة إعدادات وتوازن واحد
+  p: 'epsilon صغير وC كبير وgamma كبير، كلها تدفع المنحنى لاتباع كل نقطة، وهذا <mark>حفظ للضجيج</mark>. أما الأنبوب العريض وC الصغير وgamma الصغير فتدفعه نحو منحنى مسطّح وبسيط. راقب R² الاختبار وأنت تحرّك كلًا منها.'
+play:
+  p: 'وسّع الأنبوب بمنزلق epsilon وشاهد المنحنى يرتخي. ثم ارفع C وgamma لتراه يشتدّ حول النقاط. الخطوط المتقطعة هي حافتا الأنبوب.'
+  preset: sine
+  seed: 5
+  hints:
+    low: { max: 0.01, text: 'أنبوب شبه معدوم: كل نقطة تسحب المنحنى.' }
+    high: { min: 0.13, text: 'أنبوب عريض: معظم النقاط داخله، فيصير المنحنى شبه مسطّح.' }
+beat:
+  preset: sine
+  seed: 3
+  start: { epsilon: 0.15, C: 0, gamma: 0 }
+  target: 0.92
+quiz:
+  - q: 'وسّعت أنبوب epsilon. ماذا يحدث للمتجهات الداعمة؟'
+    a:
+      - 'يقل عددها، لأن نقاطًا أكثر صارت داخل الأنبوب'
+      - 'يزيد عددها'
+      - 'لا شيء يتغير'
+    correct: 0
+    right: 'صحيح. النقطة داخل الأنبوب لا وزن لها إطلاقًا، فالأنبوب الأعرض يترك متجهات داعمة أقل ومنحنى أبسط.'
+    wrong: 'ليس تمامًا. اذهب إلى «جرّب»، وسّع الأنبوب ولاحظ كم نقطة يبتلع.'
+code: |
+  from sklearn.preprocessing import StandardScaler
+  from sklearn.svm import SVR
+
+  sc_X, sc_y = StandardScaler(), StandardScaler()
+  X_train = sc_X.fit_transform(X_train)
+  y_train = sc_y.fit_transform(y_train.reshape(-1, 1)).ravel()   # SVR needs scaled y too
+
+  regressor = SVR(kernel='rbf', C=10, epsilon=0.1, gamma='scale')
+  regressor.fit(X_train, y_train)
+  y_pred = sc_y.inverse_transform(regressor.predict(sc_X.transform(X_test)).reshape(-1, 1))
+compare: polynomial
+---
+يتسامح انحدار المتجهات الداعمة مع الأخطاء الصغيرة. تختار أنبوبًا بعرض <b>epsilon</b> حول المنحنى. ونقطة التدريب داخل الأنبوب لا تكلّف شيئًا، فلا يشدّ المنحنى كل اهتزاز صغير. فقط النقاط خارج الأنبوب تسحبه.
+
+مع نواة RBF يستطيع المنحنى أن ينحني بقدر ما تحتاجه البيانات، فيعالج SVR منحنيات لا يعالجها الخط المستقيم. وكأي نموذج يعتمد على المسافات، يحتاج إلى <mark>توحيد المقياس</mark> أولًا.

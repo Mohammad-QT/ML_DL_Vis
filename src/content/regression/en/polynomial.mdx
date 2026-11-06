@@ -1,0 +1,52 @@
+---
+id: polynomial
+model: polynomial
+short: Polynomial
+title: Polynomial Regression
+lede: Still a regression on one input, but the line is allowed to bend.
+figure: { preset: curve, seed: 6 }
+steps:
+  - 'Add new inputs made from x: x², x³ and so on, up to the <b>degree</b> you choose.'
+  - Fit an ordinary linear regression on x and those new columns.
+  - 'Degree 1 is the straight line, degree 2 a single bend, degree 3 an S-shape, and so on.'
+  - 'More degree means more bends, which fits the training points better but may start chasing noise.'
+caution:
+  h: High degrees swing wildly
+  p: 'A high-degree curve can pass close to every training point and then <mark>swing off</mark> between and beyond them. Raise the degree only while the <mark>test</mark> R² keeps rising.'
+play:
+  p: 'Start at degree 1, then raise it one step at a time. Watch the curve bend and compare the Train and Test R². Then try Outliers, or add a point far away, and see what a high degree does with it.'
+  preset: sine
+  seed: 3
+  hints:
+    low: { max: 1, text: 'Degree 1 is a plain straight line again. It cannot bend.' }
+    high: { min: 8, text: 'A very bendy curve: look at the ends, and compare Train with Test.' }
+beat:
+  preset: sine
+  seed: 3
+  start: { degree: 1 }
+  target: 0.88
+quiz:
+  - q: 'Is polynomial regression a linear model?'
+    a:
+      - 'Yes: it is linear in the weights, because x², x³ are just new input columns'
+      - 'No: curves cannot come from a linear model'
+      - 'Only at degree 1'
+    correct: 0
+    right: 'Right. The curve is bent in x, but the model is still a weighted sum of columns, so least squares still solves it in one step.'
+    wrong: 'Not quite. The weights only multiply columns and add up, so it is linear in the weights even though the curve bends.'
+code: |
+  from sklearn.preprocessing import PolynomialFeatures, StandardScaler
+  from sklearn.linear_model import LinearRegression
+
+  sc = StandardScaler()
+  X_train = sc.fit_transform(X_train)         # scale first so high powers stay well behaved
+  poly = PolynomialFeatures(degree=4)
+  X_poly = poly.fit_transform(X_train)        # columns: 1, x, x², x³, x⁴
+  regressor = LinearRegression()
+  regressor.fit(X_poly, y_train)
+  y_pred = regressor.predict(poly.transform(sc.transform(X_test)))
+compare: linear
+---
+A straight line cannot follow a curve. <mark>Polynomial regression</mark> fixes that with a small trick: it adds columns for x², x³ and so on, then runs the same linear regression on all of them. The result is a smooth curve whose number of bends is set by the <b>degree</b>.
+
+The degree is the one setting to tune. Too low, and the curve misses the pattern. Too high, and it bends to follow noise.
