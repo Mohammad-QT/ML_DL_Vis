@@ -1,0 +1,209 @@
+---
+// The lesson Check step, one card at a time: each quiz question, then the optional "predict" and "beat" slots,
+// then a summary. State lives in src/checkflow.ts. Wrong picks also mark the right answer, so the course progress
+// (CourseNav: every .qz has an .ans.right) counts the quiz as done once every question is answered.
+import { lesson, type Lang } from '../i18n/ui';
+
+interface Q { q: string; a: string[]; correct: number; right: string; wrong: string }
+interface Props { lang: Lang; quiz: Q[]; heading: string }
+const { lang, quiz, heading } = Astro.props;
+const t = lesson[lang];
+const hasPredict = Astro.slots.has('predict');
+const hasBeat = Astro.slots.has('beat');
+const n = quiz.length + (hasPredict ? 1 : 0) + (hasBeat ? 1 : 0);
+---
+<div class="ck" data-check data-of={t.ck_of} data-sum={t.ck_sum} data-all={t.ck_all} data-some={t.ck_some} data-beat-yes={t.ck_beat_yes} data-beat-no={t.ck_beat_no}>
+  <div class="ck-head">
+    <h2 class="display">{heading}</h2>
+    <div class="ck-prog">
+      <span class="ck-of" data-ck-of>{t.ck_of.replace('{n}', '1').replace('{m}', String(n))}</span>
+      <ol class="ck-dots" aria-hidden="true">{Array.from({ length: n }, (_, k) => <li data-st={k === 0 ? 'current' : 'todo'}></li>)}</ol>
+    </div>
+  </div>
+
+  {quiz.map((q, k) => (
+    <section class="ck-card ck-q" data-scored hidden={k > 0}>
+      <div class="qz" data-correct={q.correct}>
+        <p class="q" tabindex="-1">{q.q}</p>
+        {q.a.map((a, i) => <button class="ans" data-ans={i}><span>{a}</span><span class="tag"></span></button>)}
+        <p class="fb" aria-live="polite" data-fb data-right={q.right} data-wrong={q.wrong}></p>
+      </div>
+    </section>
+  ))}
+  {hasPredict && <section class="ck-card" data-scored hidden><slot name="predict" /></section>}
+  {hasBeat && <section class="ck-card" data-beat hidden><slot name="beat" /></section>}
+
+  <section class="ck-card ck-sum" data-sum hidden>
+    <h3 class="display" tabindex="-1">{t.ck_sum_h}</h3>
+    <p class="ck-score" data-ck-score></p>
+    <p class="muted" data-ck-msg></p>
+    {hasBeat && <p class="ck-beat" data-ck-beat></p>}
+    <div class="ck-sumrow">
+      <button class="btn ghost" data-ck-again><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12a8 8 0 1 0 2.3-5.6M4 4v4h4"/></svg><span>{t.ck_again}</span></button>
+      <button class="btn" data-goto="3"><span>{t.ck_code}</span> <span class="arr">→</span></button>
+    </div>
+  </section>
+
+  <div class="ck-nav">
+    <button class="btn ghost" data-goto="1" data-ck-play><span class="arr">←</span> <span>{t.s2}</span></button>
+    <button class="btn ghost" data-ck-back hidden><span class="arr">←</span> <span>{t.ck_back}</span></button>
+    <button class="btn" data-ck-next disabled><span>{t.ck_next}</span> <span class="arr">→</span></button>
+  </div>
+</div>
+
+<style>
+  .ck-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 18px; margin-bottom: 14px; }
+  .ck-head h2 { font-size: 34px; line-height: 1.1; margin: 0; }
+  .ck-prog { display: flex; align-items: center; gap: 12px; }
+  .ck-of { font: 600 13px var(--mono); color: var(--muted); }
+  :global(html[dir="rtl"]) .ck-of { font-family: var(--body); }
+  .ck-dots { display: flex; gap: 6px; list-style: none; }
+  .ck-dots li { width: 10px; height: 10px; border-radius: 50%; background: var(--rule); transition: background-color .2s, transform .2s; }
+  .ck-dots li[data-st="current"] { background: var(--ink); transform: scale(1.25); }
+  .ck-dots li[data-st="right"] { background: var(--ok); }
+  .ck-dots li[data-st="wrong"] { background: var(--bad); }
+  .ck-dots li[data-st="seen"] { background: var(--muted); }
+  .ck-card { animation: ckin .25s ease; }
+  .ck-card[hidden] { display: none; }
+  .ck-q, .ck-sum { max-width: 680px; }
+  @keyframes ckin { from { opacity: 0; transform: translateY(6px); } }
+  .ck-card :global(h3.display) { margin-top: 0; }
+
+  .q { font: 700 21px/1.35 var(--body); margin-bottom: 8px; }
+  .q:focus { outline: none; }
+  .ans { display: block; width: 100%; text-align: start; border: 1.5px solid var(--rule); background: var(--sheet); color: var(--ink); border-radius: 14px; padding: 14px 18px; margin: 10px 0; font: 700 16.5px var(--body); cursor: pointer; box-shadow: 0 3px 0 var(--lift); transition: transform .12s; }
+  .ans:hover { transform: translateY(-2px); }
+  .qz.done .ans { cursor: default; transform: none; }
+  .ans.right { border-color: var(--ok); box-shadow: 0 3px 0 var(--ok); }
+  .ans.wrong { border-color: var(--bad); box-shadow: 0 3px 0 var(--bad); }
+  .ans .tag { float: inline-end; font: 600 12px var(--mono); }
+  .ans.right .tag { color: var(--ok); } .ans.wrong .tag { color: var(--bad); }
+  .fb { margin-top: 8px; font-size: 16.5px; min-height: 1.6em; }
+
+  .ck-sum h3 { font-size: 24px; margin-bottom: 6px; }
+  .ck-sum h3:focus { outline: none; }
+  .ck-score { font: 600 34px/1.15 var(--mono); margin: 4px 0 6px; }
+  :global(html[dir="rtl"]) .ck-score { font-family: var(--body); font-weight: 700; }
+  .ck-beat { margin-top: 6px; }
+  .ck-sumrow { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 20px; }
+  .ck-sumrow svg { width: 18px; height: 18px; }
+  :global(html[dir="rtl"]) .ck-sumrow svg { transform: scaleX(-1); }
+
+  .ck-nav { display: flex; justify-content: space-between; gap: 12px; margin-top: 22px; }
+  .ck-nav [hidden] { display: none; }
+  .ck-nav [data-ck-next] { margin-inline-start: auto; }
+  .ck-nav [data-ck-next]:disabled { opacity: .4; cursor: default; transform: none; }
+
+  @media (max-width: 760px) {
+    .ck-head h2 { font-size: 26px; }
+    .q { font-size: 18.5px; }
+    .ans { padding: 12px 14px; margin: 8px 0; font-size: 15.5px; }
+    .ck-nav { margin-top: 16px; }
+    .ck-score { font-size: 26px; }
+    .ck-sumrow { gap: 10px; }
+  }
+</style>
+
+<script>
+  import { answer, atSummary, back, canBack, canNext, count, dots, next, reset, score, start, type Flow } from '../checkflow';
+
+  const reduce = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const lit = (el: HTMLElement) => { el.classList.remove('lit'); requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('lit'))); };
+
+  for (const root of document.querySelectorAll<HTMLElement>('[data-check]')) {
+    const D = root.dataset;
+    const cards = [...root.querySelectorAll<HTMLElement>('.ck-card:not([data-sum])')];
+    const sum = root.querySelector<HTMLElement>('[data-sum]')!;
+    const $ = <T extends HTMLElement = HTMLElement>(s: string) => root.querySelector<T>(s)!;
+    const nextBtn = $<HTMLButtonElement>('[data-ck-next]'), backBtn = $('[data-ck-back]'), playBtn = $('[data-ck-play]');
+    let flow: Flow = start(cards.map(c => c.hasAttribute('data-scored')));
+
+    function render(focus = false) {
+      const i = flow.i, n = count(flow), done = atSummary(flow);
+      cards.forEach((c, k) => (c.hidden = k !== i));
+      sum.hidden = !done;
+      $('[data-ck-of]').textContent = done ? '' : D.of!.replace('{n}', String(i + 1)).replace('{m}', String(n));
+      const st = dots(flow);
+      root.querySelectorAll<HTMLElement>('.ck-dots li').forEach((li, k) => (li.dataset.st = done ? (flow.answers[k] == null ? 'seen' : flow.answers[k] ? 'right' : 'wrong') : st[k]));
+      playBtn.hidden = canBack(flow);
+      backBtn.hidden = !canBack(flow);
+      nextBtn.hidden = done;
+      nextBtn.disabled = !canNext(flow);
+      if (done) {
+        const s = score(flow);
+        $('[data-ck-score]').textContent = D.sum!.replace('{r}', String(s.right)).replace('{n}', String(s.total));
+        $('[data-ck-msg]').textContent = s.right === s.total ? D.all! : D.some!;
+        const beat = root.querySelector<HTMLElement>('[data-ck-beat]');
+        if (beat) {
+          const won = [...root.querySelectorAll<HTMLElement>('[data-role="win"], [data-role="won"]')].some(el => !el.hidden);
+          beat.textContent = won ? D.beatYes! : D.beatNo!;
+        }
+      }
+      if (focus) {
+        const shown = done ? sum : cards[i];
+        shown.querySelector<HTMLElement>('.q, h3')?.focus({ preventScroll: true });
+        // keep the card's top in view so a long card never opens half-scrolled
+        const top = root.getBoundingClientRect().top;
+        if (top < 0 || top > innerHeight * 0.4) root.scrollIntoView({ block: 'start', behavior: reduce() ? 'auto' : 'smooth' });
+      }
+    }
+    const go = (f: Flow) => { flow = f; render(true); };
+    const answered = (ok: boolean) => { flow = answer(flow, ok); render(); nextBtn.focus({ preventScroll: true }); };
+
+    nextBtn.addEventListener('click', () => go(next(flow)));
+    backBtn.addEventListener('click', () => go(back(flow)));
+    // Enter moves on once the card is answered (buttons and sliders keep their own Enter)
+    root.addEventListener('keydown', e => {
+      if (e.key !== 'Enter' || !canNext(flow)) return;
+      if ((e.target as Element).closest('button, a, input, select, textarea, canvas')) return;
+      e.preventDefault();
+      go(next(flow));
+    });
+
+    // quiz: the first pick counts; a wrong pick also shows the right answer
+    root.querySelectorAll<HTMLElement>('.qz').forEach(qz => {
+      const fb = qz.querySelector<HTMLElement>('[data-fb]')!;
+      const answers = [...qz.querySelectorAll<HTMLElement>('.ans')];
+      answers.forEach(b => b.addEventListener('click', () => {
+        if (qz.classList.contains('done')) return;
+        qz.classList.add('done');
+        const correct = Number(qz.dataset.correct), ok = Number(b.dataset.ans) === correct;
+        b.classList.add(ok ? 'right' : 'wrong');
+        b.querySelector('.tag')!.textContent = ok ? '✓' : '✗';
+        if (!ok) { const r = answers[correct]; r.classList.add('right'); r.querySelector('.tag')!.textContent = '✓'; }
+        answers.forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+        fb.innerHTML = (ok ? fb.dataset.right : fb.dataset.wrong) ?? '';
+        lit(fb);
+        answered(ok);
+      }));
+    });
+
+    // predict the line: the first pick reveals the answer
+    root.querySelectorAll<HTMLElement>('.predict').forEach(box => {
+      const fb = box.querySelector<HTMLElement>('[data-pfb]')!;
+      box.querySelectorAll<HTMLElement>('.opt').forEach(b => b.addEventListener('click', () => {
+        if (box.classList.contains('done')) return;
+        box.classList.add('done');
+        const ok = Number(b.dataset.opt) === Number(box.dataset.correct);
+        box.querySelectorAll<HTMLElement>('.opt').forEach(o => {
+          const right = Number(o.dataset.opt) === Number(box.dataset.correct);
+          o.classList.add(right ? 'right' : 'wrong');
+          o.querySelector('.tag')!.textContent = right ? '✓' : '✗';
+          o.setAttribute('aria-pressed', String(o === b));
+        });
+        fb.textContent = fb.dataset.why ?? '';
+        lit(fb);
+        answered(ok);
+      }));
+    });
+
+    $('[data-ck-again]').addEventListener('click', () => {
+      root.querySelectorAll<HTMLElement>('.qz, .predict').forEach(el => el.classList.remove('done'));
+      root.querySelectorAll<HTMLElement>('.ans, .opt').forEach(b => { b.classList.remove('right', 'wrong'); b.removeAttribute('aria-pressed'); b.querySelector('.tag')!.textContent = ''; });
+      root.querySelectorAll<HTMLElement>('[data-fb], [data-pfb]').forEach(fb => (fb.textContent = ''));
+      go(reset(flow));
+    });
+
+    render();
+  }
+</script>

@@ -6,6 +6,7 @@ import Base from '../layouts/Base.astro';
 import CourseNav from './CourseNav.astro';
 import PartProgress from './PartProgress.astro';
 import StepOf from './StepOf.astro';
+import CheckFlow from './CheckFlow.astro';
 import CodeOptions from './CodeOptions.astro';
 import NextLesson from './NextLesson.astro';
 import RegBoard from './RegBoard.astro';
@@ -84,24 +85,13 @@ const hl = (code: string) => code.replace(/&/g, '&amp;').replace(/</g, '&lt;')
   </section>
 
   <section class="sheet card" role="tabpanel">
-    <div class="read">
-      <h2 class="display">{t.quiz_h}</h2>
-      {d.quiz.map(q => (
-        <div class="qz" data-correct={q.correct}>
-          <p class="q">{q.q}</p>
-          {q.a.map((a, i) => <button class="ans" data-ans={i}><span>{a}</span><span class="tag"></span></button>)}
-          <p class="fb" aria-live="polite" data-fb data-right={q.right} data-wrong={q.wrong}></p>
-        </div>
-      ))}
-    </div>
-
-    {d.beat && <>
-      <h3 class="display">{t.beat_h}</h3>
-      <p class="muted read">{t.beat_r2_p}</p>
-      <RegBoard lang={lang} model={model} preset={d.beat.preset as never} seed={d.beat.seed} params={d.beat.start} challenge={{ target: d.beat.target }} />
-    </>}
-
-    <div class="navrow"><button class="btn ghost" data-goto="1"><span class="arr">←</span> <span>{t.s2}</span></button><button class="btn" data-goto="3"><span>{t.s4}</span> <span class="arr">→</span></button></div>
+    <CheckFlow lang={lang} quiz={d.quiz} heading={t.quiz_h}>
+      {d.beat && <div slot="beat">
+        <h3 class="display">{t.beat_h}</h3>
+        <p class="muted read">{t.beat_r2_p}</p>
+        <RegBoard lang={lang} model={model} preset={d.beat.preset as never} seed={d.beat.seed} params={d.beat.start} challenge={{ target: d.beat.target }} />
+      </div>}
+    </CheckFlow>
   </section>
 
   <section class="sheet card" role="tabpanel">
@@ -155,15 +145,6 @@ const hl = (code: string) => code.replace(/&/g, '&amp;').replace(/</g, '&lt;')
   .note { margin-top: 22px; border-inline-start: 4px solid var(--hl); padding: 4px 0 4px 16px; }
   :global(html[dir="rtl"]) .note { padding: 4px 16px 4px 0; }
 
-  .q { font: 700 21px/1.35 var(--body); margin-bottom: 8px; }
-  .ans { display: block; width: 100%; text-align: start; border: 1.5px solid var(--rule); background: var(--sheet); color: var(--ink); border-radius: 14px; padding: 14px 18px; margin: 10px 0; font: 700 16.5px var(--body); cursor: pointer; box-shadow: 0 3px 0 var(--lift); transition: transform .12s; }
-  .ans:hover { transform: translateY(-2px); }
-  .ans.right { border-color: var(--ok); box-shadow: 0 3px 0 var(--ok); }
-  .ans.wrong { border-color: var(--bad); box-shadow: 0 3px 0 var(--bad); }
-  .ans .tag { float: inline-end; font: 600 12px var(--mono); }
-  .ans.right .tag { color: var(--ok); } .ans.wrong .tag { color: var(--bad); }
-  .fb { margin-top: 8px; font-size: 16.5px; }
-  .qz { margin-bottom: 18px; }
 
 
   .navrow { display: flex; justify-content: space-between; margin-top: 28px; }
@@ -188,19 +169,6 @@ const hl = (code: string) => code.replace(/&/g, '&amp;').replace(/</g, '&lt;')
   }
   tabs.forEach(t => t.addEventListener('click', () => go(Number(t.dataset.step))));
   $$('[data-goto]').forEach(b => b.addEventListener('click', () => go(Number(b.dataset.goto))));
-
-  // multiple choice: each .qz block is one question
-  $$('.qz').forEach(qz => {
-    const fb = qz.querySelector<HTMLElement>('[data-fb]')!;
-    qz.querySelectorAll<HTMLElement>('.ans').forEach(b => b.addEventListener('click', () => {
-      const ok = Number(b.dataset.ans) === Number(qz.dataset.correct);
-      qz.querySelectorAll<HTMLElement>('.ans').forEach(x => { x.classList.remove('right', 'wrong'); x.querySelector('.tag')!.textContent = ''; });
-      b.classList.add(ok ? 'right' : 'wrong');
-      b.querySelector('.tag')!.textContent = ok ? '✓' : '✗';
-      fb.innerHTML = (ok ? fb.dataset.right : fb.dataset.wrong) ?? '';
-      lit(fb);
-    }));
-  });
 
   go(0);
 </script>

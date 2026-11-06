@@ -5,6 +5,7 @@ import Base from '../layouts/Base.astro';
 import CourseNav from './CourseNav.astro';
 import PartProgress from './PartProgress.astro';
 import StepOf from './StepOf.astro';
+import CheckFlow from './CheckFlow.astro';
 import CodeOptions from './CodeOptions.astro';
 import NextLesson from './NextLesson.astro';
 import Board from './Board.astro';
@@ -79,37 +80,27 @@ const hl = (code: string) => code.replace(/&/g, '&amp;').replace(/</g, '&lt;')
   </section>
 
   <section class="sheet card" role="tabpanel">
-    <div class="read">
-      <h2 class="display">{t.quiz_h}</h2>
-      {d.quiz.map(q => (
-        <div class="qz" data-correct={q.correct}>
-          <p class="q">{q.q}</p>
-          {q.a.map((a, i) => <button class="ans" data-ans={i}><span>{a}</span><span class="tag"></span></button>)}
-          <p class="fb" aria-live="polite" data-fb data-right={q.right} data-wrong={q.wrong}></p>
+    <CheckFlow lang={lang} quiz={d.quiz} heading={t.quiz_h}>
+      <div slot="predict">
+        <h3 class="display">{t.predict_h}</h3>
+        <p class="muted read">{t.predict_p}</p>
+        <div class="predict" data-correct={d.predict.answer}>
+          <div class="pdata"><Board lang={lang} variant="figure" preset={d.predict.preset} seed={d.predict.seed} height="230px" /></div>
+          <div class="opts">{d.predict.options.map((o, i) => (
+            <button class="opt" data-opt={i} aria-label={name(o)}>
+              <Board lang={lang} model={o as never} variant="figure" preset={d.predict.preset} seed={d.predict.seed} height="150px" cell={4} dot={3} tint={0.22} />
+              <span class="nm"><span class="tag"></span><b>{name(o)}</b></span>
+            </button>
+          ))}</div>
+          <p class="fb" aria-live="polite" data-pfb data-why={d.predict.why}></p>
         </div>
-      ))}
-    </div>
-
-    <h3 class="display">{t.predict_h}</h3>
-    <p class="muted read">{t.predict_p}</p>
-    <div class="predict" data-correct={d.predict.answer}>
-      <div class="pdata"><Board lang={lang} variant="figure" preset={d.predict.preset} seed={d.predict.seed} height="230px" /></div>
-      <div class="opts">{d.predict.options.map((o, i) => (
-        <button class="opt" data-opt={i} aria-label={name(o)}>
-          <Board lang={lang} model={o as never} variant="figure" preset={d.predict.preset} seed={d.predict.seed} height="150px" cell={4} dot={3} tint={0.22} />
-          <span class="nm"><span class="tag"></span><b>{name(o)}</b></span>
-        </button>
-      ))}</div>
-      <p class="fb" aria-live="polite" data-pfb data-why={d.predict.why}></p>
-    </div>
-
-    {d.beat && <>
-      <h3 class="display">{t.beat_h}</h3>
-      <p class="muted read">{t.beat_p}</p>
-      <Board lang={lang} model={d.model as never} preset={d.beat.preset} seed={d.beat.seed} params={{ [paramName]: d.beat.start }} challenge={{ target: d.beat.target }} paramLabel={play.param_label} />
-    </>}
-
-    <div class="navrow"><button class="btn ghost" data-goto="1"><span class="arr">←</span> <span>{t.s2}</span></button><button class="btn" data-goto="3"><span>{t.s4}</span> <span class="arr">→</span></button></div>
+      </div>
+      {d.beat && <div slot="beat">
+        <h3 class="display">{t.beat_h}</h3>
+        <p class="muted read">{t.beat_p}</p>
+        <Board lang={lang} model={d.model as never} preset={d.beat.preset} seed={d.beat.seed} params={{ [paramName]: d.beat.start }} challenge={{ target: d.beat.target }} paramLabel={play.param_label} />
+      </div>}
+    </CheckFlow>
   </section>
 
   <section class="sheet card" role="tabpanel">
@@ -160,15 +151,6 @@ const hl = (code: string) => code.replace(/&/g, '&amp;').replace(/</g, '&lt;')
   .note { margin-top: 22px; border-inline-start: 4px solid var(--hl); padding: 4px 0 4px 16px; }
   :global(html[dir="rtl"]) .note { padding: 4px 16px 4px 0; }
 
-  .q { font: 700 21px/1.35 var(--body); margin-bottom: 8px; }
-  .ans { display: block; width: 100%; text-align: start; border: 1.5px solid var(--rule); background: var(--sheet); color: var(--ink); border-radius: 14px; padding: 14px 18px; margin: 10px 0; font: 700 16.5px var(--body); cursor: pointer; box-shadow: 0 3px 0 var(--lift); transition: transform .12s; }
-  .ans:hover { transform: translateY(-2px); }
-  .ans.right { border-color: var(--ok); box-shadow: 0 3px 0 var(--ok); }
-  .ans.wrong { border-color: var(--bad); box-shadow: 0 3px 0 var(--bad); }
-  .ans .tag { float: inline-end; font: 600 12px var(--mono); }
-  .ans.right .tag { color: var(--ok); } .ans.wrong .tag { color: var(--bad); }
-  .fb { margin-top: 8px; font-size: 16.5px; }
-  .qz { margin-bottom: 18px; }
 
   .predict { margin-top: 14px; }
   .pdata { border: 1.5px solid var(--rule); border-radius: 16px; padding: 8px; background: var(--sheet); max-width: 420px; }
@@ -188,8 +170,13 @@ const hl = (code: string) => code.replace(/&/g, '&amp;').replace(/</g, '&lt;')
   @media (max-width: 860px) {
     .hero { grid-template-columns: 1fr; } h1 { font-size: 46px; }
     .how { grid-template-columns: 1fr 1fr; }
-    .opts { grid-template-columns: 1fr; }
-    .opt :global(canvas) { height: 130px !important; }
+    /* compact so the whole "predict the line" card fits a phone screen */
+    .pdata { max-width: none; padding: 6px; }
+    .pdata :global(canvas) { height: 170px !important; }
+    .opts { gap: 8px; margin-top: 10px; }
+    .opt { padding: 5px; border-radius: 12px; }
+    .opt :global(canvas) { height: 88px !important; border-radius: 8px; }
+    .opt .nm { font-size: 12.5px; line-height: 1.25; padding: 6px 2px 0; min-height: 0; }
     .card { padding: 22px; }
     :global(.crumbs) { display: none; }
   }
@@ -207,35 +194,6 @@ const hl = (code: string) => code.replace(/&/g, '&amp;').replace(/</g, '&lt;')
   }
   tabs.forEach(t => t.addEventListener('click', () => go(Number(t.dataset.step))));
   $$('[data-goto]').forEach(b => b.addEventListener('click', () => go(Number(b.dataset.goto))));
-
-  // multiple choice: each .qz block is one question
-  $$('.qz').forEach(qz => {
-    const fb = qz.querySelector<HTMLElement>('[data-fb]')!;
-    qz.querySelectorAll<HTMLElement>('.ans').forEach(b => b.addEventListener('click', () => {
-      const ok = Number(b.dataset.ans) === Number(qz.dataset.correct);
-      qz.querySelectorAll<HTMLElement>('.ans').forEach(x => { x.classList.remove('right', 'wrong'); x.querySelector('.tag')!.textContent = ''; });
-      b.classList.add(ok ? 'right' : 'wrong');
-      b.querySelector('.tag')!.textContent = ok ? '✓' : '✗';
-      fb.innerHTML = (ok ? fb.dataset.right : fb.dataset.wrong) ?? '';
-      lit(fb);
-    }));
-  });
-
-  // predict the line: the first pick reveals the answer
-  $$('.predict').forEach(box => {
-    const fb = box.querySelector<HTMLElement>('[data-pfb]')!;
-    box.querySelectorAll<HTMLElement>('.opt').forEach(b => b.addEventListener('click', () => {
-      if (box.classList.contains('done')) return;
-      box.classList.add('done');
-      box.querySelectorAll<HTMLElement>('.opt').forEach(o => {
-        const right = Number(o.dataset.opt) === Number(box.dataset.correct);
-        o.classList.add(right ? 'right' : 'wrong');
-        o.querySelector('.tag')!.textContent = right ? '✓' : '✗';
-      });
-      fb.textContent = fb.dataset.why ?? '';
-      lit(fb);
-    }));
-  });
 
   go(0);
 </script>

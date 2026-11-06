@@ -105,6 +105,10 @@ export const lesson = {
     r_crumb_part: 'Regression', r_kicker: 'Part 2 · Regression · lesson {n} of 6', r_progress: 'Regression · {n} of 6 done',
     beat_r2_p: 'The data and the split are fixed. Move the sliders until the test R² reaches the goal.',
     compare_reg: 'See {m} next to another regressor',
+    ck_of: 'Question {n} of {m}', ck_next: 'Next', ck_back: 'Back', ck_sum_h: 'How you did', ck_sum: '{r} of {n} right',
+    ck_all: 'All right. Nice work.', ck_some: 'Go back to any card to read why, or try again.',
+    ck_again: 'Try again', ck_code: 'Go to the code', ck_beat_yes: 'Beat the score: goal reached.', ck_beat_no: 'Beat the score: not reached yet. Go back to try again.',
+    ck_dots: 'Progress through the check',
   },
   ar: {
     crumb_part: 'التصنيف', kicker: 'الجزء 3 · التصنيف · الدرس {n} من 7',
@@ -123,6 +127,10 @@ export const lesson = {
     r_crumb_part: 'الانحدار', r_kicker: 'الجزء 2 · الانحدار · الدرس {n} من 6', r_progress: 'الانحدار · أنهيت {n} من 6',
     beat_r2_p: 'البيانات والتقسيم ثابتان. حرّك المنزلقات حتى يصل R² الاختبار إلى الهدف.',
     compare_reg: 'شاهد {m} بجانب نموذج انحدار آخر',
+    ck_of: 'السؤال {n} من {m}', ck_next: 'التالي', ck_back: 'السابق', ck_sum_h: 'نتيجتك', ck_sum: '{r} من {n} صحيحة',
+    ck_all: 'كلها صحيحة. أحسنت.', ck_some: 'عُد إلى أي بطاقة لتقرأ السبب، أو حاول مرة أخرى.',
+    ck_again: 'حاول مرة أخرى', ck_code: 'انتقل إلى الكود', ck_beat_yes: 'تجاوز الدرجة: تحقّق الهدف.', ck_beat_no: 'تجاوز الدرجة: لم يتحقّق الهدف بعد. عُد لتحاول مجددًا.',
+    ck_dots: 'تقدّمك في الاختبار',
   },
 };
 
