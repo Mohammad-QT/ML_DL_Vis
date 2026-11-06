@@ -8,3 +8,5 @@ export { foldIds, crossValidate, randomSplitScores, jitter, mean, std, type CvRe
 export { fitBoost, BOOST_DEFAULTS, type BoostParams, type Boosted } from './boost';
 export { RegStore, REG_PRESETS, isRegPreset, type RegPresetName } from './regstore';
 export { parseCsv, loadTable, describeColumns, detectTask, buildDataset, pca, CsvError, MAX_ROWS, type Table, type Dataset, type ColumnInfo, type Features } from './csv';
+export { UndoStack } from './undo';
+export { sampleGrid, contour, chain, curve, duel, type Duel, type Seg, type Pt } from './contour';

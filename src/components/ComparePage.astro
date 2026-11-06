@@ -3,13 +3,16 @@
 import Base from '../layouts/Base.astro';
 import NavLinks from './NavLinks.astro';
 import CsvUpload from './CsvUpload.astro';
+import Dock from './Dock.astro';
+import BottomSheet from './BottomSheet.astro';
+import { ICON } from '../ui/icons';
 import { common, type Lang } from '../i18n/ui';
 import { compare } from '../i18n/pages';
 
 interface Props { lang: Lang }
 const { lang } = Astro.props;
 const t = { ...common[lang], ...compare[lang] };
-const strings = Object.fromEntries(Object.keys(t).filter(k => /^(m_|s_|rs_|p_|v_|c_|e_|cls_|train|test)/.test(k)).map(k => [k, t[k as keyof typeof t]]));
+const strings = Object.fromEntries(Object.keys(t).filter(k => /^(m_|s_|rs_|p_|v_|c_|e_|cls_|sb_|ov_|train|test|flip)/.test(k)).map(k => [k, t[k as keyof typeof t]]));
 const json = JSON.stringify(strings).replace(/</g, '\\u003c');
 const presets = ['moons', 'blobs', 'circles', 'xor'] as const;
 const regPresets = ['curve', 'line', 'steps', 'sine', 'outliers'] as const;
@@ -33,7 +36,7 @@ const sides = [{ key: 'a', label: t.algo_a }, { key: 'b', label: t.algo_b }];
   </div>
 
   <!-- 2. Which data? Presets and your own CSV are one decision. -->
-  <section class="sheet data" aria-labelledby="data-l">
+  <section class="sheet data" aria-labelledby="data-l" data-phone="data">
     <div class="data-row">
       <span class="label" id="data-l">{t.data}</span>
       <div class="chips" data-task="cls">
@@ -46,18 +49,26 @@ const sides = [{ key: 'a', label: t.algo_a }, { key: 'b', label: t.algo_b }];
   </section>
 
   <!-- 3. Edit the points: small tools right above the boards they act on. -->
-  <div class="edit">
+  <div class="edit" data-phone="data">
+    <div class="viewpick" role="group" aria-labelledby="view-l"><span class="label" id="view-l">{t.view_l}</span>
+      <div class="miniseg">
+        <button class="on" data-view="side" aria-pressed="true">{t.view_side}</button><button data-view="overlay" aria-pressed="false">{t.view_overlay}</button></div></div>
     <div class="pick" data-task="cls" role="group" aria-labelledby="adding-l"><span class="label" id="adding-l">{t.adding}</span>
       <div class="miniseg">
         <button class="on" data-cls="0" aria-pressed="true"><span class="swatch a"></span><span>{t.cls_a}</span></button><button data-cls="1" aria-pressed="false"><span class="swatch b"></span><span>{t.cls_b}</span></button></div></div>
     <div class="acts">
       <button class="act" id="resplit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 3h5v5M4 20 21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg>{t.resplit}</button>
+      <button class="act" data-role="undo" disabled><Fragment set:html={ICON.undo} />{t.undo}</button>
       <button class="act bad" id="clear"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>{t.clear}</button>
     </div>
     <!-- 4. Quiet helper text by the boards. -->
     <p class="legend"><span class="swatch ring"></span><span>{t.legend_test}</span></p>
   </div>
 
+  <div class="cmp-stage" id="stage" data-view="side">
+  <div class="pview" role="group" aria-label={t.view_l}>
+    <button data-pview="both" class="on" aria-pressed="true">{t.view_both}</button><button data-pview="a" aria-pressed="false"><span class="tagAB sm">A</span><bdi data-chip-name="a"></bdi></button><button data-pview="b" aria-pressed="false"><span class="tagAB sm">B</span><bdi data-chip-name="b"></bdi></button>
+  </div>
   <div class="duel">
     {sides.map((s, i) => (
       <Fragment>
@@ -65,8 +76,8 @@ const sides = [{ key: 'a', label: t.algo_a }, { key: 'b', label: t.algo_b }];
         <section class="sheet side" data-side={s.key}>
           <header><span class="tagAB">{s.key.toUpperCase()}</span>
             <select aria-label={s.label}></select></header>
-          <div class="shape"></div>
-          <div class="param"></div>
+          <div class="shape" data-phone={`param-${s.key}`}></div>
+          <div class="param" data-phone={`param-${s.key}`}></div>
           <canvas class="board" role="img" aria-label={t.board_label}></canvas>
           <div class="scores" aria-live="polite"><div><small data-l="train">{t.train}</small><span class="num tr">–</span></div><div><small data-l="test">{t.test}</small><span class="num te">–</span></div><span class="bar"><i></i></span></div>
         </section>
@@ -74,9 +85,45 @@ const sides = [{ key: 'a', label: t.algo_a }, { key: 'b', label: t.algo_b }];
     ))}
   </div>
 
-  <div class="sheet verdict"><span class="vmark"></span><div id="verdict" aria-live="polite"></div></div>
+  <section class="sheet ovl">
+    <canvas class="board" id="ovl" role="img" aria-label={t.board_label}></canvas>
+    <p class="olegend"><span><i class="ln a"></i><b>A</b> <bdi data-ov-name="a"></bdi> <span class="muted">· {t.ov_a}</span></span><span><i class="ln b"></i><b>B</b> <bdi data-ov-name="b"></bdi> <span class="muted">· {t.ov_b}</span></span><span data-task="cls"><i class="ln dis"></i><span class="muted">{t.ov_dis}</span></span></p>
+  </section>
+  </div>
+
+  <div class="sheet verdict" data-phone="verdict"><span class="vmark"></span><div id="verdict" aria-live="polite"></div></div>
   <p class="hint muted" data-task="cls"><span class="on-mouse">{t.hint_add}</span><span class="on-touch">{t.hint_tap}</span></p>
   <p class="hint muted" data-task="reg" hidden><span class="on-mouse">{t.hint_add_reg}</span><span class="on-touch">{t.hint_tap_reg}</span></p>
+  <p class="hint muted swipe">{t.swipe}</p>
+
+  <Dock label={t.page_title}>
+    <div class="dk-row">
+      {sides.map((s, i) => (
+        <Fragment>
+          {i === 1 && <button type="button" class="dbtn" data-role="swap" aria-label={t.swap} title={t.swap}><Fragment set:html={ICON.swap} /></button>}
+          <button type="button" class="dbtn grow pickchip" data-sheet-open={`pick-${s.key}`} aria-expanded="false" aria-controls={`pick-${s.key}`} aria-label={s.label}>
+            <span class="tagAB sm">{s.key.toUpperCase()}</span><bdi class="nm" data-chip-name={s.key}></bdi><Fragment set:html={ICON.down} /></button>
+        </Fragment>
+      ))}
+    </div>
+    <div class="dk-row">
+      <button type="button" class="dbtn grow scoreboard" data-sheet-open="verdict-sheet" aria-expanded="false" aria-controls="verdict-sheet" aria-label={t.sb_open}><span id="sb" aria-live="polite">–</span></button>
+      <button type="button" class="dbtn flip" data-task="cls" data-role="flip" data-label={t.flip}><span class="swatch a"></span></button>
+      <button type="button" class="dbtn" data-role="undo" disabled aria-label={t.undo} title={t.undo}><Fragment set:html={ICON.undo} /></button>
+      <button type="button" class="dbtn" data-sheet-open="cmp-data" aria-expanded="false" aria-controls="cmp-data"><span>{t.data_more}</span><Fragment set:html={ICON.down} /></button>
+    </div>
+  </Dock>
+  {sides.map(s => (
+    <BottomSheet clear id={`pick-${s.key}`} title={t.pick_h.replace('{s}', s.key.toUpperCase())} closeLabel={t.close}>
+      <div class="algos" data-algos={s.key} role="group" aria-label={s.label}></div>
+      <div class="pickparam" data-slot={`param-${s.key}`}></div>
+    </BottomSheet>
+  ))}
+  <BottomSheet id="cmp-data" title={t.data} closeLabel={t.close}><div data-slot="data"></div></BottomSheet>
+  <BottomSheet id="verdict-sheet" title={t.verdict_h} closeLabel={t.close}>
+    <div class="vscores" id="vscores"></div>
+    <div data-slot="verdict"></div>
+  </BottomSheet>
   <script type="application/json" id="strings" set:html={json} />
 </Base>
 
@@ -113,7 +160,7 @@ const sides = [{ key: 'a', label: t.algo_a }, { key: 'b', label: t.algo_b }];
   .miniseg button.on { background: var(--ink); color: var(--sheet); }
   .acts { display: flex; gap: 4px; }
   .act { display: inline-flex; align-items: center; gap: 6px; border: 1.5px solid transparent; background: none; color: var(--muted); font: 600 14px var(--body); padding: 4px 9px; border-radius: 9px; cursor: pointer; transition: color .12s, border-color .12s, background-color .12s; }
-  .act svg { width: 16px; height: 16px; flex: none; }
+  .act svg, .act :global(svg) { width: 16px; height: 16px; flex: none; }
   .act:hover { color: var(--ink); border-color: var(--rule); background: var(--sheet); }
   .act.bad { color: color-mix(in srgb, var(--bad) 65%, var(--muted)); }
   .act.bad:hover { color: var(--bad); border-color: color-mix(in srgb, var(--bad) 45%, var(--rule)); }
@@ -158,15 +205,89 @@ const sides = [{ key: 'a', label: t.algo_a }, { key: 'b', label: t.algo_b }];
     .csv-tab { margin-inline-start: 0; }
     .edit { gap: 6px 12px; margin-inline: 2px; } .acts { margin-inline-start: -9px; }
   }
+  /* view: side by side or overlay (both lines on one board) */
+  .viewpick { display: flex; align-items: center; gap: 8px; }
+  .viewpick .label { margin: 0; }
+  .pview, .swipe { display: none; }
+  .ovl { display: none; padding: 14px; margin-top: 14px; }
+  .ovl canvas { height: 460px; }
+  .cmp-stage[data-view="overlay"] .ovl { display: block; }
+  .cmp-stage[data-view="overlay"] .side canvas { display: none; }
+  .cmp-stage[data-view="overlay"] .mid { padding-top: 70px; }
+  .olegend { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 20px; padding: 10px 6px 0; font-size: 14.5px; }
+  .olegend [hidden] { display: none; }
+  .olegend b { font-family: var(--mono); }
+  .ln { display: inline-block; width: 28px; border-top: 3px solid var(--ink); vertical-align: middle; margin-inline-end: 8px; }
+  .ln.b { border-top-style: dashed; border-top-color: var(--ok); }
+  .ln.dis { width: 18px; height: 13px; border: 0; border-radius: 4px; background: color-mix(in srgb, var(--hl) 34%, transparent); }
+  .tagAB.sm { width: 22px; height: 22px; font-size: 12px; border-radius: 7px; display: inline-grid; flex: none; }
+  :global(.vscores .tagAB.sm) { width: 22px; height: 22px; border-radius: 7px; display: inline-grid; place-items: center; font: 600 12px var(--mono); background: var(--ink); color: var(--sheet); margin-inline-end: 6px; vertical-align: 1px; }
+
+  /* phones: one sticky board (both lines, or A or B alone), everything else in the dock and its sheets */
+  @media (max-width: 760px), (max-height: 480px) {
+    .viewpick { display: none; }
+    .cmp-stage { position: sticky; top: 0; z-index: 6; background: var(--paper); margin-inline: -8px; padding: 8px 8px 10px; }
+    .pview { display: flex; gap: 3px; padding: 3px; background: var(--sheet); border: 1.5px solid var(--rule); border-radius: 13px; margin-bottom: 8px; box-shadow: 0 3px 0 var(--lift); }
+    .pview button { flex: 1; min-width: 0; min-height: 42px; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 0 6px; border: 0; background: none; color: var(--ink); font: 700 14px var(--body); border-radius: 10px; cursor: pointer; }
+    .pview button bdi { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .pview button.on { background: var(--ink); color: var(--sheet); }
+    .pview button.on .tagAB { background: var(--sheet); color: var(--ink); }
+    .duel { display: block; }
+    .mid, .side header, .side .scores { display: none; }
+    .side { padding: 6px; }
+    .side canvas, .ovl canvas { height: 45svh; min-height: 210px; }
+    .ovl { padding: 6px; margin: 0; }
+    .olegend { font-size: 12.5px; gap: 2px 14px; padding: 6px 4px 0; }
+    .ln { width: 20px; margin-inline-end: 5px; }
+    .cmp-stage[data-view="both"] .duel { display: none; }
+    .cmp-stage[data-view="both"] .ovl { display: block; }
+    .cmp-stage[data-view="a"] .side[data-side="b"], .cmp-stage[data-view="b"] .side[data-side="a"] { display: none; }
+    .swipe { display: block; }
+    .hint { font-size: 13.5px; margin-top: 8px; }
+    /* moved into sheets */
+    .data { border: 0; box-shadow: none; background: none; padding: 0; margin-bottom: 16px; }
+    .edit { margin: 0; gap: 12px 14px; }
+    .edit .legend { flex-basis: 100%; margin: 0; }
+    .act { min-height: 44px; }
+    .miniseg button { min-height: 40px; padding: 3px 12px; }
+    .verdict { border: 0; box-shadow: none; background: none; padding: 4px 0 0; margin: 0; font-size: 16.5px; }
+    .algos { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 14px; }
+    .algos :global(.chip) { min-height: 44px; padding: 4px 10px; font-size: 14px; text-align: start; line-height: 1.2; }
+    .pickparam .shape { padding-inline: 0; }
+    .pickparam .param { padding-inline: 0; }
+    .pickparam .param :global(input[type="range"]) { height: 30px; }
+    .pickchip { justify-content: flex-start; gap: 7px; padding: 0 9px; }
+    .pickchip .nm { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; text-align: start; }
+    .scoreboard { justify-content: flex-start; padding: 0 10px; font: 600 13px var(--mono); min-width: 0; }
+    .scoreboard :global(#sb) { display: flex; flex-direction: column; align-items: flex-start; line-height: 1.2; overflow: hidden; white-space: nowrap; }
+    .scoreboard :global(#sb .sc) { display: flex; gap: 9px; direction: ltr; unicode-bidi: isolate; }
+    .scoreboard :global(#sb .sc b) { margin-inline-end: 3px; }
+    .scoreboard :global(#sb b) { color: var(--muted); }
+    .scoreboard :global(#sb .w) { font: 700 12.5px var(--body); }
+    :global(.vscores table) { width: 100%; border-collapse: collapse; font-size: 15px; margin-bottom: 12px; }
+    :global(.vscores th), :global(.vscores td) { padding: 8px 4px; text-align: start; border-bottom: 1.5px solid var(--rule); }
+    :global(.vscores thead th) { font: 600 12px var(--mono); color: var(--muted); text-transform: uppercase; }
+    :global(.vscores td) { font: 600 18px var(--mono); }
+    :global(.vscores tr.lead th) { color: var(--ink); }
+    :global(.vscores tr.lead td:last-child) { box-shadow: inset 0 -3px 0 var(--hl); }
+  }
+  @media (max-height: 480px) {
+    .side canvas, .ovl canvas { height: calc(100svh - var(--dock-h, 64px) - 112px); min-height: 140px; }
+    .pview { margin-bottom: 6px; }
+    .pview button { min-height: 36px; }
+    .cmp-stage { padding-top: 4px; }
+  }
 </style>
 
 <script>
   import { Board } from '../engine/board';
   import { RegBoard } from '../engine/regboard';
+  import { OverlayBoard } from '../engine/overlayboard';
   import { mountCsv } from '../csvui';
+  import { isPhone, mountSheets, onPhone, onSwipe, relocate, showDockWhileVisible } from '../ui/dock';
   import {
-    Store, RegStore, MODELS, REG_MODELS, MODEL_NAMES, REG_NAMES, defaults, regDefaults, fitModel, fitReg, score, r2, pct, fmtR2,
-    isModel, isRegModel, isPreset, isRegPreset, type Label, type ParamSpec, type Params,
+    Store, RegStore, UndoStack, MODELS, REG_MODELS, MODEL_NAMES, REG_NAMES, defaults, regDefaults, fitModel, fitReg, score, r2, pct, fmtR2, duel,
+    isModel, isRegModel, isPreset, isRegPreset, type Label, type ParamSpec, type Params, type Point, type Model, type RegModel,
   } from '../engine';
 
   const S: Record<string, string> = JSON.parse(document.getElementById('strings')!.textContent!);
@@ -174,47 +295,70 @@ const sides = [{ key: 'a', label: t.algo_a }, { key: 'b', label: t.algo_b }];
   const $$ = (s: string) => [...document.querySelectorAll<HTMLElement>(s)];
 
   type Task = 'cls' | 'reg';
-  interface Side { key: 'a' | 'b'; el: HTMLElement; name: string; params: Params; board: Board | RegBoard; tr: number | null; te: number | null }
+  type Key = 'a' | 'b';
+  interface Side { key: Key; el: HTMLElement; paramEl: HTMLElement; shapeEl: HTMLElement; name: string; params: Params; board: Board | RegBoard; tr: number | null; te: number | null }
   const q = new URLSearchParams(location.search);
   let task: Task = q.get('task') === 'reg' ? 'reg' : 'cls';
   let store: Store | RegStore;
+  let ovl: OverlayBoard;
   let cls: Label = 0;
+  const undo = new UndoStack<Point>();
   const names = () => (task === 'reg' ? REG_NAMES : MODEL_NAMES) as string[];
   const valid = (n: string | null) => !!n && (task === 'reg' ? isRegModel(n) : isModel(n));
   const defaultsOf = (n: string): Params => (task === 'reg' ? regDefaults(n as never) : defaults(n as never));
   const specsOf = (n: string) => Object.entries((task === 'reg' ? REG_MODELS[n as keyof typeof REG_MODELS] : MODELS[n as keyof typeof MODELS]).params as Record<string, ParamSpec>);
   const DEF = { cls: ['knn', 'tree'], reg: ['linear', 'polynomial'] };
 
-  const sides = {} as Record<'a' | 'b', Side>;
+  // Phone: the data card, edit tools, settings and verdict move into bottom sheets (before anything reads them).
+  relocate(document);
+  const sheets = mountSheets(document);
+  showDockWhileVisible($('.dock'), $('#stage'));
+
+  const sides = {} as Record<Key, Side>;
   for (const key of ['a', 'b'] as const) {
     const el = $(`.side[data-side="${key}"]`);
-    sides[key] = { key, el, name: '', params: {}, board: undefined as never, tr: null, te: null };
-    $<HTMLSelectElement>('select', el).addEventListener('change', e => {
-      const s = sides[key];
-      s.name = (e.target as HTMLSelectElement).value;
-      s.params = defaultsOf(s.name);
-      buildParam(s); refit(); syncUrl();
-    });
+    sides[key] = { key, el, paramEl: $(`.param[data-phone="param-${key}"]`), shapeEl: $(`.shape[data-phone="param-${key}"]`), name: '', params: {}, board: undefined as never, tr: null, te: null };
+    $<HTMLSelectElement>('select', el).addEventListener('change', e => pick(sides[key], (e.target as HTMLSelectElement).value));
+  }
+
+  /** Switch one side to another algorithm (from its select, or from the phone's algorithm sheet). */
+  function pick(s: Side, name: string) {
+    s.name = name;
+    s.params = defaultsOf(s.name);
+    buildParam(s); refit(); syncUrl();
   }
 
   /** Each task has its own store and board class, so the canvases are swapped for fresh ones. */
-  function mountBoard(s: Side) {
-    const old = $<HTMLCanvasElement>('canvas', s.el), c = old.cloneNode(false) as HTMLCanvasElement;
+  function fresh(old: HTMLCanvasElement) {
+    const c = old.cloneNode(false) as HTMLCanvasElement;
     old.replaceWith(c);
+    return c;
+  }
+  const add = (p: { x: number; y: number }, e: MouseEvent) => {
+    undo.push(task === 'reg' ? (store as RegStore).add(p.x, p.y) : (store as Store).add(p.x, p.y, (e.shiftKey ? 1 - cls : cls) as Label));
+    syncUndo();
+  };
+  /** Undo is live while a point the viewer added is still in the data. */
+  function syncUndo() {
+    const can = undo.prune(p => store.points.includes(p)) > 0;
+    $$('[data-role="undo"]').forEach(b => ((b as HTMLButtonElement).disabled = !can));
+  }
+  function mountBoard(s: Side) {
+    const c = fresh($<HTMLCanvasElement>('canvas', s.el));
     const other = () => (s.key === 'a' ? sides.b : sides.a).board;
     const onHover = (g: { x: number; y: number } | null) => other()?.setGhost(g);
-    s.board = task === 'reg'
-      ? new RegBoard(c, store, { onAdd: p => (store as RegStore).add(p.x, p.y), onHover })
-      : new Board(c, store, { onAdd: (p, e) => (store as Store).add(p.x, p.y, (e.shiftKey ? 1 - cls : cls) as Label), onHover });
+    s.board = task === 'reg' ? new RegBoard(c, store, { onAdd: add, onHover }) : new Board(c, store, { onAdd: add, onHover });
   }
 
   const fmt = (spec: ParamSpec, v: number) => (spec.log ? String(+Math.pow(10, v).toPrecision(2)) : String(v));
   function buildParam(s: Side) {
-    const box = $('.param', s.el), specs = specsOf(s.name);
+    const box = s.paramEl, specs = specsOf(s.name);
     const sel = $<HTMLSelectElement>('select', s.el);
     sel.innerHTML = names().map(n => `<option value="${n}">${S[`m_${n}`]}</option>`).join('');
     sel.value = s.name;
-    $('.shape', s.el).textContent = '→ ' + S[`${task === 'reg' ? 'rs' : 's'}_${s.name}`];
+    $$(`[data-chip-name="${s.key}"], [data-ov-name="${s.key}"]`).forEach(el => (el.textContent = S[`m_${s.name}`]));
+    buildAlgos(s);
+    s.shapeEl.textContent = '→ ' + S[`${task === 'reg' ? 'rs' : 's'}_${s.name}`];
     if (!specs.length) { box.innerHTML = `<p>${task === 'reg' ? S.p_none_reg : S.p_none}</p>`; return; }
     box.innerHTML = specs.map(([k, spec]) => `<label><span class="label">${S[`p_${k}`]} · <b>${fmt(spec, s.params[k])}</b></span><input type="range" min="${spec.min}" max="${spec.max}" step="${spec.step}" value="${s.params[k]}"></label>`).join('');
     box.querySelectorAll<HTMLInputElement>('input').forEach((inp, i) => inp.addEventListener('input', () => {
@@ -225,8 +369,19 @@ const sides = [{ key: 'a', label: t.algo_a }, { key: 'b', label: t.algo_b }];
     }));
   }
 
+  /** The phone algorithm sheet: one button per algorithm, the current one pressed. */
+  function buildAlgos(s: Side) {
+    const box = $(`[data-algos="${s.key}"]`);
+    box.innerHTML = names().map(n => `<button type="button" class="chip${n === s.name ? ' on' : ''}" aria-pressed="${n === s.name}" data-algo="${n}">${S[`m_${n}`]}</button>`).join('');
+    box.querySelectorAll<HTMLElement>('[data-algo]').forEach(b => b.addEventListener('click', () => {
+      if (b.dataset.algo === s.name) return;
+      pick(s, b.dataset.algo!);
+      $<HTMLElement>(`[data-algo="${s.name}"]`, box).focus({ preventScroll: true });
+    }));
+  }
+
   function refit() {
-    const tr = store.train(), te = store.test();
+    const tr = store.train(), te = store.test(), fits: Array<Model | RegModel> = [];
     for (const s of [sides.a, sides.b]) {
       if (task === 'reg') {
         const m = fitReg(s.name as never, s.params, tr);
@@ -234,31 +389,36 @@ const sides = [{ key: 'a', label: t.algo_a }, { key: 'b', label: t.algo_b }];
         s.tr = r2(m, tr); s.te = r2(m, te);
         $('.tr', s.el).textContent = fmtR2(s.tr);
         $('.te', s.el).textContent = fmtR2(s.te);
+        fits.push(m);
       } else {
         const m = fitModel(s.name as never, s.params, tr);
         (s.board as Board).setModel(m);
         s.tr = score(m, tr); s.te = score(m, te);
         $('.tr', s.el).textContent = pct(s.tr);
         $('.te', s.el).textContent = pct(s.te);
+        fits.push(m);
       }
       $<HTMLElement>('.bar i', s.el).style.width = `${Math.max(0, s.te ?? 0) * 100}%`;
     }
+    ovl.setPair(task === 'reg' ? { kind: 'reg', a: fits[0] as RegModel, b: fits[1] as RegModel } : { kind: 'cls', a: fits[0] as Model, b: fits[1] as Model });
+    syncUndo();
     verdict();
   }
 
+  const show = (v: number | null) => (task === 'reg' ? fmtR2(v) : pct(v));
   function verdict() {
     const A = sides.a, B = sides.b, n = store.test().length, out: string[] = [], reg = task === 'reg';
     A.el.classList.remove('lead'); B.el.classList.remove('lead');
-    if (n < 4 || A.te == null || B.te == null) out.push(S.v_more);
+    const d = duel(A.te, B.te, n, reg);
+    if (d.kind === 'more') out.push(S.v_more);
     else {
-      const d = reg ? A.te - B.te : Math.round((A.te - B.te) * n);
-      if (Math.abs(d) < (reg ? 0.005 : 1)) out.push(reg ? S.v_tie_r2 : S.v_tie);
+      if (d.kind === 'tie') out.push(reg ? S.v_tie_r2 : S.v_tie);
       else {
-        const w = d > 0 ? A : B, l = d > 0 ? B : A;
+        const w = sides[d.side], l = sides[d.side === 'a' ? 'b' : 'a'];
         w.el.classList.add('lead');
         out.push(reg
           ? S.v_win_r2.replace('{m}', `<b>${S[`m_${w.name}`]}</b>`).replace('{a}', fmtR2(w.te)).replace('{b}', fmtR2(l.te))
-          : S.v_win.replace('{m}', `<b>${S[`m_${w.name}`]}</b>`).replace('{d}', String(Math.abs(d))).replace('{n}', String(n)));
+          : S.v_win.replace('{m}', `<b>${S[`m_${w.name}`]}</b>`).replace('{d}', String(d.diff)).replace('{n}', String(n)));
       }
       for (const s of [A, B]) {
         if (s.tr == null || s.te == null) continue;
@@ -268,23 +428,41 @@ const sides = [{ key: 'a', label: t.algo_a }, { key: 'b', label: t.algo_b }];
       }
     }
     $('#verdict').innerHTML = out.map(t => `<p>${t}</p>`).join('');
+    // phone scoreboard: "A 91% · B 84% · A wins" (test scores; R² for regression)
+    const tail = d.kind === 'win' ? S.sb_win.replace('{s}', d.side.toUpperCase()) : d.kind === 'tie' ? S.sb_tie : S.sb_more;
+    $('#sb').innerHTML = `<span class="sc"><span><b>A</b>${show(A.te)}</span><span><b>B</b>${show(B.te)}</span></span><span class="w${d.kind === 'win' ? '' : ' muted'}">${tail}</span>`;
+    const tl = reg ? [S.train_r2, S.test_r2] : [S.train, S.test];
+    $('#vscores').innerHTML = `<table><thead><tr><th></th><th>${tl[0]}</th><th>${tl[1]}</th></tr></thead><tbody>${[A, B].map(s =>
+      `<tr class="${s.el.classList.contains('lead') ? 'lead' : ''}"><th><span class="tagAB sm">${s.key.toUpperCase()}</span> ${S[`m_${s.name}`]}</th><td>${show(s.tr)}</td><td>${show(s.te)}</td></tr>`).join('')}</tbody></table>`;
   }
 
   function syncUrl() { history.replaceState(null, '', `?a=${sides.a.name}&b=${sides.b.name}${task === 'reg' ? '&task=reg' : ''}`); }
 
+  /** The class being added: the desktop pair of buttons and the phone's one-tap toggle show the same thing. */
+  function setCls(c: Label) {
+    cls = c;
+    $$('[data-cls]').forEach(x => { const on = Number(x.dataset.cls) === c; x.classList.toggle('on', on); x.setAttribute('aria-pressed', String(on)); });
+    const flip = $('[data-role="flip"]'), name = $(`[data-cls="${c}"] span:not(.swatch)`).textContent!;
+    flip.querySelector('.swatch')!.className = `swatch ${c ? 'b' : 'a'}`;
+    flip.setAttribute('aria-label', flip.dataset.label!.replace('{c}', name));
+    flip.title = name;
+  }
+
   /** Name the two "Adding" buttons after an uploaded file's classes, or restore the defaults. */
   function setClassNames(names: [string, string] | null) {
     $$('[data-cls] span:not(.swatch)').forEach((el, i) => (el.textContent = names ? names[i] : S[i ? 'cls_b' : 'cls_a']));
+    setCls(cls);
   }
 
   /** Switch task: new store, new boards, default algorithms (or the ones in the URL on first load). */
   function setTask(next: Task, fromUrl = false, preset = true) {
     task = next;
     store = task === 'reg' ? new RegStore({ testFrac: 0.25 }) : new Store({ testFrac: 0.25 });
-    store.subscribe(refit);
+    undo.clear();
     $$('[data-task-btn]').forEach(b => { b.classList.toggle('on', b.dataset.taskBtn === task); b.setAttribute('aria-pressed', String(b.dataset.taskBtn === task)); });
     $$('[data-task]').forEach(el => (el.hidden = el.dataset.task !== task));
     $$('.scores [data-l]').forEach(l => (l.textContent = S[task === 'reg' ? `${l.dataset.l}_r2` : l.dataset.l!]));
+    ovl = new OverlayBoard(fresh($<HTMLCanvasElement>('#ovl')), store, { onAdd: add });
     (['a', 'b'] as const).forEach((key, i) => {
       const s = sides[key], fromQ = fromUrl && valid(q.get(key)) ? q.get(key)! : null;
       s.name = fromQ ?? DEF[task][i];
@@ -292,19 +470,35 @@ const sides = [{ key: 'a', label: t.algo_a }, { key: 'b', label: t.algo_b }];
       mountBoard(s);
       buildParam(s);
     });
+    store.subscribe(refit);
     setClassNames(null);
-    if (!preset) { $$('[data-preset],[data-rpreset]').forEach(x => x.classList.remove('on')); if (!fromUrl) syncUrl(); return; }
+    if (!preset) { $$('[data-preset],[data-rpreset]').forEach(x => x.classList.remove('on')); refit(); if (!fromUrl) syncUrl(); return; }
     if (task === 'reg') (store as RegStore).preset('curve', 5); else (store as Store).preset('moons', 5);
     $$('[data-preset]').forEach(x => x.classList.toggle('on', x.dataset.preset === 'moons'));
     $$('[data-rpreset]').forEach(x => x.classList.toggle('on', x.dataset.rpreset === 'curve'));
     if (!fromUrl) syncUrl();
   }
 
+  // Views. Desktop: side by side (default) or overlay. Phone: both on one board (default), or A or B alone.
+  const stage = $('#stage');
+  let dview: 'side' | 'overlay' = 'side', pview: 'both' | Key = 'both';
+  const PVIEWS = ['both', 'a', 'b'] as const;
+  function applyView() {
+    stage.dataset.view = isPhone() ? pview : dview;
+    $$('[data-view]').forEach(b => { const on = b.dataset.view === dview; b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)); });
+    $$('[data-pview]').forEach(b => { const on = b.dataset.pview === pview; b.classList.toggle('on', on); b.setAttribute('aria-pressed', String(on)); });
+  }
+  $$('[data-view]').forEach(b => b.addEventListener('click', () => { dview = b.dataset.view as typeof dview; applyView(); }));
+  $$('[data-pview]').forEach(b => b.addEventListener('click', () => { pview = b.dataset.pview as typeof pview; applyView(); }));
+  onSwipe(stage, dir => {
+    const i = Math.min(2, Math.max(0, PVIEWS.indexOf(pview) + dir));
+    if (PVIEWS[i] !== pview && isPhone()) { pview = PVIEWS[i]; applyView(); }
+  });
+  onPhone(applyView);
+
   $$('[data-task-btn]').forEach(b => b.addEventListener('click', () => { if (b.dataset.taskBtn !== task) setTask(b.dataset.taskBtn as Task); }));
-  $$('[data-cls]').forEach(b => b.addEventListener('click', () => {
-    cls = Number(b.dataset.cls) as Label;
-    $$('[data-cls]').forEach(x => { x.classList.toggle('on', x === b); x.setAttribute('aria-pressed', String(x === b)); });
-  }));
+  $$('[data-cls]').forEach(b => b.addEventListener('click', () => setCls(Number(b.dataset.cls) as Label)));
+  $('[data-role="flip"]').addEventListener('click', () => setCls((1 - cls) as Label));
   $$('[data-preset]').forEach(b => b.addEventListener('click', () => {
     const name = b.dataset.preset!;
     if (task !== 'cls' || !isPreset(name)) return;
@@ -319,11 +513,16 @@ const sides = [{ key: 'a', label: t.algo_a }, { key: 'b', label: t.algo_b }];
   }));
   $('#resplit').addEventListener('click', () => store.resplit());
   $('#clear').addEventListener('click', () => { store.clear(); $$('[data-preset],[data-rpreset]').forEach(x => x.classList.remove('on')); });
-  $('#swap').addEventListener('click', () => {
+  const undoLast = () => { const p = undo.pop(x => store.points.includes(x)); if (p) store.remove(p); };
+  $$('[data-role="undo"]').forEach(b => b.addEventListener('click', undoLast));
+  stage.addEventListener('keydown', e => { if ((e.ctrlKey || e.metaKey) && !e.shiftKey && e.key.toLowerCase() === 'z') { e.preventDefault(); undoLast(); } });
+  const swap = () => {
     [sides.a.name, sides.b.name] = [sides.b.name, sides.a.name];
     [sides.a.params, sides.b.params] = [sides.b.params, sides.a.params];
     buildParam(sides.a); buildParam(sides.b); refit(); syncUrl();
-  });
+  };
+  $('#swap').addEventListener('click', swap);
+  $('[data-role="swap"]').addEventListener('click', swap);
 
   /** "Your CSV" is the last data option: it opens the upload panel inside the data card. Picking a preset closes it. */
   const csvTab = $('#csv-tab'), csvPanel = $('#csv');
@@ -343,6 +542,8 @@ const sides = [{ key: 'a', label: t.algo_a }, { key: 'b', label: t.algo_b }];
     setClassNames(d.classes ?? null);
   });
   $$('[data-preset],[data-rpreset],[data-task-btn]').forEach(b => b.addEventListener('click', () => { csv.reset(); showCsv(false); }));
+  // presets in the phone Data sheet: close the sheet so the new data is in view
+  $$('[data-preset],[data-rpreset]').forEach(b => b.addEventListener('click', () => sheets['cmp-data']?.close(false)));
 
   setTask(task, true);
   requestAnimationFrame(() => requestAnimationFrame(() => $('#head').classList.add('lit')));

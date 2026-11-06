@@ -1,0 +1,9 @@
+---
+// The phone thumb dock: a bar fixed to the bottom of the screen holding the controls you touch most.
+// Shown by src/ui/dock.ts (showDockWhileVisible) only on phones and only while its board is on screen.
+import '../styles/dock.css';
+
+interface Props { label: string; class?: string }
+const { label, class: cls } = Astro.props;
+---
+<div class:list={['dock', cls]} role="group" aria-label={label}><slot /></div>

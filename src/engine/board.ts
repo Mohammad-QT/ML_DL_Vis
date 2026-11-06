@@ -1,4 +1,5 @@
 import type { Model, Point } from './types';
+import { contour, sampleGrid } from './contour';
 
 export type RGB = [number, number, number];
 
@@ -44,7 +45,7 @@ export class Board {
   protected ghost: { x: number; y: number } | null = null;
   /** True while the cursor is driven by the keyboard (arrow keys), so subclasses can draw a visible marker. */
   protected kbActive = false;
-  protected colors!: { a: RGB; b: RGB; sheet: RGB; ink: RGB; grid: RGB };
+  protected colors!: { a: RGB; b: RGB; sheet: RGB; ink: RGB; grid: RGB; ok: RGB; hl: RGB };
   model: Model | null = null;
 
   constructor(private canvas: HTMLCanvasElement, protected store: { points: Point[] }, protected opts: BoardOptions = {}) {
@@ -164,8 +165,11 @@ export class Board {
     return { x: (e.clientX - r.left) / r.width, y: (e.clientY - r.top) / r.height };
   }
 
-  private readColors() {
-    this.colors = { a: cssColor('--a'), b: cssColor('--b'), sheet: cssColor('--sheet'), ink: cssColor('--ink'), grid: cssColor('--muted') };
+  protected readColors() {
+    this.colors = {
+      a: cssColor('--a'), b: cssColor('--b'), sheet: cssColor('--sheet'), ink: cssColor('--ink'), grid: cssColor('--muted'),
+      ok: cssColor('--ok'), hl: cssColor('--hl'),
+    };
   }
 
   private resize() {
@@ -199,9 +203,7 @@ export class Board {
     if (!model) return;
 
     // sample P(class B) on grid corners, shade each cell by the mean, then trace the 0.5 contour
-    const cols = Math.ceil(W / cell), rows = Math.ceil(H / cell), C1 = cols + 1;
-    const v = new Float32Array(C1 * (rows + 1));
-    for (let r = 0; r <= rows; r++) for (let q = 0; q <= cols; q++) v[r * C1 + q] = model.predict(q * cell / W, r * cell / H);
+    const g = sampleGrid((x, y) => model.predict(x, y), W, H, cell), { v, cols, rows } = g, C1 = cols + 1;
     const tint = opts.tint ?? 0.2;
     for (let r = 0; r < rows; r++) for (let q = 0; q < cols; q++) {
       const p = (v[r * C1 + q] + v[r * C1 + q + 1] + v[(r + 1) * C1 + q] + v[(r + 1) * C1 + q + 1]) / 4;
@@ -215,16 +217,7 @@ export class Board {
     f.lineCap = 'round';
     f.lineJoin = 'round';
     f.beginPath();
-    const lerp = (a: number, b: number) => (0.5 - a) / (b - a);
-    for (let r = 0; r < rows; r++) for (let q = 0; q < cols; q++) {
-      const tl = v[r * C1 + q], tr = v[r * C1 + q + 1], br = v[(r + 1) * C1 + q + 1], bl = v[(r + 1) * C1 + q];
-      const x0 = q * cell, y0 = r * cell, pts: Array<[number, number]> = [];
-      if ((tl > 0.5) !== (tr > 0.5)) pts.push([x0 + lerp(tl, tr) * cell, y0]);
-      if ((tr > 0.5) !== (br > 0.5)) pts.push([x0 + cell, y0 + lerp(tr, br) * cell]);
-      if ((bl > 0.5) !== (br > 0.5)) pts.push([x0 + lerp(bl, br) * cell, y0 + cell]);
-      if ((tl > 0.5) !== (bl > 0.5)) pts.push([x0, y0 + lerp(tl, bl) * cell]);
-      for (let i = 0; i + 1 < pts.length; i += 2) { f.moveTo(pts[i][0], pts[i][1]); f.lineTo(pts[i + 1][0], pts[i + 1][1]); }
-    }
+    for (const [x1, y1, x2, y2] of contour(g)) { f.moveTo(x1, y1); f.lineTo(x2, y2); }
     f.stroke();
   }
 
