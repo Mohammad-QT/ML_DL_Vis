@@ -1,0 +1,180 @@
+---
+// A live regression board. `variant="play"` is the full playground (R² scores, one slider per setting, presets, residuals);
+// `variant="figure"` is a small static drawing of one model on fixed data.
+import { REG_MODELS, regDefaults, type ParamSpec, type Params, type RegModelName, type RegPresetName } from '../engine';
+import { common, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+  model: RegModelName;
+  params?: Params;
+  preset?: RegPresetName;
+  seed?: number;
+  variant?: 'play' | 'figure';
+  /** "Beat the score": data is fixed, only the sliders are live, and reaching test R² of `target` (0-1) wins. */
+  challenge?: { target: number };
+  /** Hint under the sliders when the first setting is at or below `low.max` / at or above `high.min`. */
+  hints?: { low?: { max: number; text: string }; high?: { min: number; text: string } };
+  height?: string;
+}
+const { lang, model, preset = 'curve', seed = 3, variant = 'play', challenge, hints = {}, height = variant === 'figure' ? '190px' : '440px' } = Astro.props;
+const t = common[lang];
+const params = { ...regDefaults(model), ...Astro.props.params };
+const specs = Object.entries(REG_MODELS[model].params as Record<string, ParamSpec>);
+/** Settings marked `log` are log10 values: show the real number, e.g. 10 instead of 1. */
+const show = (spec: ParamSpec, v: number) => (spec.log ? String(Number((10 ** v).toPrecision(2))) : String(v));
+const config = { model, params, preset, seed, variant, hints, target: challenge?.target, logs: Object.fromEntries(specs.map(([k, s]) => [k, !!s.log])), first: specs[0]?.[0] };
+const presets = ['line', 'curve', 'steps', 'sine', 'outliers'] as const;
+---
+{variant === 'figure' ? (
+  <canvas class="board" data-regboard data-config={JSON.stringify(config)} style={`height:${height};cursor:default`} aria-hidden="true"></canvas>
+) : (
+  <div class="play" data-regboard data-config={JSON.stringify(config)}>
+    <div class="frame">
+      <canvas class="board" style={`height:${height}`}></canvas>
+      <div class="under"><span class="on-mouse">{t.hint_add_reg}</span><span class="on-touch">{t.hint_tap_reg}</span></div>
+    </div>
+    <div class="side">
+      <div class="box scores" aria-live="polite">
+        <div><small>{t.train_r2}</small><div class="num" data-role="train">–</div></div>
+        <div><small>{t.test_r2}</small><div class="num" data-role="test">–</div></div>
+      </div>
+      {specs.length > 0 ? (
+        <div class="box">
+          {specs.map(([k, spec]) => (
+            <label class="par">
+              <span class="label">{t[`p_${k}` as keyof typeof t]} · <b data-pval={k}>{show(spec, params[k])}</b></span>
+              <input type="range" data-param={k} min={spec.min} max={spec.max} step={spec.step} value={params[k]}>
+            </label>
+          ))}
+          <div class="hint" data-role="hint"></div>
+        </div>
+      ) : <div class="box"><span class="hint">{t.p_none_reg}</span></div>}
+      {challenge && (
+        <div class="box goal">
+          <span class="label">{t.goal}</span>
+          <div class="num">{t.goal_r2.replace('{t}', challenge.target.toFixed(2))}</div>
+          <p class="win" data-role="win" hidden>{t.win}</p>
+          <p class="win" data-role="won" hidden>{t.win_before}</p>
+        </div>
+      )}
+      {!challenge && <div class="box"><span class="label">{t.data}</span><div class="chips">
+        {presets.map(p => <button class:list={['chip', { on: p === preset }]} data-preset={p}>{t[`d_${p}`]}</button>)}
+        <button class="chip" data-role="resplit">{t.resplit}</button>
+        <button class="chip" data-role="clear">{t.clear}</button>
+      </div></div>}
+      <div class="box"><button class="chip" data-role="resid" aria-pressed="false">{t.residuals}</button></div>
+      <p class="legend"><span class="swatch ring"></span><span>{t.legend_test}</span> {t.legend_resid}</p>
+    </div>
+  </div>
+)}
+
+<style>
+  .play { display: grid; grid-template-columns: 1fr 250px; gap: 20px; margin-top: 16px; }
+  .frame { border: 1.5px solid var(--rule); border-radius: 16px; padding: 8px; background: var(--sheet); }
+  .under { display: flex; justify-content: space-between; gap: 12px; font-size: 14px; color: var(--muted); padding: 10px 6px 2px; }
+  .side { display: flex; flex-direction: column; gap: 12px; }
+  .box { display: block; background: var(--paper); border-radius: 14px; padding: 12px 14px; }
+  .scores { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .scores .num { font: 600 30px/1 var(--mono); }
+  .scores small { font: 500 12px var(--mono); color: var(--muted); }
+  .par { display: block; margin-bottom: 8px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip[aria-pressed="true"] { background: var(--ink); color: var(--sheet); border-color: var(--ink); }
+  .hint { font-size: 13.5px; line-height: 1.4; margin-top: 4px; min-height: 38px; color: var(--muted); }
+  .legend { font-size: 13px; color: var(--muted); line-height: 1.4; }
+  @media (max-width: 860px) {
+    .play { grid-template-columns: 1fr; }
+    .play canvas { height: 340px !important; }
+  }
+</style>
+
+<script>
+  import { RegBoard } from '../engine/regboard';
+  import { RegStore, fitReg, r2, fmtR2, isRegPreset, type Params, type RegModelName, type RegPresetName } from '../engine';
+
+  interface Config {
+    model: RegModelName; params: Params; preset: RegPresetName; seed: number; variant: 'play' | 'figure';
+    hints: { low?: { max: number; text: string }; high?: { min: number; text: string } };
+    target?: number; logs: Record<string, boolean>; first?: string;
+  }
+
+  for (const root of document.querySelectorAll<HTMLElement>('[data-regboard]')) {
+    const cfg: Config = JSON.parse(root.dataset.config!);
+
+    if (cfg.variant === 'figure') {
+      const store = new RegStore();
+      const board = new RegBoard(root as HTMLCanvasElement, store, { static: true });
+      store.preset(cfg.preset, cfg.seed);
+      store.points.forEach(p => (p.test = false));
+      board.setReg(fitReg(cfg.model, cfg.params, store.points));
+      continue;
+    }
+
+    const $ = <T extends Element = HTMLElement>(s: string) => root.querySelector<T>(s)!;
+    const $$ = (s: string) => [...root.querySelectorAll<HTMLElement>(s)];
+    const params = { ...cfg.params };
+    const storeKey = `mlv-beat-reg-${cfg.model}`;
+    const won = root.querySelector<HTMLElement>('[data-role="won"]'), win = root.querySelector<HTMLElement>('[data-role="win"]');
+    if (cfg.target != null) {
+      try { if (localStorage.getItem(storeKey)) won!.hidden = false; } catch { /* storage blocked: the goal still works */ }
+    }
+
+    const store = new RegStore({ testFrac: 0.25 });
+    const board = new RegBoard($<HTMLCanvasElement>('canvas'), store, {
+      onAdd: cfg.target != null ? undefined : p => store.add(p.x, p.y),
+    });
+    const refit = () => {
+      const m = fitReg(cfg.model, params, store.train());
+      board.setReg(m);
+      const te = r2(m, store.test());
+      $('[data-role="train"]').textContent = fmtR2(r2(m, store.train()));
+      $('[data-role="test"]').textContent = fmtR2(te);
+      if (cfg.target != null && te != null) {
+        const reached = Math.round(te * 100) >= Math.round(cfg.target * 100);
+        win!.hidden = !reached;
+        if (reached) {
+          won!.hidden = true;
+          try { localStorage.setItem(storeKey, '1'); } catch { /* storage blocked: success just isn't remembered */ }
+        }
+      }
+    };
+    store.subscribe(refit);
+
+    const showHint = () => {
+      const el = root.querySelector<HTMLElement>('[data-role="hint"]');
+      if (!el || !cfg.first) return;
+      const v = params[cfg.first], { low, high } = cfg.hints;
+      el.textContent = low && v <= low.max ? low.text : high && v >= high.min ? high.text : '';
+    };
+    $$('[data-param]').forEach(sl => sl.addEventListener('input', () => {
+      const k = sl.dataset.param!, v = Number((sl as HTMLInputElement).value);
+      params[k] = v;
+      $(`[data-pval="${k}"]`).textContent = cfg.logs[k] ? String(Number((10 ** v).toPrecision(2))) : String(v);
+      showHint();
+      refit();
+    }));
+    showHint();
+
+    const resid = $('[data-role="resid"]');
+    resid.addEventListener('click', () => {
+      const on = resid.getAttribute('aria-pressed') !== 'true';
+      resid.setAttribute('aria-pressed', String(on));
+      board.setResiduals(on);
+    });
+
+    if (cfg.target != null) { store.preset(cfg.preset, cfg.seed); continue; }
+    $$('[data-preset]').forEach(b => b.addEventListener('click', () => {
+      const name = b.dataset.preset!;
+      if (!isRegPreset(name)) return;
+      store.preset(name);
+      $$('[data-preset]').forEach(x => x.classList.toggle('on', x === b));
+    }));
+    $('[data-role="resplit"]').addEventListener('click', () => store.resplit());
+    $('[data-role="clear"]').addEventListener('click', () => {
+      store.clear();
+      $$('[data-preset]').forEach(x => x.classList.remove('on'));
+    });
+    store.preset(cfg.preset, cfg.seed);
+  }
+</script>

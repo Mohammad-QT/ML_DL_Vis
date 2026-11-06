@@ -1,0 +1,46 @@
+---
+id: forest
+model: forest
+short: Random forest
+title: Random Forest Regression
+lede: Grow many different trees and average their answers.
+figure: { preset: sine, seed: 7 }
+steps:
+  - 'For each tree, draw a random sample of the training points, with repeats. This is a <b>bootstrap</b> sample.'
+  - 'Grow a regression tree on that sample.'
+  - 'Repeat for as many trees as you set.'
+  - 'A new x is sent through every tree, and the forest predicts the average of their answers.'
+caution:
+  h: More trees will not fix a bad idea
+  p: 'Extra trees calm the jitter and almost never hurt, but they cost time and stop helping after a point. A forest also cannot predict beyond the y values it saw: <mark>outside the data, it goes flat</mark>.'
+play:
+  p: 'Start with one tree: a jagged staircase. Add trees and watch the average smooth out. Then try the Outliers preset.'
+  preset: sine
+  seed: 5
+  hints:
+    low: { max: 1, text: 'One tree: a jagged staircase that follows its own sample.' }
+    high: { min: 30, text: 'Many trees: the average is smooth, and adding more changes little.' }
+beat:
+  preset: sine
+  seed: 5
+  start: { trees: 1 }
+  target: 0.94
+quiz:
+  - q: 'Why does averaging many trees help?'
+    a:
+      - 'Each tree overfits in a different way, so the mistakes partly cancel out'
+      - 'Each tree is perfect, so the average is perfect'
+      - 'It makes the curve a straight line'
+    correct: 0
+    right: 'Right. Every tree sees a different bootstrap sample and makes different mistakes. Averaging them cancels much of the noise.'
+    wrong: 'Not quite. Single trees are noisy. Averaging many different ones smooths out their individual mistakes.'
+code: |
+  from sklearn.ensemble import RandomForestRegressor
+  regressor = RandomForestRegressor(n_estimators=100, random_state=0)
+  regressor.fit(X_train, y_train)
+  y_pred = regressor.predict(X_test)
+compare: tree
+---
+One tree is easy to read but jumpy: change a few points and its steps move. A <mark>random forest</mark> grows many trees, each on a slightly different random sample of the data, and takes the <b>average</b>. The jumpiness cancels out and the curve gets smoother and more reliable.
+
+It is one of the strongest models out of the box: no scaling, few settings, and rarely a bad overfit.

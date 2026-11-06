@@ -1,0 +1,52 @@
+---
+id: svr
+model: svr
+short: SVR
+title: Support Vector Regression
+lede: Fit a smooth curve inside a tube. Points inside the tube cost nothing.
+figure: { preset: sine, seed: 2 }
+steps:
+  - 'Draw a tube of half-width <b>epsilon</b> around the curve. A point inside the tube is “close enough” and is ignored.'
+  - 'Only points outside the tube pull on the curve. They are the <b>support vectors</b>.'
+  - '<b>C</b> sets how hard a point outside the tube can pull. A large C chases every miss.'
+  - '<b>Gamma</b> sets how bendy the curve may be. A large gamma gives a wiggly curve.'
+caution:
+  h: Three settings, one balance
+  p: 'Small epsilon, large C and large gamma all push the curve to follow every point, which <mark>memorises noise</mark>. A wide tube, small C or small gamma push it toward a flat, simple curve. Look at the test R² as you move each one.'
+play:
+  p: 'Widen the tube with the epsilon slider and watch the curve relax. Then raise C and gamma to see it tighten around the points. The dashed lines are the edges of the tube.'
+  preset: sine
+  seed: 5
+  hints:
+    low: { max: 0.01, text: 'Almost no tube: every point pulls on the curve.' }
+    high: { min: 0.13, text: 'A wide tube: most points sit inside it, so the curve goes nearly flat.' }
+beat:
+  preset: sine
+  seed: 3
+  start: { epsilon: 0.15, C: 0, gamma: 0 }
+  target: 0.92
+quiz:
+  - q: 'You widen the epsilon tube. What happens to the support vectors?'
+    a:
+      - There are fewer of them, because more points sit inside the tube
+      - There are more of them
+      - Nothing changes
+    correct: 0
+    right: 'Right. A point inside the tube gets no weight at all, so a wider tube leaves fewer support vectors and a simpler curve.'
+    wrong: 'Not quite. Go to Play, widen the tube and notice how many points it swallows.'
+code: |
+  from sklearn.preprocessing import StandardScaler
+  from sklearn.svm import SVR
+
+  sc_X, sc_y = StandardScaler(), StandardScaler()
+  X_train = sc_X.fit_transform(X_train)
+  y_train = sc_y.fit_transform(y_train.reshape(-1, 1)).ravel()   # SVR needs scaled y too
+
+  regressor = SVR(kernel='rbf', C=10, epsilon=0.1, gamma='scale')
+  regressor.fit(X_train, y_train)
+  y_pred = sc_y.inverse_transform(regressor.predict(sc_X.transform(X_test)).reshape(-1, 1))
+compare: polynomial
+---
+Support vector regression tolerates small mistakes. You choose a tube of width <b>epsilon</b> around the curve. A training point inside the tube costs nothing, so the curve is not tugged by every little wobble. Only the points outside the tube pull on it.
+
+With the RBF kernel, the curve can bend as much as the data needs, so SVR handles curves that a straight line cannot. Like every distance-based model, it needs <mark>feature scaling</mark> first.

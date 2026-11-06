@@ -1,0 +1,46 @@
+---
+id: tree
+model: tree
+short: Decision tree
+title: Decision Tree Regression
+lede: Cut the x-axis into pieces and predict the average of each piece.
+figure: { preset: steps, seed: 6 }
+steps:
+  - 'Try every cut of the form “is x below this value?”.'
+  - 'Keep the cut that makes the two sides most similar in y (the smallest squared error).'
+  - 'Repeat inside each side until the tree reaches its <b>max depth</b>.'
+  - 'A new x lands in one piece, and the answer is the average y of that piece.'
+caution:
+  h: A deep tree memorises
+  p: 'Each extra level doubles the number of steps. Left alone, the tree ends up with <mark>one step per training point</mark>, so train R² is perfect and test R² falls. The curve is also always a staircase, even when the real trend is smooth.'
+play:
+  p: 'Start at depth 1: a single cut and two flat steps. Raise the depth and watch the staircase grow. Try the Steps preset, then the Straight line.'
+  preset: steps
+  seed: 3
+  hints:
+    low: { max: 1, text: 'One cut, two steps. Crude, but you can see where it cut.' }
+    high: { min: 8, text: 'Deep tree: close to one step per point. Compare Train and Test.' }
+beat:
+  preset: steps
+  seed: 3
+  start: { depth: 1 }
+  target: 0.95
+quiz:
+  - q: 'What does a regression tree predict inside one of its pieces?'
+    a:
+      - The most common y value
+      - The average y of the training points in that piece
+      - A straight line through the points in that piece
+    correct: 1
+    right: 'Right. Every piece predicts one flat value: the average of its training points. That is why the curve is a staircase.'
+    wrong: 'Not quite. A classification tree takes a vote, but a regression tree averages. Look at the flat steps on the board.'
+code: |
+  from sklearn.tree import DecisionTreeRegressor
+  regressor = DecisionTreeRegressor(max_depth=4, random_state=0)
+  regressor.fit(X_train, y_train)
+  y_pred = regressor.predict(X_test)
+compare: forest
+---
+A regression tree plays <mark>twenty questions</mark> with x. Each question cuts the x-axis in two, and in the end every piece predicts the <b>average</b> y of the training points that fell inside it. That gives a staircase.
+
+There is no equation and no scaling to do. The tree simply finds where y jumps and puts a step there, so it is very good at data with sudden changes.

@@ -14,3 +14,11 @@ export type PrepId = (typeof PREP)[number];
 export const prepPath = (id: PrepId) => (id === 'start' ? 'learn/0-start/' : `learn/1-data/${id}/`);
 export const prepNotebookUrl = (id: PrepId) =>
   `https://colab.research.google.com/github/Mohammad-QT/ML_DL_Vis/blob/main/notebooks/${id === 'start' ? '0-start/hello' : `1-data/${id}`}.ipynb`;
+
+/** The 6 regression lessons in course order. `multiple` has no board: its Play tab is a small feature-weights interactive. */
+export const REGRESSION = ['linear', 'multiple', 'polynomial', 'svr', 'tree', 'forest'] as const;
+export type RegId = (typeof REGRESSION)[number];
+
+export const regPath = (id: RegId) => `learn/2-regression/${id}/`;
+export const regNotebookUrl = (id: RegId) =>
+  `https://colab.research.google.com/github/Mohammad-QT/ML_DL_Vis/blob/main/notebooks/2-regression/${id}.ipynb`;

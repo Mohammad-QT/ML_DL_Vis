@@ -1,7 +1,6 @@
-import type { Store } from './store';
-import type { Model } from './types';
+import type { Model, Point } from './types';
 
-type RGB = [number, number, number];
+export type RGB = [number, number, number];
 
 export interface BoardOptions {
   /** Draw only: no hover, no clicks. */
@@ -16,7 +15,7 @@ export interface BoardOptions {
 }
 
 /** Read a CSS custom property from :root as an RGB triple (handles hex and rgba()). */
-function cssColor(name: string): RGB {
+export function cssColor(name: string): RGB {
   const v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
   const c = document.createElement('canvas').getContext('2d')!;
   c.fillStyle = v;
@@ -25,7 +24,7 @@ function cssColor(name: string): RGB {
   const m = h.match(/[\d.]+/g);
   return m ? [Number(m[0]), Number(m[1]), Number(m[2])] : [0, 0, 0];
 }
-const rgb = (c: RGB, a = 1) => `rgba(${c[0]},${c[1]},${c[2]},${a})`;
+export const rgb = (c: RGB, a = 1) => `rgba(${c[0]},${c[1]},${c[2]},${a})`;
 
 /**
  * Draws a fitted model over the store's points: a tinted probability field, the 0.5 decision line
@@ -33,18 +32,18 @@ const rgb = (c: RGB, a = 1) => `rgba(${c[0]},${c[1]},${c[2]},${a})`;
  * Redraws on resize and on the window `themechange` event.
  */
 export class Board {
-  private ctx: CanvasRenderingContext2D;
-  private field = document.createElement('canvas');
+  protected ctx: CanvasRenderingContext2D;
+  protected field = document.createElement('canvas');
   private prev = document.createElement('canvas');
-  private W = 0;
-  private H = 0;
-  private dpr = 1;
+  protected W = 0;
+  protected H = 0;
+  protected dpr = 1;
   private fade = 1;
-  private ghost: { x: number; y: number } | null = null;
-  private colors!: { a: RGB; b: RGB; sheet: RGB; ink: RGB; grid: RGB };
+  protected ghost: { x: number; y: number } | null = null;
+  protected colors!: { a: RGB; b: RGB; sheet: RGB; ink: RGB; grid: RGB };
   model: Model | null = null;
 
-  constructor(private canvas: HTMLCanvasElement, private store: Store, private opts: BoardOptions = {}) {
+  constructor(private canvas: HTMLCanvasElement, protected store: { points: Point[] }, protected opts: BoardOptions = {}) {
     this.ctx = canvas.getContext('2d')!;
     if (!opts.static) this.bindPointer();
     new ResizeObserver(() => this.resize()).observe(canvas);
@@ -141,7 +140,7 @@ export class Board {
     this.draw();
   }
 
-  private renderField() {
+  protected renderField() {
     const { W, H, dpr, colors, model, opts } = this;
     const cell = opts.cell ?? 5;
     this.field.width = W * dpr;
@@ -190,7 +189,7 @@ export class Board {
     f.stroke();
   }
 
-  private draw() {
+  protected draw() {
     const { ctx, canvas, W, H, dpr, colors, model, ghost, opts } = this;
     if (!W) return;
     ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -199,6 +198,7 @@ export class Board {
     ctx.drawImage(this.field, 0, 0);
     ctx.globalAlpha = 1;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    this.drawUnder();
     const R = opts.dot ?? 5;
     if (ghost && model?.neighbours && !opts.static) {
       ctx.lineWidth = 1.4;
@@ -219,5 +219,10 @@ export class Board {
       ctx.beginPath(); ctx.arc(ghost.x * W, ghost.y * H, 9, 0, 7);
       ctx.setLineDash([3, 3]); ctx.lineWidth = 2; ctx.strokeStyle = rgb(c ? colors.b : colors.a); ctx.stroke(); ctx.setLineDash([]);
     }
+    this.drawOver();
   }
+
+  /** Hooks for subclasses: drawn above the field and below the points / above everything. */
+  protected drawUnder(): void {}
+  protected drawOver(): void {}
 }
