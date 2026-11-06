@@ -7,3 +7,4 @@ export { REG_MODELS, REG_NAMES, isRegModel, regDefaults, fitReg, r2, fmtR2, type
 export { foldIds, crossValidate, randomSplitScores, jitter, mean, std, type CvResult } from './selection';
 export { fitBoost, BOOST_DEFAULTS, type BoostParams, type Boosted } from './boost';
 export { RegStore, REG_PRESETS, isRegPreset, type RegPresetName } from './regstore';
+export { parseCsv, loadTable, describeColumns, detectTask, buildDataset, pca, CsvError, MAX_ROWS, type Table, type Dataset, type ColumnInfo, type Features } from './csv';

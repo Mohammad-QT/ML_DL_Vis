@@ -11,9 +11,10 @@
   --grid: rgba(21, 32, 43, .055);
   --a: #2d5be3;          /* class A: cobalt */
   --b: #d93d74;          /* class B: raspberry */
+  --b-text: #c42a60;     /* B as text on light sheets (AA) */
   --hl: #ffe14d;         /* highlighter */
   --hl-mark: #ffe14d;
-  --ok: #17915f;
+  --ok: #0f7a4e;      /* darkened from #17915f for AA text contrast */
   --bad: #c8334e;
   --lift: #cfdad5;       /* chunky button underside */
   --code-bg: #15202b;
@@ -32,6 +33,7 @@
   --grid: rgba(227, 235, 240, .045);
   --a: #7d9cff;
   --b: #ff74a2;
+  --b-text: #ff74a2;
   --hl: #f3d040;
   --hl-mark: rgba(243, 208, 64, .34);
   --ok: #45c98f;
@@ -54,6 +56,8 @@ body {
   transition: background-color .25s, color .25s;
 }
 a { color: inherit; }
+.skip { position: absolute; inset-inline-start: 12px; top: -60px; z-index: 50; background: var(--ink); color: var(--sheet); padding: 8px 14px; border-radius: 9px; font-weight: 700; text-decoration: none; }
+.skip:focus { top: 10px; }
 :focus-visible { outline: 3px solid var(--a); outline-offset: 2px; border-radius: 6px; }
 .wrap { max-width: 1060px; margin: 0 auto; padding: 0 22px; }
 .display { font-family: var(--display); font-weight: 750; letter-spacing: -.025em; font-stretch: 92%; }
@@ -101,7 +105,7 @@ html[dir="rtl"] mark { background-position: 100% 0; }
 .swatch { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-inline-end: 6px; vertical-align: -1px; }
 .swatch.a { background: var(--a); } .swatch.b { background: var(--b); }
 .swatch.ring { background: none; border: 2px solid var(--muted); }
-.ca { color: var(--a); } .cb { color: var(--b); }
+.ca { color: var(--a); } .cb { color: var(--b-text); }
 input[type="range"] { width: 100%; accent-color: var(--ink); }
 .label { display: block; font: 600 12px var(--mono); text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-bottom: 6px; }
 html[dir="rtl"] .label { letter-spacing: 0; font-family: var(--body); }
@@ -120,3 +124,7 @@ pre .k { color: #ffd84d; } pre .n { color: #8fd3ff; } pre .c { color: #7f93a3; }
 /* input-specific copy: mouse wording by default, touch wording on devices without hover */
 .on-touch { display: none; }
 @media (hover: none) { .on-touch { display: revert; } .on-mouse { display: none; } }
+main:focus { outline: none; }
+
+/* Arabic titles keep "(Latin name)" together on wide screens; on phones let it wrap so long names don't push the page sideways */
+@media (max-width: 600px) { h1 bdi { white-space: normal !important; } }

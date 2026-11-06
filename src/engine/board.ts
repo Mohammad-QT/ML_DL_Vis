@@ -39,7 +39,11 @@ export class Board {
   protected H = 0;
   protected dpr = 1;
   private fade = 1;
+  private visible = true;
+  private dirty = false;
   protected ghost: { x: number; y: number } | null = null;
+  /** True while the cursor is driven by the keyboard (arrow keys), so subclasses can draw a visible marker. */
+  protected kbActive = false;
   protected colors!: { a: RGB; b: RGB; sheet: RGB; ink: RGB; grid: RGB };
   model: Model | null = null;
 
@@ -47,7 +51,14 @@ export class Board {
     this.ctx = canvas.getContext('2d')!;
     if (!opts.static) this.bindPointer();
     new ResizeObserver(() => this.resize()).observe(canvas);
-    addEventListener('themechange', () => { if (this.W) { this.readColors(); this.renderField(); this.draw(); } });
+    // Boards scrolled out of view skip rendering and catch up when they appear.
+    if (typeof IntersectionObserver !== 'undefined') {
+      new IntersectionObserver(es => {
+        this.visible = es[es.length - 1].isIntersecting;
+        if (this.visible && this.dirty) this.refresh();
+      }, { rootMargin: '200px' }).observe(canvas);
+    }
+    addEventListener('themechange', () => { if (this.W) { this.colors = undefined as never; this.refresh(); } });
   }
 
   setModel(m: Model, animate = false): void {
@@ -63,13 +74,24 @@ export class Board {
       step(t0);
     } else {
       this.model = m;
-      if (this.W) { this.renderField(); this.draw(); }
+      this.refresh();
     }
+  }
+
+  /** Re-render the field and redraw, or remember to do so when the board next comes into view. */
+  protected refresh(): void {
+    if (!this.W) return;
+    if (!this.visible) { this.dirty = true; return; }
+    this.dirty = false;
+    if (!this.colors) this.readColors();
+    this.renderField();
+    this.draw();
   }
 
   setGhost(g: { x: number; y: number } | null): void { this.ghost = g; this.draw(); }
 
-  private hover(g: { x: number; y: number } | null) {
+  private hover(g: { x: number; y: number } | null, kb = false) {
+    this.kbActive = kb && !!g;
     this.ghost = g;
     this.draw();
     this.opts.onHover?.(g);
@@ -97,7 +119,7 @@ export class Board {
       down.timer = window.setTimeout(() => { if (down?.id === id) { down.holding = true; this.hover(p); } }, HOLD_MS);
     });
     c.addEventListener('pointermove', e => {
-      if (e.pointerType === 'mouse') { this.hover(this.pos(e)); return; }
+      if (e.pointerType === 'mouse') { this.hover(this.pos(e)); kb.x = clamp(this.ghost!.x); kb.y = clamp(this.ghost!.y); return; }
       if (!down || down.id !== e.pointerId) return;
       if (down.holding) this.hover(this.pos(e));
       else if (Math.hypot(e.clientX - down.x, e.clientY - down.y) > SLOP) { down.holding = true; clearTimeout(down.timer); this.hover(this.pos(e)); }
@@ -116,6 +138,24 @@ export class Board {
     });
     c.addEventListener('pointercancel', e => end(e, false));
     c.addEventListener('pointerleave', e => { if (e.pointerType === 'mouse') this.hover(null); });
+    // Keyboard: Tab to the board, arrows move a cursor (Shift = bigger steps), Enter or Space adds a point (Shift = other class).
+    c.tabIndex = 0;
+    const kb = { x: 0.5, y: 0.5 };
+    const clamp = (v: number) => Math.min(0.97, Math.max(0.03, v));
+    c.addEventListener('focus', () => { if (c.matches(':focus-visible')) this.hover({ ...kb }, true); });
+    c.addEventListener('blur', () => { if (this.kbActive) this.hover(null); });
+    c.addEventListener('keydown', e => {
+      const d = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[e.key];
+      if (d) {
+        e.preventDefault();
+        const step = e.shiftKey ? 0.1 : 0.03;
+        kb.x = clamp(kb.x + d[0] * step); kb.y = clamp(kb.y + d[1] * step);
+        this.hover({ ...kb }, true);
+      } else if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        this.opts.onAdd?.({ ...kb }, e as unknown as MouseEvent);
+      }
+    });
     c.addEventListener('contextmenu', e => { if (down) e.preventDefault(); });
   }
 
@@ -135,9 +175,8 @@ export class Board {
     if (!this.W || !this.H) return;
     this.canvas.width = this.W * this.dpr;
     this.canvas.height = this.H * this.dpr;
-    this.readColors();
-    this.renderField();
-    this.draw();
+    this.colors = undefined as never;
+    this.refresh();
   }
 
   protected renderField() {
@@ -191,7 +230,7 @@ export class Board {
 
   protected draw() {
     const { ctx, canvas, W, H, dpr, colors, model, ghost, opts } = this;
-    if (!W) return;
+    if (!W || !this.colors) return;
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     if (this.fade < 1 && this.prev.width) { ctx.drawImage(this.prev, 0, 0); ctx.globalAlpha = this.fade; }

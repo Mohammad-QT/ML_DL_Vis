@@ -1,4 +1,4 @@
-import { rng } from './random';
+import { rng, thin } from './random';
 import type { ParamSpec } from './models';
 import type { Params, Sample } from './types';
 
@@ -86,8 +86,8 @@ function svr(p: { C: number; gamma: number; epsilon: number }): RegTrainable {
   const K = (a: number, b: number) => Math.exp(-gamma * (a - b) ** 2) + 1;
   return {
     tube: eps,
-    fit(t) {
-      const n = t.length, X = t.map(q => q.x * 2 - 1);
+    fit(all) {
+      const t = thin(all, 250), n = t.length, X = t.map(q => q.x * 2 - 1);
       offset = mean(t.map(q => q.y));
       const Y = t.map(q => q.y - offset);
       const Kc = new Float64Array(n * n);

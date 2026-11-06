@@ -13,3 +13,9 @@ export function gauss(r: Rng): number {
 }
 
 export const randomSeed = (): number => ((Math.random() * 1e9) | 0) + 1;
+
+/** At most `max` items, evenly spaced through the list (same input, same output). Keeps the O(n²) kernel models fast on big uploads. */
+export function thin<T>(items: T[], max: number): T[] {
+  if (items.length <= max) return items;
+  return Array.from({ length: max }, (_, i) => items[Math.floor((i * items.length) / max)]);
+}

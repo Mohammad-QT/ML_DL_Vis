@@ -44,7 +44,7 @@ const presets = ['blobs', 'moons', 'circles', 'xor'] as const;
 ) : (
   <div class="play" data-board data-config={JSON.stringify(config)}>
     <div class="frame">
-      <canvas class="board" style={`height:${height}`}></canvas>
+      <canvas class="board" role="img" aria-label={t.board_label} style={`height:${height}`}></canvas>
       <div class="under"><span class="on-mouse">{t.hint_add}</span><span class="on-touch">{t.hint_tap}</span></div>
     </div>
     <div class="side">

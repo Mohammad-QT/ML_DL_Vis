@@ -31,7 +31,7 @@ const presets = ['line', 'curve', 'steps', 'sine', 'outliers'] as const;
 ) : (
   <div class="play" data-regboard data-config={JSON.stringify(config)}>
     <div class="frame">
-      <canvas class="board" style={`height:${height}`}></canvas>
+      <canvas class="board" role="img" aria-label={t.board_label} style={`height:${height}`}></canvas>
       <div class="under"><span class="on-mouse">{t.hint_add_reg}</span><span class="on-touch">{t.hint_tap_reg}</span></div>
     </div>
     <div class="side">

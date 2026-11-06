@@ -2,13 +2,14 @@
 // Two algorithms on one dataset, ported from sketches/compare. `?a=&b=` picks the algorithms.
 import Base from '../layouts/Base.astro';
 import NavLinks from './NavLinks.astro';
+import CsvUpload from './CsvUpload.astro';
 import { common, type Lang } from '../i18n/ui';
 import { compare } from '../i18n/pages';
 
 interface Props { lang: Lang }
 const { lang } = Astro.props;
 const t = { ...common[lang], ...compare[lang] };
-const strings = Object.fromEntries(Object.keys(t).filter(k => /^(m_|s_|rs_|p_|v_|train|test)/.test(k)).map(k => [k, t[k as keyof typeof t]]));
+const strings = Object.fromEntries(Object.keys(t).filter(k => /^(m_|s_|rs_|p_|v_|c_|e_|cls_|train|test)/.test(k)).map(k => [k, t[k as keyof typeof t]]));
 const json = JSON.stringify(strings).replace(/</g, '\\u003c');
 const presets = ['moons', 'blobs', 'circles', 'xor'] as const;
 const regPresets = ['curve', 'line', 'steps', 'sine', 'outliers'] as const;
@@ -36,6 +37,8 @@ const sides = [{ key: 'a', label: t.algo_a }, { key: 'b', label: t.algo_b }];
     <span class="legend"><span class="swatch ring"></span><span>{t.legend_test}</span></span>
   </div>
 
+  <CsvUpload lang={lang} t={strings as Record<string, string>} />
+
   <div class="duel">
     {sides.map((s, i) => (
       <Fragment>
@@ -45,7 +48,7 @@ const sides = [{ key: 'a', label: t.algo_a }, { key: 'b', label: t.algo_b }];
             <select aria-label={s.label}></select></header>
           <div class="shape"></div>
           <div class="param"></div>
-          <canvas class="board"></canvas>
+          <canvas class="board" role="img" aria-label={t.board_label}></canvas>
           <div class="scores" aria-live="polite"><div><small data-l="train">{t.train}</small><span class="num tr">–</span></div><div><small data-l="test">{t.test}</small><span class="num te">–</span></div><span class="bar"><i></i></span></div>
         </section>
       </Fragment>
@@ -105,6 +108,7 @@ const sides = [{ key: 'a', label: t.algo_a }, { key: 'b', label: t.algo_b }];
 <script>
   import { Board } from '../engine/board';
   import { RegBoard } from '../engine/regboard';
+  import { mountCsv } from '../csvui';
   import {
     Store, RegStore, MODELS, REG_MODELS, MODEL_NAMES, REG_NAMES, defaults, regDefaults, fitModel, fitReg, score, r2, pct, fmtR2,
     isModel, isRegModel, isPreset, isRegPreset, type Label, type ParamSpec, type Params,
@@ -213,8 +217,13 @@ const sides = [{ key: 'a', label: t.algo_a }, { key: 'b', label: t.algo_b }];
 
   function syncUrl() { history.replaceState(null, '', `?a=${sides.a.name}&b=${sides.b.name}${task === 'reg' ? '&task=reg' : ''}`); }
 
+  /** Name the two "Adding" buttons after an uploaded file's classes, or restore the defaults. */
+  function setClassNames(names: [string, string] | null) {
+    $$('[data-cls] span:not(.swatch)').forEach((el, i) => (el.textContent = names ? names[i] : S[i ? 'cls_b' : 'cls_a']));
+  }
+
   /** Switch task: new store, new boards, default algorithms (or the ones in the URL on first load). */
-  function setTask(next: Task, fromUrl = false) {
+  function setTask(next: Task, fromUrl = false, preset = true) {
     task = next;
     store = task === 'reg' ? new RegStore({ testFrac: 0.25 }) : new Store({ testFrac: 0.25 });
     store.subscribe(refit);
@@ -228,6 +237,8 @@ const sides = [{ key: 'a', label: t.algo_a }, { key: 'b', label: t.algo_b }];
       mountBoard(s);
       buildParam(s);
     });
+    setClassNames(null);
+    if (!preset) { $$('[data-preset],[data-rpreset]').forEach(x => x.classList.remove('on')); if (!fromUrl) syncUrl(); return; }
     if (task === 'reg') (store as RegStore).preset('curve', 5); else (store as Store).preset('moons', 5);
     $$('[data-preset]').forEach(x => x.classList.toggle('on', x.dataset.preset === 'moons'));
     $$('[data-rpreset]').forEach(x => x.classList.toggle('on', x.dataset.rpreset === 'curve'));
@@ -258,6 +269,15 @@ const sides = [{ key: 'a', label: t.algo_a }, { key: 'b', label: t.algo_b }];
     [sides.a.params, sides.b.params] = [sides.b.params, sides.a.params];
     buildParam(sides.a); buildParam(sides.b); refit(); syncUrl();
   });
+
+  const csv = mountCsv($('#csv'), S, d => {
+    if (!d) return;
+    if (d.task !== task) setTask(d.task, false, false);
+    else $$('[data-preset],[data-rpreset]').forEach(x => x.classList.remove('on'));
+    store.load(d.points);
+    setClassNames(d.classes ?? null);
+  });
+  $$('[data-preset],[data-rpreset],[data-task-btn]').forEach(b => b.addEventListener('click', () => csv.reset()));
 
   setTask(task, true);
   requestAnimationFrame(() => requestAnimationFrame(() => $('#head').classList.add('lit')));

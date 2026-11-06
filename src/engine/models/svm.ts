@@ -1,4 +1,4 @@
-import { rng } from '../random';
+import { rng, thin } from '../random';
 import type { Trainable } from '../types';
 import { sigmoid } from './logistic';
 
@@ -24,7 +24,9 @@ export function svm(kernel: 'linear' | 'rbf', p: { C?: number; gamma?: number })
       const a = new Float64Array(n);
       b = 0;
       let passes = 0, iter = 0;
-      const f = (i: number) => { let s = b; for (let j = 0; j < n; j++) if (a[j]) s += a[j] * Y[j] * Kc[j * n + i]; return s; };
+      // F[k] caches the current decision value for training point k, so each error costs O(1) and an update costs O(n)
+      const F = new Float64Array(n);
+      const f = (i: number) => F[i];
       while (passes < 8 && iter++ < 150) {
         let changed = 0;
         for (let i = 0; i < n; i++) {
@@ -44,7 +46,10 @@ export function svm(kernel: 'linear' | 'rbf', p: { C?: number; gamma?: number })
           const b1 = b - Ei - Y[i] * (ni - ai) * Kc[i * n + i] - Y[j] * (nj - aj) * Kc[i * n + j];
           const b2 = b - Ej - Y[i] * (ni - ai) * Kc[i * n + j] - Y[j] * (nj - aj) * Kc[j * n + j];
           a[i] = ni; a[j] = nj;
-          b = ni > 0 && ni < C ? b1 : nj > 0 && nj < C ? b2 : (b1 + b2) / 2;
+          const nb = ni > 0 && ni < C ? b1 : nj > 0 && nj < C ? b2 : (b1 + b2) / 2;
+          const di = Y[i] * (ni - ai), dj = Y[j] * (nj - aj), db = nb - b;
+          for (let k = 0; k < n; k++) F[k] += di * Kc[i * n + k] + dj * Kc[j * n + k] + db;
+          b = nb;
           changed++;
         }
         passes = changed ? 0 : passes + 1;

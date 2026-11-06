@@ -13,7 +13,7 @@ export class RegBoard extends Board {
 
   setReg(m: RegModel): void {
     this.reg = m;
-    if (this.W) { this.renderField(); this.draw(); }
+    this.refresh();
   }
 
   setResiduals(on: boolean): void { this.residuals = on; this.draw(); }
@@ -74,5 +74,11 @@ export class RegBoard extends Board {
     if (!ghost || !reg || this.opts.static) return;
     ctx.beginPath(); ctx.arc(ghost.x * W, reg.predict(ghost.x) * H, 8, 0, 7);
     ctx.setLineDash([3, 3]); ctx.lineWidth = 2; ctx.strokeStyle = rgb(colors.ink); ctx.stroke(); ctx.setLineDash([]);
+    if (this.kbActive) {
+      // keyboard cursor: a cross where Enter will add the point
+      const x = ghost.x * W, y = ghost.y * H;
+      ctx.beginPath(); ctx.moveTo(x - 9, y); ctx.lineTo(x + 9, y); ctx.moveTo(x, y - 9); ctx.lineTo(x, y + 9);
+      ctx.lineWidth = 2; ctx.strokeStyle = rgb(colors.b); ctx.stroke();
+    }
   }
 }
