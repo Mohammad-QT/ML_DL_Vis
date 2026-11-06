@@ -90,10 +90,10 @@ const rail = Astro.slots.has('rail');
 <style>
   .coursebtn { display: none; align-items: center; gap: 7px; height: 34px; padding: 0 12px; border: 1.5px solid var(--rule); background: var(--sheet); color: var(--ink); border-radius: 10px; font: 700 14px var(--body); cursor: pointer; box-shadow: 0 3px 0 var(--lift); }
   .coursebtn:hover { border-color: var(--muted); }
-  .has-rail .wrap { max-width: 1720px; padding: 0 28px; }
+  .has-rail .wrap { max-width: none; padding: 0 28px; }
   .withrail { display: grid; grid-template-columns: 290px minmax(0, 1fr); gap: 36px; align-items: start; transition: grid-template-columns .2s ease; }
   :global(html[data-rail="min"]) .withrail { grid-template-columns: 58px minmax(0, 1fr); }
-  .withrail > main { min-width: 0; }
+  .withrail > main { min-width: 0; width: 100%; max-width: 1480px; justify-self: center; }
   @media (max-width: 1099px) {
     .has-rail .wrap { max-width: 1060px; padding: 0 22px; }
     .withrail { display: block; }
