@@ -1,0 +1,56 @@
+---
+id: categories
+short: Text categories
+title: Text categories
+lede: Models need numbers. A Country column holds words, so we turn each word into numbers.
+figure: { preset: xor, seed: 4, caption: Categories become numbers }
+steps_h: How one-hot encoding works
+steps:
+  - List the different categories, A to Z.
+  - Make one new column for each category.
+  - Put a 1 in the column that matches the row and 0 in the others.
+  - Drop the original text column.
+caution:
+  h: Numbers carry an order
+  p: 'Tree models cope with label codes, but models built on distance or lines, like K-NN, SVM and logistic regression, <mark>take the order literally</mark>. When in doubt, use one-hot.'
+play:
+  p: Switch between the two encodings. In label mode, read the panel on the side. The numbers invent an order.
+ui:
+  col_country: Country
+  col_code: Code
+  label: Label encoding
+  onehot: One-hot encoding
+  order: The model sees
+  no_order: Three separate yes/no columns. No country is bigger than another.
+  note_label: 'Spain is 2 and France is 0, so a distance-based model thinks Spain is twice as far from France as Germany is. Nothing in the data says that.'
+  note_onehot: 'Each row has a single 1. Every country is the same distance from every other, so no order sneaks in. The price is one extra column per country.'
+quiz:
+  - q: 'Label encoding turns France, Germany and Spain into 0, 1 and 2. What problem can this cause?'
+    a:
+      - The model may treat the countries as ordered, as if Spain > France
+      - The column becomes too long
+      - The countries get deleted
+    correct: 0
+    right: 'Right. Numbers have an order and a distance, and countries have neither. That is why we use <mark>one-hot</mark>.'
+    wrong: 'Not quite. Go back to Play and read the panel in label mode.'
+  - q: You one-hot encode a column with 5 different countries. How many new columns do you get?
+    a:
+      - '1'
+      - '5'
+      - '25'
+    correct: 1
+    right: Right. One column per category.
+    wrong: 'Not this one. Switch to one-hot in Play and count the columns for 3 countries.'
+code: |
+  from sklearn.compose import ColumnTransformer
+  from sklearn.preprocessing import OneHotEncoder
+
+  ct = ColumnTransformer([('country', OneHotEncoder(), [0])], remainder='passthrough')
+  X = ct.fit_transform(X)   # country becomes 0/1 columns, the other columns pass through
+---
+A model can only do maths on numbers. A column like **Country** (France, Spain, Germany) has to be encoded first. There are two ways.
+
+- **Label encoding** gives each category a number: France 0, Germany 1, Spain 2 (A to Z). It is one column and easy to read.
+- **One-hot encoding** makes one column per category, with a 1 where the row belongs and 0 everywhere else.
+
+The catch is that numbers have an order and a distance. With label encoding the model may read Spain (2) as bigger than France (0), and Germany as halfway between them. Countries have no such order, so for plain categories use <mark>one-hot</mark>. Label encoding is fine for the thing you predict (the labels, <code>y</code>) and for categories with a real order, such as small, medium and large.

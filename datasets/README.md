@@ -17,3 +17,18 @@ Public data used by the notebooks in `notebooks/`. Notebooks load these files fr
 
 Why these two features: body mass is in the thousands while bill length is under 60, so the data shows
 why feature scaling matters for K-NN and SVM.
+
+## `customers.csv`
+
+| | |
+|---|---|
+| Used by | `notebooks/1-data/*.ipynb` and `notebooks/0-start/hello.ipynb` |
+| Rows | 80 made-up shoppers |
+| Columns | `country` (France, Germany, Spain), `age`, `salary`, `purchased` (0 or 1) |
+| Source | Original to this project. Generated with NumPy (`numpy.random.default_rng(2026)`): ages 21-61, salary rising with age plus noise, `purchased` drawn from a logistic function of age and salary, then 6 ages and 6 salaries blanked at random |
+| License | CC0 1.0 (public domain dedication), same as the rest of the data here |
+| Changes | None. Blanks are left empty on purpose, so the missing-values lesson has something to fix |
+
+No real person is in this file. Age is the stronger signal for `purchased`, and salary is about a thousand times larger
+than age in raw units, so K-NN gets clearly better after scaling.
+

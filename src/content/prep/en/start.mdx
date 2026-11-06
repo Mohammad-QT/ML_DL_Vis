@@ -1,0 +1,53 @@
+---
+id: start
+short: Start here
+title: Start here
+lede: Ten minutes to learn how this site works, how to read a board, and what Colab is. Nothing to install.
+figure: { preset: blobs, seed: 5, model: logistic, caption: Two classes and the line between them }
+steps_h: How to read a board
+steps:
+  - 'Each colour is one <b>class</b>. Here, blue did not buy and pink bought.'
+  - 'The tinted areas and the line show what the model predicts for any spot on the board.'
+  - '<b>Filled</b> points are training data. The model learns from these.'
+  - '<b>Ringed</b> points are test data. The model never sees them while learning, so they show how it does on new cases.'
+caution:
+  h: A high train score is not the goal
+  p: 'A model can score 100% on its training points and still fail on new ones. Trust the <mark>test score</mark>. When train is high and test is low, the model memorised instead of learned.'
+play:
+  p: Click the board to add a point. Hold Shift while you click to add the other class. Watch the line and both scores change.
+  p_touch: Tap the board to add a point. Pick its class with the buttons first. Watch the line and both scores change.
+quiz:
+  - q: What do the ringed points on a board show?
+    a:
+      - Training data the model learned from
+      - Test data the model never trained on
+      - Points the model got wrong
+    correct: 1
+    right: 'Right. Ringed points are held back, so the test score shows how the model handles <mark>new cases</mark>.'
+    wrong: Not quite. Filled points are the training data. Ringed points are kept back for testing.
+  - q: 'A model scores 100% on train and 70% on test. What does that tell you?'
+    a:
+      - It memorised the training points and does not handle new ones well
+      - The model is perfect
+      - The test data is broken
+    correct: 0
+    right: 'Right. A big gap between train and test is the sign of <mark>overfitting</mark>.'
+    wrong: 'Not this one. The test points are fair. A big gap means the model memorised the training data.'
+code: |
+  import pandas as pd
+
+  # Load a small table and look at the first rows
+  data = pd.read_csv(DATA_URL)
+  data.head()
+---
+**This site** teaches machine learning by letting you watch models decide. Add a point, move a slider, and see the line move. Every lesson has four tabs: <b>Learn</b> (the idea), <b>Play</b> (a live board), <b>Check</b> (a short quiz) and <b>Code</b> (the Python that does it).
+
+<h3 class="display">What Colab is</h3>
+
+**Colab** is Google's free notebook in your browser. It runs Python on Google's computers, so you install nothing. Each Code tab has an **Open in Colab** button. It opens a copy of our notebook, straight from GitHub.
+
+Sign in with a Google account, press <code>Shift + Enter</code> to run a cell, and change anything you like. You can't break the original. Your changes are <mark>not saved</mark> unless you save them: use **File → Save a copy in Drive** to keep the notebook, or **File → Download → .ipynb** to keep a file.
+
+<h3 class="display">The suggested route</h3>
+
+Go in order. Part 1 prepares the data in four short lessons. Then pick Regression or Classification. Not sure which algorithm fits? The picker on the home page asks three questions.

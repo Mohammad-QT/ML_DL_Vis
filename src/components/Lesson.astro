@@ -3,15 +3,16 @@
 import type { CollectionEntry } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import Board from './Board.astro';
-import { href, common, lesson, type Lang } from '../i18n/ui';
+import { href, common, lesson, prep as prepText, type Lang } from '../i18n/ui';
 import { MODELS, type ModelName } from '../engine';
-import { CLASSIFICATION, lessonPath, notebookUrl } from '../lessons';
+import { CLASSIFICATION, lessonPath, notebookUrl, prepPath } from '../lessons';
 
 interface Props { lang: Lang; entry: CollectionEntry<'lessons'> }
 const { lang, entry } = Astro.props;
 const d = entry.data;
 const c = common[lang];
 const t = lesson[lang];
+const pt = prepText[lang];
 const name = (id: string) => c[`m_${id}` as keyof typeof c];
 const fill = (s: string, vars: Record<string, string | number>) => s.replace(/\{(\w+)\}/g, (_, k) => String(vars[k]));
 const n = CLASSIFICATION.indexOf(d.model as never) + 1;
@@ -54,7 +55,9 @@ const hl = (code: string) => code.replace(/&/g, '&amp;').replace(/</g, '&lt;')
     <ol class="how" style={`--cols:${d.steps.length}`}>{d.steps.map(s => <li set:html={s} />)}</ol>
     <div class="note read"><h3 class="display" style="margin-top:0">{d.caution.h}</h3><p set:html={d.caution.p} /></div>
     <div class="navrow">
-      {prev ? <a class="btn ghost" href={href(lang, lessonPath(prev))}><span class="arr">←</span> <span>{fill(t.prev, { m: name(prev) })}</span></a> : <span></span>}
+      {prev
+        ? <a class="btn ghost" href={href(lang, lessonPath(prev))}><span class="arr">←</span> <span>{fill(t.prev, { m: name(prev) })}</span></a>
+        : <a class="btn ghost" href={href(lang, prepPath('scaling'))}><span class="arr">←</span> <span>{fill(t.prev, { m: pt.n_scaling })}</span></a>}
       <button class="btn" data-goto="1"><span>{t.s2}</span> <span class="arr">→</span></button>
     </div>
   </section>

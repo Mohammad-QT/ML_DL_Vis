@@ -1,0 +1,64 @@
+---
+id: missing
+short: Missing values
+title: Missing values
+lede: Real data has blanks. Most models can't read them, so you decide what to do first.
+figure: { preset: blobs, seed: 8, caption: Plenty of data, a few blanks }
+steps_h: What an imputer does
+steps:
+  - Look at one column and set its blanks aside.
+  - Work out the mean (or median) of the numbers that are there.
+  - Write that value into every blank in the column.
+  - Repeat for each column that has blanks.
+caution:
+  h: Learn the fill value from training rows only
+  p: 'Work out the mean on the <b>training</b> rows, then use it to fill both training and test rows. If test data leaks into the mean, the test score <mark>looks better than it should</mark>. The split lesson explains why.'
+play:
+  p: 'Pick a way to treat the blanks and watch the row count and the two column means. Salary has one very high value, so the mean and the median disagree.'
+ui:
+  col_country: Country
+  col_age: Age
+  col_salary: Salary
+  rows: Rows kept
+  mean_age: Mean age
+  mean_salary: Mean salary
+  blank: blank
+  none: Leave blanks
+  drop: Drop rows
+  mean: Fill with mean
+  median: Fill with median
+  note_none: 'Four rows have a blank. The means use only the numbers that exist.'
+  note_drop: 'Any row with a blank is crossed out and ignored. Only 6 of 10 rows are left, and the means moved because different people are left.'
+  note_mean: 'Each blank gets its column mean (highlighted). All 10 rows stay, and each column mean stays the same.'
+  note_median: 'Each blank gets its column median (highlighted). The median ignores the 250,000 outlier, so filled salaries are lower than with the mean and the salary mean drops.'
+quiz:
+  - q: A salary column has one huge outlier. Which fill value is safer?
+    a:
+      - The mean
+      - The median
+      - Zero
+    correct: 1
+    right: 'Right. The median is the middle value, so one outlier <mark>barely moves it</mark>.'
+    wrong: 'Not quite. Try the Play tab: the mean gets pulled up by the 250,000, the median does not.'
+  - q: What does dropping every row with a blank cost you?
+    a:
+      - Some of your data, sometimes a lot
+      - Nothing, it is always the best choice
+      - The column names
+    correct: 0
+    right: 'Right. In the table you saw, 4 blanks removed 4 of 10 rows.'
+    wrong: 'Not this one. Go back to Play, pick Drop rows, and look at the row count.'
+code: |
+  from sklearn.impute import SimpleImputer
+
+  imputer = SimpleImputer(strategy='mean')   # or 'median'
+  imputer.fit(X_train)                       # learn each column's mean from the training rows
+  X_train = imputer.transform(X_train)
+  X_test = imputer.transform(X_test)
+---
+Open any real table and some cells are empty: someone skipped a field, or a sensor failed. Scikit-learn models stop with an error when they meet a blank, so every blank needs a plan. There are two common ones.
+
+- **Drop** the rows that have blanks. It is simple, but you lose data. With many blanks you can lose most of the table.
+- **Fill** each blank with a typical value from its column: the <mark>mean</mark> (the average) or the **median** (the middle value). Both keep every row.
+
+The median is safer when a column has an outlier, like one huge salary. The outlier pulls the mean up but hardly moves the median.

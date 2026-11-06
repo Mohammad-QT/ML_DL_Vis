@@ -2,14 +2,16 @@
 // Course home, ported from sketches/home: live hero, the route, and the algorithm picker.
 import Base from '../layouts/Base.astro';
 import NavLinks from './NavLinks.astro';
-import { common, href, type Lang } from '../i18n/ui';
+import { common, href, prep, type Lang } from '../i18n/ui';
 import { home } from '../i18n/pages';
 import { MODEL_NAMES } from '../engine';
-import { CLASSIFICATION, lessonPath } from '../lessons';
+import { CLASSIFICATION, lessonPath, prepPath, type PrepId } from '../lessons';
 
 interface Props { lang: Lang }
 const { lang } = Astro.props;
 const t = { ...common[lang], ...home[lang] };
+const pn = prep[lang];
+const PART1: PrepId[] = ['missing', 'categories', 'split', 'scaling'];
 const m = (n: string) => t[`m_${n}` as keyof typeof t];
 const lessonHref: Record<string, string> = Object.fromEntries(CLASSIFICATION.map(id => [id, href(lang, lessonPath(id))]));
 
@@ -38,7 +40,7 @@ const REG: Array<[keyof typeof t, string]> = [
       <h1 class="display" set:html={t.h1} />
       <p class="lede">{t.lede}</p>
       <div class="ctas">
-        <a class="btn" href="#route"><span>{t.start}</span> <span class="arr">→</span></a>
+        <a class="btn" href={href(lang, prepPath('start'))}><span>{t.start}</span> <span class="arr">→</span></a>
         <a class="btn ghost" href="#pick">{t.pick}</a>
       </div>
     </div>
@@ -55,8 +57,9 @@ const REG: Array<[keyof typeof t, string]> = [
     <h2 class="display">{t.route_h}</h2>
     <p class="sub">{t.route_p}</p>
     <ol class="route">
-      <li class="stop first"><div class="pt">0</div><div class="sheet body"><h3 class="display"><span>{t.p0}</span></h3><p>{t.p0_d}</p></div></li>
-      <li class="stop"><div class="pt">1</div><div class="sheet body"><h3 class="display"><span>{t.p1}</span><small>4 {t.lessons}</small></h3><p>{t.p1_d}</p></div></li>
+      <li class="stop first"><div class="pt">0</div><div class="sheet body"><h3 class="display"><a href={href(lang, prepPath('start'))}>{t.p0}</a></h3><p>{t.p0_d}</p></div></li>
+      <li class="stop"><div class="pt">1</div><div class="sheet body"><h3 class="display"><a href={href(lang, prepPath('missing'))}>{t.p1}</a><small>4 {t.lessons}</small></h3><p>{t.p1_d}</p>
+        <div class="links">{PART1.map(id => <a class="chip" href={href(lang, prepPath(id))}>{pn[`n_${id}` as keyof typeof pn]}</a>)}</div></div></li>
       <li class="stop"><div class="pt">2</div><div class="sheet body"><h3 class="display"><span>{t.p2}</span><small>6 {t.lessons}</small></h3><p>{t.p2_d}</p>
         <div class="minis">{REG.map(([k, path]) => (
           <div class="mini soon"><svg viewBox="0 0 80 48" preserveAspectRatio="none" aria-hidden="true"><g fill="none" stroke="var(--ink)" stroke-width="1.8" stroke-linecap="round" set:html={path} /><g fill="var(--a)">{dots.map(([x, y]) => <circle cx={x} cy={y} r="2.2" />)}</g></svg><span>{t[k]}</span><small>{t.soon}</small></div>
@@ -120,6 +123,10 @@ const REG: Array<[keyof typeof t, string]> = [
   .stop h3 { font-size: 24px; line-height: 1.15; display: flex; justify-content: space-between; gap: 10px; }
   .stop h3 small { font: 500 13px var(--mono); color: var(--muted); white-space: nowrap; }
   .stop p { color: var(--muted); margin-top: 4px; }
+  .stop h3 a { color: inherit; text-decoration: none; }
+  .stop h3 a:hover { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 4px; }
+  .stop .links { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+  .stop .links a.chip { text-decoration: none; }
   .stop.later .pt { border-style: dashed; color: var(--muted); background: transparent; box-shadow: none; }
   .stop.later .body { border-style: dashed; background: transparent; box-shadow: none; }
   .minis { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 10px; margin-top: 14px; }

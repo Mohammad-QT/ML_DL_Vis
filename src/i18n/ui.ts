@@ -95,3 +95,21 @@ export const lesson = {
     progress: 'التصنيف · أنهيت {n} من 7',
   },
 };
+
+/** Extra text for the Part 0 and Part 1 lesson template (it reuses `lesson` for the tabs and buttons). */
+export const prep = {
+  en: {
+    part0: 'Start here', part1: 'Prepare the data',
+    kicker0: 'Part 0 · Start here', kicker1: 'Part 1 · Prepare the data · lesson {n} of 4',
+    progress0: 'Start here', progress1: 'Prepare the data · {n} of 4',
+    n_start: 'Start here', n_missing: 'Missing values', n_categories: 'Text categories', n_split: 'Train/test split', n_scaling: 'Feature scaling',
+    code_p: 'This is the core of the notebook. Open the full notebook to run it, change it, or download it. Nothing to install.',
+  },
+  ar: {
+    part0: 'ابدأ من هنا', part1: 'جهّز البيانات',
+    kicker0: 'الجزء 0 · ابدأ من هنا', kicker1: 'الجزء 1 · جهّز البيانات · الدرس {n} من 4',
+    progress0: 'ابدأ من هنا', progress1: 'جهّز البيانات · أنهيت {n} من 4',
+    n_start: 'ابدأ من هنا', n_missing: 'القيم المفقودة', n_categories: 'الفئات النصية', n_split: 'تقسيم التدريب والاختبار', n_scaling: 'توحيد المقياس',
+    code_p: 'هذا هو جوهر الدفتر. افتح الدفتر كاملًا لتشغيله أو تعديله أو تنزيله. لا حاجة لتثبيت أي شيء.',
+  },
+};

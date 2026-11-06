@@ -2,9 +2,18 @@ import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
 import { MODEL_NAMES } from './engine';
+import { PREP } from './lessons';
 
 const model = z.enum(MODEL_NAMES as [string, ...string[]]);
 const preset = z.enum(['blobs', 'moons', 'circles', 'xor']);
+const quiz = z.array(z.object({
+  q: z.string(),
+  a: z.array(z.string()).min(2).max(4),
+  /** Index into `a`. */
+  correct: z.number(),
+  right: z.string(),
+  wrong: z.string(),
+})).min(1);
 const hint = z.object({ text: z.string() });
 
 // One MDX file per lesson per language: `lessons/<lang>/<model>.mdx`. The body is the "idea" text.
@@ -33,14 +42,7 @@ const lessons = defineCollection({
         high: hint.extend({ min: z.number() }).optional(),
       }).default({}),
     }),
-    quiz: z.array(z.object({
-      q: z.string(),
-      a: z.array(z.string()).min(2).max(4),
-      /** Index into `a`. */
-      correct: z.number(),
-      right: z.string(),
-      wrong: z.string(),
-    })).min(1),
+    quiz,
     /** "Predict the line": three models drawn on the same data; `answer` is the index of this lesson's model. */
     predict: z.object({ preset, seed: z.number(), options: z.array(model).length(3), answer: z.number(), why: z.string() }),
     /** "Beat the score": fixed data and split; reach `target` % test accuracy by moving the slider from `start`. */
@@ -52,4 +54,24 @@ const lessons = defineCollection({
   }),
 });
 
-export const collections = { lessons };
+// Part 0 and Part 1: `prep/<lang>/<id>.mdx`. The body is the "idea" text; the Play tab is a board (Part 0) or an interactive from `ui`.
+const prep = defineCollection({
+  loader: glob({ pattern: '**/*.mdx', base: './src/content/prep' }),
+  schema: z.object({
+    id: z.enum(PREP),
+    short: z.string(),
+    title: z.string(),
+    lede: z.string(),
+    figure: z.object({ preset, seed: z.number(), model: model.optional(), caption: z.string() }),
+    steps_h: z.string(),
+    steps: z.array(z.string()).min(3).max(4),
+    caution: z.object({ h: z.string(), p: z.string() }),
+    play: z.object({ p: z.string(), p_touch: z.string().optional() }),
+    /** Words used by the interactive (labels, notes). Same keys in every language. */
+    ui: z.record(z.string(), z.string()).default({}),
+    quiz,
+    code: z.string(),
+  }),
+});
+
+export const collections = { lessons, prep };

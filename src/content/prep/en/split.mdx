@@ -1,0 +1,53 @@
+---
+id: split
+short: Train/test split
+title: Train/test split
+lede: Hide some data from the model, so its score tells you how it will do on new cases.
+figure: { preset: moons, seed: 9, caption: Hold some points back }
+steps_h: How the split works
+steps:
+  - 'Shuffle the row numbers, using the <code>random_state</code> seed.'
+  - Take the first share (the test size) as the test set.
+  - Everything else is the training set.
+  - Train on the training set only. Score on the test set at the end.
+caution:
+  h: Split before you fit anything
+  p: 'Scalers and imputers learn numbers (means, spreads) from data. Fit them on the <b>training</b> set only. If test information leaks in, the test score <mark>looks better than it should</mark>.'
+play:
+  p: 'Drag the slider to change the test share. Press Re-shuffle for a new random split, then type an old random_state back in: the same points come back.'
+ui:
+  alt: Points split into train and test
+  share: Test share
+  train: Train
+  test: Test
+  shuffle: Re-shuffle
+  legend: Colour is the class.
+  legend_test: Ringed points are test.
+quiz:
+  - q: You use random_state=42 today and run the split again tomorrow. What happens?
+    a:
+      - You get the same split
+      - You get a different split
+      - The split fails
+    correct: 0
+    right: 'Right. <code>random_state</code> fixes the shuffle, so the split is <mark>repeatable</mark>.'
+    wrong: 'Not quite. Go back to Play, type the same random_state twice, and compare.'
+  - q: Why do we hide test data from the model?
+    a:
+      - So the score shows how it handles new cases
+      - To make training faster
+      - Because test data is lower quality
+    correct: 0
+    right: 'Right. A model can memorise what it has seen. Only <mark>unseen</mark> points show if it really learned.'
+    wrong: 'Not this one. Test data is just as good. It is kept apart so the score is honest.'
+code: |
+  from sklearn.model_selection import train_test_split
+
+  X_train, X_test, y_train, y_test = train_test_split(
+      X, y, test_size=0.25, random_state=0)
+---
+If you test a model on the same points it learned from, it can simply remember them and look perfect. So before training, set aside a share of the rows as the <mark>test set</mark>. The rest is the **training set**. On every board in this course, the ringed points are the test set.
+
+How big should it be? 20 to 30 per cent for testing is common. Less test data makes the score noisy. Less training data makes the model worse.
+
+The split is random. <code>random_state</code> is the seed of that randomness: the same number gives the same split every time, so you tomorrow, or a friend today, get the same result. Change the number and you get a different split, and a slightly different score.
