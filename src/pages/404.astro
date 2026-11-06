@@ -1,0 +1,29 @@
+---
+// Served by GitHub Pages for any missing URL. One page for both languages, since the language can't be known here.
+import Base from '../layouts/Base.astro';
+import { common, href } from '../i18n/ui';
+const en = common.en, ar = common.ar;
+---
+<Base lang="en" title="404">
+  <section class="nf">
+    <p class="mono code">404</p>
+    <h1 class="display">{en.nf_h}</h1>
+    <p class="muted">{en.nf_p}</p>
+    <p><a class="chip on" href={href('en')}>{en.nf_home}</a></p>
+    <div class="ar" lang="ar" dir="rtl">
+      <h2 class="display">{ar.nf_h}</h2>
+      <p class="muted">{ar.nf_p}</p>
+      <p><a class="chip on" href={href('ar')}>{ar.nf_home}</a></p>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .nf { padding: 60px 0 40px; max-width: 640px; }
+  .code { font-size: 15px; color: var(--muted); margin-bottom: 6px; }
+  h1 { font-size: 52px; line-height: 1.05; margin-bottom: 12px; }
+  .nf p { margin-bottom: 14px; }
+  .chip { text-decoration: none; display: inline-block; }
+  .ar { margin-top: 36px; padding-top: 28px; border-top: 1.5px solid var(--rule); }
+  .ar h2 { font-size: 34px; margin-bottom: 10px; }
+</style>

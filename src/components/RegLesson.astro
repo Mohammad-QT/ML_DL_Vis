@@ -53,9 +53,9 @@ const hl = (code: string) => code.replace(/&/g, '&amp;').replace(/</g, '&lt;')
       <h2 class="display">{t.idea_h}</h2>
       <slot />
     </div>
-    <h3 class="display">{t.steps_h}</h3>
+    <h3 class="display" set:html={t.steps_h} />
     <ol class="how" style={`--cols:${d.steps.length}`}>{d.steps.map(s => <li set:html={s} />)}</ol>
-    <div class="note read"><h3 class="display" style="margin-top:0">{d.caution.h}</h3><p set:html={d.caution.p} /></div>
+    <div class="note read"><h3 class="display" style="margin-top:0" set:html={d.caution.h} /><p set:html={d.caution.p} /></div>
     <div class="navrow">
       {prev
         ? <a class="btn ghost" href={href(lang, regPath(prev))}><span class="arr">←</span> <span>{fill(t.prev, { m: name(prev) })}</span></a>

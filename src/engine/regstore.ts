@@ -43,6 +43,13 @@ export class RegStore {
   split(r: Rng = rng(randomSeed())): void { this.points.forEach(p => (p.test = r() < this.testFrac)); }
   resplit(): void { this.split(); this.emit(); }
   add(x: number, y: number): void { this.points.push({ x, y, c: 0, test: false }); this.emit(); }
+  /** Replace the data with uploaded points (already scaled to [0, 1]) and make a fresh split. */
+  load(points: Sample[], seed: number = randomSeed()): void {
+    this.presetName = null;
+    this.points = points.map(p => ({ x: p.x, y: p.y, c: p.c, test: false }));
+    this.split(rng(seed));
+    this.emit();
+  }
   clear(): void { this.points = []; this.presetName = null; this.emit(); }
   train(): Point[] { return this.points.filter(p => !p.test); }
   test(): Point[] { return this.points.filter(p => p.test); }

@@ -63,3 +63,8 @@ and dummy-variable trap in the multiple linear regression notebook.
 
 Why this data: it is real, medium-sized (569 rows) and tidy, so cross-validation, grid search and boosting each take seconds.
 The notebooks say it is a teaching example, not medical advice.
+
+## Sample files on the site
+
+`public/samples/customers.csv` and `public/samples/mpg.csv` are copies of the files above. The "try a sample" links
+on the Compare page serve them. Keep the copies in sync if you change the originals.
