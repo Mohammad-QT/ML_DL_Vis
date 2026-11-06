@@ -46,11 +46,7 @@ export class Board {
 
   constructor(private canvas: HTMLCanvasElement, private store: Store, private opts: BoardOptions = {}) {
     this.ctx = canvas.getContext('2d')!;
-    if (!opts.static) {
-      canvas.addEventListener('click', e => opts.onAdd?.(this.pos(e), e));
-      canvas.addEventListener('mousemove', e => { this.ghost = this.pos(e); this.draw(); opts.onHover?.(this.ghost); });
-      canvas.addEventListener('mouseleave', () => { this.ghost = null; this.draw(); opts.onHover?.(null); });
-    }
+    if (!opts.static) this.bindPointer();
     new ResizeObserver(() => this.resize()).observe(canvas);
     addEventListener('themechange', () => { if (this.W) { this.readColors(); this.renderField(); this.draw(); } });
   }
@@ -73,6 +69,56 @@ export class Board {
   }
 
   setGhost(g: { x: number; y: number } | null): void { this.ghost = g; this.draw(); }
+
+  private hover(g: { x: number; y: number } | null) {
+    this.ghost = g;
+    this.draw();
+    this.opts.onHover?.(g);
+  }
+
+  /**
+   * Mouse: hover shows the ghost, a click adds a point.
+   * Touch/pen: a tap adds a point; touch-and-hold shows the ghost until the finger lifts.
+   * The canvas sets `touch-action: pinch-zoom` so taps and drags don't scroll the page.
+   */
+  private bindPointer() {
+    const c = this.canvas;
+    c.style.touchAction = 'pinch-zoom';
+    c.style.userSelect = 'none';
+    c.style.setProperty('-webkit-touch-callout', 'none');
+    const HOLD_MS = 280, SLOP = 10;
+    let down: { id: number; x: number; y: number; holding: boolean; timer: number } | null = null;
+
+    let mouseDown = false;
+    c.addEventListener('pointerdown', e => {
+      if (e.pointerType === 'mouse') { mouseDown = e.button === 0; return; }
+      try { c.setPointerCapture(e.pointerId); } catch { /* pointer already gone: the hold still works without capture */ }
+      const id = e.pointerId, p = this.pos(e);
+      down = { id, x: e.clientX, y: e.clientY, holding: false, timer: 0 };
+      down.timer = window.setTimeout(() => { if (down?.id === id) { down.holding = true; this.hover(p); } }, HOLD_MS);
+    });
+    c.addEventListener('pointermove', e => {
+      if (e.pointerType === 'mouse') { this.hover(this.pos(e)); return; }
+      if (!down || down.id !== e.pointerId) return;
+      if (down.holding) this.hover(this.pos(e));
+      else if (Math.hypot(e.clientX - down.x, e.clientY - down.y) > SLOP) { down.holding = true; clearTimeout(down.timer); this.hover(this.pos(e)); }
+    });
+    const end = (e: PointerEvent, add: boolean) => {
+      if (!down || down.id !== e.pointerId) return;
+      clearTimeout(down.timer);
+      const wasHolding = down.holding;
+      down = null;
+      if (wasHolding) this.hover(null);
+      else if (add) this.opts.onAdd?.(this.pos(e), e);
+    };
+    c.addEventListener('pointerup', e => {
+      if (e.pointerType === 'mouse') { if (mouseDown && e.button === 0) this.opts.onAdd?.(this.pos(e), e); mouseDown = false; return; }
+      end(e, true);
+    });
+    c.addEventListener('pointercancel', e => end(e, false));
+    c.addEventListener('pointerleave', e => { if (e.pointerType === 'mouse') this.hover(null); });
+    c.addEventListener('contextmenu', e => { if (down) e.preventDefault(); });
+  }
 
   private pos(e: MouseEvent) {
     const r = this.canvas.getBoundingClientRect();

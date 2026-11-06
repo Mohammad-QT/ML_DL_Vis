@@ -39,7 +39,7 @@ const presets = ['blobs', 'moons', 'circles', 'xor'] as const;
   <div class="play" data-board data-config={JSON.stringify(config)}>
     <div class="frame">
       <canvas class="board" style={`height:${height}`}></canvas>
-      <div class="under"><span>{t.hint_add}</span></div>
+      <div class="under"><span class="on-mouse">{t.hint_add}</span><span class="on-touch">{t.hint_tap}</span></div>
     </div>
     <div class="side">
       <div class="box scores" aria-live="polite">

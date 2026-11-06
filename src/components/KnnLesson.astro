@@ -44,7 +44,7 @@ const steps = [t.s1, t.s2, t.s3, t.s4];
 
   <section class="sheet card" role="tabpanel">
     <h2 class="display">{t.play_h}</h2>
-    <p class="muted read">{t.play_p}</p>
+    <p class="muted read"><span class="on-mouse">{t.play_p}</span><span class="on-touch">{t.play_p_touch}</span></p>
     <Board lang={lang} model="knn" params={{ k: 5 }} preset="blobs" seed={3} paramLabel={t.p_k}
       hints={{ low: { max: 3, text: t.k_small }, high: { min: 15, text: t.k_big } }} />
     <div class="navrow"><button class="btn ghost" data-goto="0"><span class="arr">←</span> <span>{t.s1}</span></button><button class="btn" data-goto="2"><span>{t.s3}</span> <span class="arr">→</span></button></div>
