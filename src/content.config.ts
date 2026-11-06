@@ -2,7 +2,7 @@ import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
 import { MODEL_NAMES, REG_NAMES, REG_PRESETS } from './engine';
-import { PREP, REGRESSION } from './lessons';
+import { PREP, REGRESSION, SELECTION } from './lessons';
 
 const model = z.enum(MODEL_NAMES as [string, ...string[]]);
 const preset = z.enum(['blobs', 'moons', 'circles', 'xor']);
@@ -111,4 +111,23 @@ const regression = defineCollection({
   }),
 });
 
-export const collections = { lessons, prep, regression };
+// Part 10 lessons: `selection/<lang>/<id>.mdx`. The Play tab is an interactive chosen by `id`; its words come from `ui`.
+const selection = defineCollection({
+  loader: glob({ pattern: '**/*.mdx', base: './src/content/selection' }),
+  schema: z.object({
+    id: z.enum(SELECTION),
+    short: z.string(),
+    title: z.string(),
+    lede: z.string(),
+    figure: z.object({ preset, seed: z.number(), model, caption: z.string() }),
+    steps_h: z.string(),
+    steps: z.array(z.string()).min(3).max(4),
+    caution: z.object({ h: z.string(), p: z.string() }),
+    play: z.object({ p: z.string(), p_touch: z.string().optional() }),
+    ui: z.record(z.string(), z.string()).default({}),
+    quiz,
+    code: z.string(),
+  }),
+});
+
+export const collections = { lessons, prep, regression, selection };

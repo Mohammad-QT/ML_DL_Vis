@@ -1,0 +1,60 @@
+---
+// Mount point for one Part 10 interactive. The markup is built in src/selection/demos.ts.
+import { MODEL_NAMES } from '../engine';
+import { common, type Lang } from '../i18n/ui';
+
+interface Props { lang: Lang; demo: 'cv' | 'grid' | 'boost'; ui: Record<string, string> }
+const { lang, demo, ui } = Astro.props;
+const names = Object.fromEntries(MODEL_NAMES.map(n => [`m_${n}`, common[lang][`m_${n}` as keyof (typeof common)['en']]]));
+---
+<div class="demo sel" data-demo={demo} data-ui={JSON.stringify({ ...ui, ...names })}></div>
+
+<style is:global>
+  .sel { margin-top: 16px; }
+  .sel .dsplit { display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: 20px; }
+  .sel .gsplit { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .sel .frame { border: 1.5px solid var(--rule); border-radius: 16px; padding: 8px; background: var(--sheet); }
+  .sel .dside { display: flex; flex-direction: column; gap: 12px; }
+  .sel .box { display: block; background: var(--paper); border-radius: 14px; padding: 12px 14px; }
+  .sel .box input[type="range"] { width: 100%; }
+  .sel .box select { width: 100%; font: 600 15px var(--body); padding: 6px 8px; border: 1.5px solid var(--rule); border-radius: 9px; background: var(--sheet); color: var(--ink); }
+  .sel .chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 10px; }
+  .sel .btn { font-size: 15px; padding: 7px 14px; }
+  .sel .scores { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .sel .scores3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 10px; }
+  .sel .scores b, .sel .scores3 b { display: block; font: 600 28px/1.1 var(--mono); }
+  .sel .scores3 b { font-size: 22px; }
+  .sel .scores small, .sel .scores3 small { font: 500 12px var(--mono); color: var(--muted); }
+  .sel .legend { font-size: 13px; color: var(--muted); line-height: 1.5; margin-top: 8px; }
+  .sel .swatch.ring { display: inline-block; width: 11px; height: 11px; border-radius: 50%; border: 2px solid var(--ink); vertical-align: -1px; }
+  .sel .dnote { margin-top: 14px; max-width: 700px; border-inline-start: 4px solid var(--hl); padding: 2px 14px; min-height: 1.5em; }
+  .sel .dstrips { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 14px; }
+  .sel .pane { margin: 0; padding: 12px; min-width: 0; }
+  .sel .pane figcaption { display: flex; flex-direction: column; padding: 2px 4px 8px; font-size: 14px; color: var(--muted); }
+  .sel .pane figcaption b { font: 700 17px var(--body); color: var(--ink); }
+  .sel .plot { display: block; width: 100%; height: auto; }
+  .sel .lgs { display: flex; flex-wrap: wrap; gap: 14px; padding: 4px 6px; font-size: 13px; color: var(--muted); }
+  .sel .lg i { display: inline-block; width: 14px; height: 4px; border-radius: 2px; margin-inline-end: 6px; vertical-align: middle; }
+  .sel h3.display { font-size: 21px; margin: 26px 0 10px; }
+  .sel .heat { display: grid; grid-template-columns: 70px repeat(var(--n), minmax(0, 1fr)); gap: 4px; }
+  .sel .ax { font: 600 12px var(--mono); color: var(--muted); display: grid; place-items: center; text-align: center; }
+  .sel .corner { font-size: 10px; }
+  .sel .cell { aspect-ratio: 1; min-height: 40px; border: 1.5px solid var(--rule); border-radius: 9px; cursor: pointer; font: 600 15px var(--mono); color: var(--ink); background: color-mix(in srgb, var(--ok) calc(var(--w, 0) * 1%), var(--paper)); padding: 0; }
+  .sel .cell b { font: inherit; }
+  .sel .cell.pin { border-color: var(--ink); }
+  .sel .cell.best { outline: 3px solid var(--hl); outline-offset: 1px; }
+  .sel .cell.best b::after { content: " ★"; font-size: 11px; }
+  .sel .prog { height: 6px; border-radius: 9px; background: var(--rule); overflow: hidden; margin-top: 10px; }
+  .sel .prog i { display: block; height: 100%; width: 0; background: var(--ok); }
+  @media (max-width: 860px) {
+    .sel .dsplit, .sel .gsplit, .sel .dstrips { grid-template-columns: 1fr; }
+    .sel .frame canvas { height: 320px !important; }
+    .sel .gsplit .frame canvas { height: 260px !important; }
+    .sel .heat { grid-template-columns: 52px repeat(var(--n), minmax(0, 1fr)); }
+  }
+</style>
+
+<script>
+  import { mountSelection } from '../selection/demos';
+  mountSelection();
+</script>

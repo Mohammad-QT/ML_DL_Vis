@@ -1,0 +1,13 @@
+---
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+import SelLesson from '../../../../components/SelLesson.astro';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('selection', e => e.id.startsWith('ar/'));
+  return entries.map(entry => ({ params: { slug: entry.data.id }, props: { entry } }));
+}
+interface Props { entry: CollectionEntry<'selection'> }
+const { entry } = Astro.props;
+const { Content } = await render(entry);
+---
+<SelLesson lang="ar" entry={entry}><Content /></SelLesson>

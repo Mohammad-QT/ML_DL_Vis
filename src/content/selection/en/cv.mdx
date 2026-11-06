@@ -1,0 +1,68 @@
+---
+id: cv
+short: k-fold cross-validation
+title: k-fold cross-validation
+lede: One train/test split can be lucky or unlucky. Cross-validation tests on every part of the data, one part at a time.
+figure: { preset: moons, seed: 9, model: knn, caption: Every point gets a turn as test data }
+steps_h: How k-fold works
+steps:
+  - 'Shuffle the rows and cut them into <b>k</b> equal parts, called folds.'
+  - Hold out fold 1 as the test set. Train on the other k − 1 folds.
+  - Score the model on the held-out fold. Then repeat with fold 2, fold 3, and so on.
+  - 'You now have k scores. Report their <b>mean</b>, and their spread (the standard deviation).'
+caution:
+  h: Cross-validation does not train your final model
+  p: 'It only <mark>measures</mark> how well a setup works. Once you have picked the model and its settings, train it once on all the data you have.'
+play:
+  p: 'Press Next fold to move the held-out fold (the ringed points) along. Pick another model or change k. Then press Try one random split a few times and compare how much those scores jump around with the fold scores.'
+ui:
+  model: Model
+  k: Folds (k)
+  step: Next fold
+  animate: Animate
+  pause: Pause
+  new_data: New data
+  legend_test: Ringed points are held out. Filled points train the model.
+  fold_of: 'Fold {i} of {k}: {n} points held out, test score {s}.'
+  strip_cv: Cross-validation
+  strip_one: One random split at a time
+  split_btn: Try one random split
+  mean_std: 'Mean {m} ± {s}'
+  revealing: '{i} of {k} folds scored'
+  one_hint: Press the button below
+  one_range: '{n} splits: from {lo} to {hi}'
+  split_of: 'Random split {i}: {n} points held out, test score {s}.'
+  p_knn: Neighbours (k)
+  p_svm: C
+  p_ksvm: gamma
+  p_tree: Depth
+  p_forest: Trees
+quiz:
+  - q: You run 5-fold cross-validation and get five scores. How many models were trained?
+    a:
+      - '1'
+      - '5'
+      - '25'
+    correct: 1
+    right: 'Right. One model per fold: each is trained on four folds and tested on the fifth.'
+    wrong: 'Not quite. Each fold gets its own model, so with k = 5 you train 5 models. Step through the folds on the Play tab to see it.'
+  - q: Your five fold scores are 70, 74, 88, 91 and 72. What does the wide spread tell you?
+    a:
+      - The score depends a lot on which points are held out
+      - The model is perfect
+      - The folds were too large
+    correct: 0
+    right: 'Right. When the folds disagree, a <mark>single split</mark> could easily have shown you 70 or 91. The mean is the safer number.'
+    wrong: 'Not this one. A wide spread means the score swings with the choice of test points. That is exactly what one lucky split hides.'
+code: |
+  from sklearn.model_selection import cross_val_score, KFold
+
+  cv = KFold(n_splits=5, shuffle=True, random_state=0)
+  scores = cross_val_score(model, X, y, cv=cv)
+  print(scores.mean(), scores.std())
+---
+So far you scored a model on one test set. That raises a fair worry: what if the test set happened to be easy, or unusually hard? The score would say more about your split than about your model.
+
+**k-fold cross-validation** fixes this by using every point as test data exactly once. Cut the data into <mark>k folds</mark>. Train on k − 1 of them, test on the one left out, and repeat until each fold has had its turn. You get k scores. Their mean is your estimate, and their spread tells you how much to trust it.
+
+A bigger k means more models to train, and each one sees more of the data. 5 and 10 are the usual choices. In the Play tab you can pick any of the seven classifiers and watch the held-out fold move.

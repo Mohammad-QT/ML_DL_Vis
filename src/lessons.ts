@@ -22,3 +22,11 @@ export type RegId = (typeof REGRESSION)[number];
 export const regPath = (id: RegId) => `learn/2-regression/${id}/`;
 export const regNotebookUrl = (id: RegId) =>
   `https://colab.research.google.com/github/Mohammad-QT/ML_DL_Vis/blob/main/notebooks/2-regression/${id}.ipynb`;
+
+/** The 3 model-selection lessons (Part 10), in course order. They live under `learn/10-selection/`. */
+export const SELECTION = ['cv', 'grid', 'boost'] as const;
+export type SelId = (typeof SELECTION)[number];
+
+export const selPath = (id: SelId) => `learn/10-selection/${id}/`;
+export const selNotebookUrl = (id: SelId) =>
+  `https://colab.research.google.com/github/Mohammad-QT/ML_DL_Vis/blob/main/notebooks/10-selection/${id}.ipynb`;

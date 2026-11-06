@@ -4,4 +4,6 @@ export { Store, PRESETS, isPreset, type PresetName } from './store';
 export { MODELS, MODEL_NAMES, isModel, defaults, fitModel, type ModelName, type ParamSpec } from './models';
 export { score, pct } from './score';
 export { REG_MODELS, REG_NAMES, isRegModel, regDefaults, fitReg, r2, fmtR2, type RegModel, type RegModelName } from './regression';
+export { foldIds, crossValidate, randomSplitScores, jitter, mean, std, type CvResult } from './selection';
+export { fitBoost, BOOST_DEFAULTS, type BoostParams, type Boosted } from './boost';
 export { RegStore, REG_PRESETS, isRegPreset, type RegPresetName } from './regstore';

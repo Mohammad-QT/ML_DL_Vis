@@ -48,3 +48,18 @@ Why this data: weight and horsepower both relate to fuel economy, but the horsep
 file shows a straight line, a bend, a staircase and a smooth curve. `origin` is a text category for the one-hot encoding
 and dummy-variable trap in the multiple linear regression notebook.
 
+
+## `breast_cancer.csv`
+
+| | |
+|---|---|
+| Used by | `notebooks/10-selection/*.ipynb` |
+| Rows | 569 breast biopsy samples (212 malignant, 357 benign) |
+| Columns | `diagnosis` (1 = malignant, 0 = benign) and eight "mean" measurements of the cell nuclei: `mean_radius`, `mean_texture`, `mean_perimeter`, `mean_area`, `mean_smoothness`, `mean_compactness`, `mean_concavity`, `mean_concave_points` |
+| Source | Breast Cancer Wisconsin (Diagnostic) data set, UCI Machine Learning Repository, [archive.ics.uci.edu/dataset/17](https://archive.ics.uci.edu/dataset/17/breast+cancer+wisconsin+diagnostic) (DOI 10.24432/C5DW2B). Exported from the copy bundled with scikit-learn (`sklearn.datasets.load_breast_cancer`) |
+| Original authors | William H. Wolberg, W. Nick Street, Olvi L. Mangasarian (1995) |
+| License | CC BY 4.0, as listed for UCI repository data sets. Attribution is given in the notebooks and here. Owner: please confirm on the UCI page before the site goes public |
+| Changes | Kept `diagnosis` (recoded so malignant is 1) and the eight "mean" columns, rounded to 5 decimals. The "error" and "worst" columns and the sample id were dropped |
+
+Why this data: it is real, medium-sized (569 rows) and tidy, so cross-validation, grid search and boosting each take seconds.
+The notebooks say it is a teaching example, not medical advice.

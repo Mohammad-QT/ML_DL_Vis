@@ -135,3 +135,17 @@ export const prep = {
     code_p: 'هذا هو جوهر الدفتر. افتح الدفتر كاملًا لتشغيله أو تعديله أو تنزيله. لا حاجة لتثبيت أي شيء.',
   },
 };
+
+/** Extra text for the Part 10 lesson template (it reuses `lesson` for the tabs and buttons). */
+export const sel = {
+  en: {
+    part: 'Model selection', kicker: 'Part 10 · Model selection · lesson {n} of 3', progress: 'Model selection · {n} of 3',
+    n_cv: 'k-fold cross-validation', n_grid: 'Grid search', n_boost: 'XGBoost',
+    code_p: 'This is the core of the notebook. Open the full notebook to run it, change it, or download it. Nothing to install.',
+  },
+  ar: {
+    part: 'اختيار النموذج', kicker: 'الجزء 10 · اختيار النموذج · الدرس {n} من 3', progress: 'اختيار النموذج · أنهيت {n} من 3',
+    n_cv: 'التحقق المتقاطع k-fold', n_grid: 'البحث الشبكي', n_boost: 'XGBoost',
+    code_p: 'هذا هو جوهر الدفتر. افتح الدفتر كاملًا لتشغيله أو تعديله أو تنزيله. لا حاجة لتثبيت أي شيء.',
+  },
+};
