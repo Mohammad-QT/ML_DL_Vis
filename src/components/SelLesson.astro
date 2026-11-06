@@ -2,10 +2,15 @@
 // Lesson template for Part 0 and Part 1: same tabs and look as Lesson.astro, but the Play tab is a board (Part 0) or a small interactive.
 import type { CollectionEntry } from 'astro:content';
 import Base from '../layouts/Base.astro';
+import CourseNav from './CourseNav.astro';
+import PartProgress from './PartProgress.astro';
+import StepOf from './StepOf.astro';
+import CodeOptions from './CodeOptions.astro';
+import NextLesson from './NextLesson.astro';
 import Board from './Board.astro';
 import SelDemo from './SelDemo.astro';
 import { href, common, lesson, sel as selText, type Lang } from '../i18n/ui';
-import { SELECTION, lessonPath, selNotebookUrl, selPath } from '../lessons';
+import { SELECTION, lessonPath, selPath } from '../lessons';
 
 interface Props { lang: Lang; entry: CollectionEntry<'selection'> }
 const { lang, entry } = Astro.props;
@@ -16,15 +21,18 @@ const pt = selText[lang];
 const fill = (s: string, vars: Record<string, string | number>) => s.replace(/\{(\w+)\}/g, (_, k) => String(vars[k]));
 const name = (id: string) => pt[`n_${id}` as keyof typeof pt];
 const n = SELECTION.indexOf(d.id) + 1;
-const prev = SELECTION[n - 2], next = SELECTION[n];
+const prev = SELECTION[n - 2];
 const steps = [t.s1, t.s2, t.s3, t.s4];
+const key = `10/${d.id}`;
+const partId = '10' as const;
 const hl = (code: string) => code.replace(/&/g, '&amp;').replace(/</g, '&lt;')
   .replace(/\b(from|import)\b|\b\d+(?:\.\d+)?\b/g, (m, kw) => `<span class="${kw ? 'k' : 'n'}">${m}</span>`);
 const play = d.play;
 ---
 <Base lang={lang} title={d.short} description={d.lede}>
   <nav class="crumbs" slot="crumbs"><a href={href(lang)}>{c.nav_course}</a> / <span>{pt.part}</span></nav>
-  <div class="progress" slot="bar"><span>{fill(pt.progress, { n })}</span><span class="track"><i data-pbar data-base={Math.round(n / 3 * 100)}></i></span></div>
+  <PartProgress slot="bar" lang={lang} part={partId} />
+  <CourseNav slot="rail" lang={lang} current={key} />
 
   <section class="hero">
     <div>
@@ -42,6 +50,7 @@ const play = d.play;
     {steps.map((s, i) => (
       <button class:list={['tab', { on: i === 0 }]} role="tab" aria-selected={i === 0 ? 'true' : 'false'} data-step={i}><span class="n">{i + 1}</span><span>{s}</span></button>
     ))}
+    <StepOf lang={lang} />
   </div>
 
   <section class="sheet card on" role="tabpanel">
@@ -86,16 +95,10 @@ const play = d.play;
       <h2 class="display">{t.code_h}</h2>
       <p class="muted">{pt.code_p}</p>
 <pre set:html={hl(d.code)} />
-      <div class="codecta">
-        <a class="btn hl" href={selNotebookUrl(d.id)} target="_blank" rel="noopener"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M7 7h10v10M7 17 17 7"/></svg><span>{t.colab}</span></a>
-      </div>
+      <CodeOptions lang={lang} current={key}></CodeOptions>
     </div>
-    <div class="navrow">
-      <button class="btn ghost" data-goto="2"><span class="arr">←</span> <span>{t.s3}</span></button>
-      {next
-        ? <a class="btn" href={href(lang, selPath(next))}><span>{fill(t.next, { m: name(next) })}</span> <span class="arr">→</span></a>
-        : <a class="btn" href={href(lang) + '#route'}><span>{t.route}</span> <span class="arr">→</span></a>}
-    </div>
+    <NextLesson lang={lang} current={key} />
+    <div class="navrow"><button class="btn ghost" data-goto="2"><span class="arr">←</span> <span>{t.s3}</span></button></div>
   </section>
 </Base>
 
@@ -109,9 +112,6 @@ const play = d.play;
   .fp figcaption { font: 500 13px var(--mono); color: var(--muted); padding: 10px 4px 2px; }
   .fp figcaption b { color: var(--ink); font-family: var(--body); font-size: 15px; }
 
-  .progress { display: flex; align-items: center; gap: 10px; font: 500 12px var(--mono); color: var(--muted); }
-  .progress .track { width: 120px; height: 6px; border-radius: 9px; background: var(--rule); overflow: hidden; }
-  .progress .track i { display: block; height: 100%; width: 28%; background: var(--ok); border-radius: 9px; transition: width .4s; }
 
   .tabs { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
   .tab { display: flex; align-items: center; gap: 9px; border: 1.5px solid var(--rule); background: var(--sheet); color: var(--muted); font: 700 16px var(--body); padding: 8px 18px 8px 9px; border-radius: 13px; cursor: pointer; box-shadow: 0 3px 0 var(--lift); transition: transform .12s; }
@@ -150,13 +150,12 @@ const play = d.play;
   .qz { margin-bottom: 18px; }
 
 
-  .codecta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 18px; }
   .navrow { display: flex; justify-content: space-between; margin-top: 28px; }
 
   @media (max-width: 860px) {
     .hero { grid-template-columns: 1fr; } h1 { font-size: 46px; }
     .how { grid-template-columns: 1fr 1fr; }
-    .card { padding: 22px; } .progress { display: none; }
+    .card { padding: 22px; }
     :global(.crumbs) { display: none; }
   }
 </style>
@@ -164,15 +163,12 @@ const play = d.play;
 <script>
   const $$ = (s: string) => [...document.querySelectorAll<HTMLElement>(s)];
   const tabs = $$('.tab'), cards = $$('.card');
-  const pbar = document.querySelector<HTMLElement>('[data-pbar]');
-  const base = Number(pbar?.dataset.base ?? 0);
   const lit = (el: HTMLElement) => { el.classList.remove('lit'); requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('lit'))); };
 
   function go(i: number) {
     tabs.forEach((t, j) => { t.classList.toggle('on', j === i); t.setAttribute('aria-selected', String(j === i)); if (j < i) t.classList.add('done'); });
     cards.forEach((c, j) => c.classList.toggle('on', j === i));
     lit(cards[i]);
-    if (pbar) pbar.style.width = `${Math.min(100, base + i * 4)}%`;
   }
   tabs.forEach(t => t.addEventListener('click', () => go(Number(t.dataset.step))));
   $$('[data-goto]').forEach(b => b.addEventListener('click', () => go(Number(b.dataset.goto))));

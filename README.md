@@ -95,6 +95,22 @@ npm run build    # static site in dist/
 Built with [Astro](https://astro.build) and TypeScript. The models in [`src/engine/`](src/engine/) are written from
 scratch and run in the browser. Pushing to `main` deploys to GitHub Pages.
 
+## Use it offline
+
+The site is an installable app. Open it once while online, and every lesson, the fonts and the notebooks are saved
+in your browser, so it keeps working without internet. In Chrome or Edge, use **Install the app** at the bottom of
+the course menu on any lesson page (or the install icon in the address bar). Your progress stays in that browser.
+
+To run your own copy offline from this repository:
+
+```bash
+npm install
+npm run build && npm run preview   # http://localhost:4321/ML_DL_Vis/
+```
+
+Notebooks still read their data from GitHub. To run them with no internet at all, download
+[`datasets/`](datasets/) too and point the notebook at the local file.
+
 ## Copyright
 
 © 2026 Mohammad Ismael Al-Qatameen. All rights reserved.

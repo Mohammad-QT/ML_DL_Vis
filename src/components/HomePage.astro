@@ -2,7 +2,8 @@
 // Course home, ported from sketches/home: live hero, the route, and the algorithm picker.
 import Base from '../layouts/Base.astro';
 import NavLinks from './NavLinks.astro';
-import { common, href, prep, sel, type Lang } from '../i18n/ui';
+import { common, href, fill, nav, prep, sel, type Lang } from '../i18n/ui';
+import { LESSONS, lessonName, partName } from '../course';
 import { home } from '../i18n/pages';
 import { MODEL_NAMES } from '../engine';
 import { CLASSIFICATION, REGRESSION, SELECTION, lessonPath, prepPath, regPath, selPath, type PrepId } from '../lessons';
@@ -23,6 +24,10 @@ const strings = {
   compareUrl: href(lang, 'compare/'),
 };
 const json = JSON.stringify(strings).replace(/</g, '\\u003c');
+// "Continue where you left off": every lesson's name, part and link, in course order
+const nt = nav[lang];
+const course = LESSONS.map(l => ({ key: l.key, name: lessonName(lang, l), part: fill(nt.cont_part, { n: l.part, p: partName(lang, l.part) }), href: href(lang, l.path) }));
+const courseJson = JSON.stringify(course).replace(/</g, '\\u003c');
 
 const dots = [[8, 40], [16, 35], [24, 35], [32, 28], [40, 27], [48, 20], [56, 18], [64, 11], [72, 9]];
 const REG: Array<[keyof typeof t, string]> = [
@@ -41,6 +46,12 @@ const REG: Array<[keyof typeof t, string]> = [
     <div>
       <h1 class="display" set:html={t.h1} />
       <p class="lede">{t.lede}</p>
+      <a class="sheet cont" href={href(lang, LESSONS[0].path)} data-continue hidden>
+        <span class="k">{nt.cont}</span>
+        <b class="display" data-cont-name></b>
+        <small data-cont-part></small>
+        <span class="go" aria-hidden="true"><span class="arr">→</span></span>
+      </a>
       <div class="ctas">
         <a class="btn" href={href(lang, prepPath('start'))}><span>{t.start}</span> <span class="arr">→</span></a>
         <a class="btn ghost" href="#pick">{t.pick}</a>
@@ -59,23 +70,23 @@ const REG: Array<[keyof typeof t, string]> = [
     <h2 class="display">{t.route_h}</h2>
     <p class="sub">{t.route_p}</p>
     <ol class="route">
-      <li class="stop first"><div class="pt">0</div><div class="sheet body"><h3 class="display"><a href={href(lang, prepPath('start'))}>{t.p0}</a></h3><p>{t.p0_d}</p></div></li>
+      <li class="stop first"><div class="pt">0</div><div class="sheet body"><h3 class="display"><a href={href(lang, prepPath('start'))} data-lesson="0/start">{t.p0}</a></h3><p>{t.p0_d}</p></div></li>
       <li class="stop"><div class="pt">1</div><div class="sheet body"><h3 class="display"><a href={href(lang, prepPath('missing'))}>{t.p1}</a><small>4 {t.lessons}</small></h3><p>{t.p1_d}</p>
-        <div class="links">{PART1.map(id => <a class="chip" href={href(lang, prepPath(id))}>{pn[`n_${id}` as keyof typeof pn]}</a>)}</div></div></li>
+        <div class="links">{PART1.map(id => <a class="chip" href={href(lang, prepPath(id))} data-lesson={`1/${id}`}>{pn[`n_${id}` as keyof typeof pn]}</a>)}</div></div></li>
       <li class="stop"><div class="pt">2</div><div class="sheet body"><h3 class="display"><span>{t.p2}</span><small>6 {t.lessons}</small></h3><p>{t.p2_d}</p>
         <div class="minis">{REG.map(([k, path], i) => (
-          <a class="mini" href={href(lang, regPath(REGRESSION[i]))}><svg viewBox="0 0 80 48" preserveAspectRatio="none" aria-hidden="true"><g fill="none" stroke="var(--ink)" stroke-width="1.8" stroke-linecap="round" set:html={path} /><g fill="var(--a)">{dots.map(([x, y]) => <circle cx={x} cy={y} r="2.2" />)}</g></svg><span>{t[k]}</span></a>
+          <a class="mini" href={href(lang, regPath(REGRESSION[i]))} data-lesson={`2/${REGRESSION[i]}`}><svg viewBox="0 0 80 48" preserveAspectRatio="none" aria-hidden="true"><g fill="none" stroke="var(--ink)" stroke-width="1.8" stroke-linecap="round" set:html={path} /><g fill="var(--a)">{dots.map(([x, y]) => <circle cx={x} cy={y} r="2.2" />)}</g></svg><span>{t[k]}</span></a>
         ))}</div>
       </div></li>
       <li class="stop"><div class="pt">3</div><div class="sheet body"><h3 class="display"><span>{t.p3}</span><small>7 {t.lessons}</small></h3><p>{t.p3_d}</p>
         <div class="minis">{MODEL_NAMES.map(n => lessonHref[n]
-          ? <a class="mini" href={lessonHref[n]}><canvas class="board" data-m={n} aria-hidden="true"></canvas><span>{m(n)}</span></a>
+          ? <a class="mini" href={lessonHref[n]} data-lesson={`3/${n}`}><canvas class="board" data-m={n} aria-hidden="true"></canvas><span>{m(n)}</span></a>
           : <div class="mini soon"><canvas class="board" data-m={n} aria-hidden="true"></canvas><span>{m(n)}</span><small>{t.soon}</small></div>
         )}</div>
       </div></li>
       <li class="stop later"><div class="pt">4–9</div><div class="sheet body"><h3 class="display"><span>{t.later}</span></h3><p>{t.later_d}</p></div></li>
       <li class="stop"><div class="pt">10</div><div class="sheet body"><h3 class="display"><a href={href(lang, selPath('cv'))}>{t.p10}</a><small>3 {t.lessons}</small></h3><p>{t.p10_d}</p>
-        <div class="links">{SEL.map(id => <a class="chip" href={href(lang, selPath(id))}>{sn[`n_${id}` as keyof typeof sn]}</a>)}</div></div></li>
+        <div class="links">{SEL.map(id => <a class="chip" href={href(lang, selPath(id))} data-lesson={`10/${id}`}>{sn[`n_${id}` as keyof typeof sn]}</a>)}</div></div></li>
     </ol>
   </section>
 
@@ -97,6 +108,7 @@ const REG: Array<[keyof typeof t, string]> = [
     </div>
   </section>
   <script type="application/json" id="strings" set:html={json} />
+  <script type="application/json" id="course" set:html={courseJson} />
 </Base>
 
 <style>
@@ -104,6 +116,14 @@ const REG: Array<[keyof typeof t, string]> = [
   h1 { font-size: 66px; line-height: .98; margin-bottom: 18px; }
   .lede { font-size: 19.5px; color: var(--muted); margin-bottom: 26px; }
   .ctas { display: flex; flex-wrap: wrap; gap: 12px; }
+  .cont { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "k go" "nm go" "pp go"; column-gap: 14px; align-items: center; margin-bottom: 18px; padding: 14px 18px; text-decoration: none; border-color: var(--ink); transition: transform .12s; }
+  .cont[hidden] { display: none; }
+  .cont:hover { transform: translateY(-2px); }
+  .cont .k { grid-area: k; font: 600 12px var(--mono); text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+  :global(html[dir="rtl"]) .cont .k { letter-spacing: 0; font-family: var(--body); }
+  .cont b { grid-area: nm; font-size: 22px; line-height: 1.2; }
+  .cont small { grid-area: pp; color: var(--muted); font-size: 14.5px; }
+  .cont .go { grid-area: go; width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; background: var(--hl); color: #15202b; border: 1.5px solid #d9b928; box-shadow: 0 4px 0 #c9a821; font-weight: 700; font-size: 20px; }
   .stage { padding: 10px; min-width: 0; }
   #hero { height: 380px; cursor: default; }
   .now { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; padding: 12px 6px 4px; }
@@ -140,6 +160,16 @@ const REG: Array<[keyof typeof t, string]> = [
   .mini.soon canvas, .mini.soon svg { cursor: default; opacity: .7; }
   .mini span { display: block; font-size: 13px; font-weight: 700; padding: 6px 2px 1px; line-height: 1.25; }
   .mini small { display: block; font: 500 11px var(--mono); color: var(--muted); padding: 0 2px; }
+  /* progress dots: half = in progress, full = done (painted from the learner's saved progress) */
+  .mini { position: relative; }
+  .mini[data-state="started"]::after, .mini[data-state="done"]::after { content: ""; position: absolute; top: 10px; inset-inline-end: 10px; width: 11px; height: 11px; border-radius: 50%; border: 2px solid var(--ok); background: var(--sheet); box-sizing: border-box; }
+  .mini[data-state="started"]::after { background: linear-gradient(90deg, var(--ok) 50%, var(--sheet) 50%); }
+  .mini[data-state="done"]::after { background: var(--ok); }
+  .links .chip[data-state="started"]::before, .links .chip[data-state="done"]::before, .stop h3 a[data-state="started"]::after, .stop h3 a[data-state="done"]::after { content: ""; display: inline-block; width: 9px; height: 9px; border-radius: 50%; border: 2px solid var(--ok); margin-inline-end: 6px; vertical-align: 0; box-sizing: content-box; }
+  .stop h3 a[data-state]::after { margin: 0 0 0 10px; vertical-align: middle; }
+  :global(html[dir="rtl"]) .stop h3 a[data-state]::after { margin: 0 10px 0 0; }
+  .links .chip[data-state="started"]::before, .stop h3 a[data-state="started"]::after { background: linear-gradient(90deg, var(--ok) 50%, transparent 50%); }
+  .links .chip[data-state="done"]::before, .stop h3 a[data-state="done"]::after { background: var(--ok); }
 
   .picker { padding: 28px 30px; }
   .qs { display: grid; gap: 22px; }
@@ -176,6 +206,8 @@ const REG: Array<[keyof typeof t, string]> = [
 <script>
   import { Board } from '../engine/board';
   import { RegBoard } from '../engine/regboard';
+  import { load, resume } from '../progress';
+  import { paint, watch } from '../progressui';
   import { Store, RegStore, fitModel, fitReg, MODEL_NAMES, type Model, type ModelName, type RegModelName } from '../engine';
 
   const S: Record<string, string> = JSON.parse(document.getElementById('strings')!.textContent!);
@@ -263,6 +295,21 @@ const REG: Array<[keyof typeof t, string]> = [
     if (n === 2) $('.qblock[data-q="3"]').classList.remove('off');
     renderResult();
   })));
+
+  // progress: dots on the route and "Continue where you left off"
+  const COURSE: { key: string; name: string; part: string; href: string }[] = JSON.parse(document.getElementById('course')!.textContent!);
+  function showProgress() {
+    paint();
+    const key = resume(load(), COURSE.map(c => c.key));
+    const l = COURSE.find(c => c.key === key), card = $<HTMLAnchorElement>('[data-continue]');
+    card.hidden = !l;
+    if (!l) return;
+    card.href = l.href;
+    $('[data-cont-name]').textContent = l.name;
+    $('[data-cont-part]').textContent = l.part;
+  }
+  showProgress();
+  watch(showProgress);
 
   show(0, false);
   play();

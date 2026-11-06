@@ -153,3 +153,52 @@ export const sel = {
     code_p: 'هذا هو جوهر الدفتر. افتح الدفتر كاملًا لتشغيله أو تعديله أو تنزيله. لا حاجة لتثبيت أي شيء.',
   },
 };
+
+/** Course navigation, progress, code options and the offline app. */
+export const nav = {
+  en: {
+    course: 'Course', toc: 'Course contents', close: 'Close the course menu',
+    part: 'Part {n}', count: '{d} of {n}', overall: '{d} of {n} lessons done', bar: '{p} · {d} of {n} done',
+    later: 'Parts 4–9', later_d: 'Coming later',
+    here: 'You are here', st_none: 'Not started', st_started: 'In progress', st_done: 'Done',
+    saved: 'Progress is saved in this browser only.',
+    reset: 'Reset progress', reset_q: 'Erase all your progress on this device?', reset_yes: 'Yes, erase it', cancel: 'Cancel',
+    reset_done: 'Progress erased.',
+    install: 'Install the app', install_d: 'Works offline once installed.',
+    step: 'Step {n} of 4',
+    next_h: 'Next lesson', next_part: 'Part {n} · {p}',
+    end_h: 'You reached the end of the course for now',
+    end_p: 'Parts 4–9 come later. Go back to the route to revisit any lesson.', end_cta: 'Back to the route',
+    cont: 'Continue where you left off', cont_part: 'Part {n} · {p}',
+    download: 'Download notebook (.ipynb)',
+    local_h: 'Run it on your computer (VS Code or Jupyter)',
+    local_1: 'Install Python 3 from python.org. On Windows, tick “Add python.exe to PATH”.',
+    local_2: 'Open a terminal and install the libraries:',
+    local_3: 'Open the downloaded <code>.ipynb</code> file in VS Code (with the Jupyter extension) or in Jupyter, then run the cells from top to bottom.',
+    local_net: 'The notebook reads its data from GitHub, so keep the internet on when you run it. To work fully offline, also download the <a href="{u}" target="_blank" rel="noopener">datasets folder</a> and change the URL in the notebook to the local file name.',
+  },
+  ar: {
+    course: 'الدورة', toc: 'محتويات الدورة', close: 'أغلق قائمة الدورة',
+    part: 'الجزء {n}', count: '{d} من {n}', overall: 'أنهيت {d} من {n} درسًا', bar: '{p} · أنهيت {d} من {n}',
+    later: 'الأجزاء 4–9', later_d: 'لاحقًا',
+    here: 'أنت هنا', st_none: 'لم تبدأ', st_started: 'قيد التعلّم', st_done: 'مكتمل',
+    saved: 'يُحفظ تقدّمك في هذا المتصفح فقط.',
+    reset: 'إعادة ضبط التقدّم', reset_q: 'هل تريد مسح كل تقدّمك على هذا الجهاز؟', reset_yes: 'نعم، امسحه', cancel: 'إلغاء',
+    reset_done: 'مُسح التقدّم.',
+    install: 'ثبّت التطبيق', install_d: 'يعمل دون إنترنت بعد تثبيته.',
+    step: 'الخطوة {n} من 4',
+    next_h: 'الدرس التالي', next_part: 'الجزء {n} · {p}',
+    end_h: 'وصلت إلى نهاية الدورة حاليًا',
+    end_p: 'الأجزاء 4–9 تأتي لاحقًا. عد إلى المسار لتراجع أي درس.', end_cta: 'العودة إلى المسار',
+    cont: 'تابع من حيث توقفت', cont_part: 'الجزء {n} · {p}',
+    download: 'نزّل الدفتر (<bdi>.ipynb</bdi>)',
+    local_h: 'شغّله على حاسوبك (<bdi>VS Code</bdi> أو <bdi>Jupyter</bdi>)',
+    local_1: 'ثبّت Python 3 من موقع python.org. على Windows فعّل خيار “Add python.exe to PATH”.',
+    local_2: 'افتح الطرفية (Terminal) وثبّت المكتبات:',
+    local_3: 'افتح ملف <code>.ipynb</code> الذي نزّلته في VS Code (مع إضافة Jupyter) أو في Jupyter، ثم شغّل الخلايا من الأعلى إلى الأسفل.',
+    local_net: 'يقرأ الدفتر بياناته من GitHub، لذا أبقِ الإنترنت متصلًا عند تشغيله. لتعمل دون إنترنت تمامًا، نزّل أيضًا <a href="{u}" target="_blank" rel="noopener">مجلد البيانات</a> وغيّر الرابط في الدفتر إلى اسم الملف المحلي.',
+  },
+};
+
+/** Fill `{name}` placeholders. */
+export const fill = (s: string, vars: Record<string, string | number>) => s.replace(/\{(\w+)\}/g, (_, k) => String(vars[k] ?? `{${k}}`));

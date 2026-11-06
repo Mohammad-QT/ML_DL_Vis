@@ -1,0 +1,59 @@
+---
+// Ways to run a lesson's notebook: Colab (default), download the .ipynb, or run it locally.
+// The learner's last choice (Colab or local) is remembered and shown first.
+import { fill, nav, lesson, type Lang } from '../i18n/ui';
+import { findLesson, colabUrl, githubUrl } from '../course';
+interface Props { lang: Lang; current: string }
+const { lang, current } = Astro.props;
+const t = nav[lang];
+const l = findLesson(current)!;
+const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
+const file = l.notebook.split('/').pop()!;
+const pip = `pip install pandas scikit-learn matplotlib${l.key === '10/boost' ? ' xgboost' : ''}`;
+---
+<div class="runopts" data-runopts>
+  <div class="codecta">
+    <a class="btn hl" data-run="colab" href={colabUrl(l)} target="_blank" rel="noopener"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M7 7h10v10M7 17 17 7"/></svg><span>{lesson[lang].colab}</span></a>
+    <a class="btn ghost" data-run="local" href={base + l.notebook} download={file}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg><span set:html={t.download} /></a>
+    <slot />
+  </div>
+  <details class="local" data-local>
+    <summary set:html={t.local_h} />
+    <ol>
+      <li set:html={t.local_1} />
+      <li><span set:html={t.local_2} /><pre>{pip}</pre></li>
+      <li set:html={t.local_3} />
+    </ol>
+    <p class="net" set:html={fill(t.local_net, { u: githubUrl('datasets') })} />
+  </details>
+</div>
+
+<style>
+  .codecta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 18px; }
+  .local { margin-top: 16px; border: 1.5px solid var(--rule); border-radius: 14px; background: var(--paper); padding: 0 16px; }
+  .local summary { cursor: pointer; font-weight: 700; padding: 12px 0; }
+  .local[open] summary { border-bottom: 1.5px dashed var(--rule); margin-bottom: 10px; }
+  .local ol { padding-inline-start: 22px; display: grid; gap: 8px; }
+  .local li { font-size: 15.5px; }
+  .local pre { margin-top: 6px; font-size: 13.5px; }
+  .local .net { font-size: 14.5px; color: var(--muted); margin: 12px 0 14px; }
+  .local :global(code) { font: 500 .86em var(--mono); background: var(--sheet); padding: 1px 6px; border-radius: 5px; }
+  .runopts.local-first [data-run="local"] { order: -1; }
+</style>
+
+<script>
+  import { getRun, setRun } from '../progress';
+  document.querySelectorAll<HTMLElement>('[data-runopts]').forEach(box => {
+    const colab = box.querySelector<HTMLElement>('[data-run="colab"]')!, local = box.querySelector<HTMLElement>('[data-run="local"]')!;
+    const details = box.querySelector<HTMLDetailsElement>('[data-local]')!;
+    const apply = (pref: 'colab' | 'local') => {
+      box.classList.toggle('local-first', pref === 'local');
+      colab.classList.toggle('hl', pref === 'colab'); colab.classList.toggle('ghost', pref === 'local');
+      local.classList.toggle('hl', pref === 'local'); local.classList.toggle('ghost', pref === 'colab');
+    };
+    apply(getRun());
+    colab.addEventListener('click', () => setRun('colab'));
+    local.addEventListener('click', () => { setRun('local'); details.open = true; });
+    details.addEventListener('toggle', () => { if (details.open) setRun('local'); });
+  });
+</script>

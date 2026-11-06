@@ -1,0 +1,34 @@
+---
+// The card at the end of the Code step: what comes next, and which part it belongs to.
+import { href, fill, nav, type Lang } from '../i18n/ui';
+import { nextLesson, lessonName, partName } from '../course';
+interface Props { lang: Lang; current: string }
+const { lang, current } = Astro.props;
+const t = nav[lang];
+const next = nextLesson(current);
+---
+{next
+  ? <a class="sheet nextcard" href={href(lang, next.path)}>
+      <span class="k">{t.next_h}</span>
+      <span class="nm display">{lessonName(lang, next)}</span>
+      <span class="pp">{fill(t.next_part, { n: next.part, p: partName(lang, next.part) })}</span>
+      <span class="go" aria-hidden="true"><span class="arr">→</span></span>
+    </a>
+  : <a class="sheet nextcard" href={href(lang) + '#route'}>
+      <span class="k">{t.end_cta}</span>
+      <span class="nm display">{t.end_h}</span>
+      <span class="pp">{t.end_p}</span>
+      <span class="go" aria-hidden="true"><span class="arr">→</span></span>
+    </a>}
+
+<style>
+  .nextcard { display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-areas: "k go" "nm go" "pp go"; column-gap: 16px; align-items: center;
+    margin-top: 26px; padding: 18px 22px; text-decoration: none; border-color: var(--ink); transition: transform .12s, background-color .25s; }
+  .nextcard:hover { transform: translateY(-2px); }
+  .k { grid-area: k; font: 600 12px var(--mono); text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+  :global(html[dir="rtl"]) .k { letter-spacing: 0; font-family: var(--body); }
+  .nm { grid-area: nm; font-size: 26px; line-height: 1.15; margin: 2px 0; }
+  .pp { grid-area: pp; color: var(--muted); font-size: 15px; }
+  .go { grid-area: go; width: 48px; height: 48px; border-radius: 14px; display: grid; place-items: center; background: var(--hl); color: #15202b; border: 1.5px solid #d9b928; box-shadow: 0 4px 0 #c9a821; font-size: 22px; font-weight: 700; }
+  @media (max-width: 600px) { .nm { font-size: 22px; } .nextcard { padding: 16px; } .go { width: 40px; height: 40px; } }
+</style>
