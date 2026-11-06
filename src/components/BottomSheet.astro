@@ -1,0 +1,20 @@
+---
+// A phone bottom sheet (see src/ui/dock.ts). Open it with a button carrying `data-sheet-open={id}`.
+// Hidden on wider screens, where the same controls sit in the page.
+import '../styles/dock.css';
+
+interface Props {
+  id: string; title: string; closeLabel: string;
+  /** Don't dim the page behind: for sheets you tune while watching the board. A tap outside still closes it. */
+  clear?: boolean;
+}
+const { id, title, closeLabel, clear } = Astro.props;
+---
+<div class:list={['bscrim', { clear }]}></div>
+<div class="bsheet" id={id} role="dialog" aria-labelledby={`${id}-h`}>
+  <div class="bs-head">
+    <h2 class="bs-title" id={`${id}-h`}>{title}</h2>
+    <button type="button" class="dbtn bs-x" data-sheet-close aria-label={closeLabel} title={closeLabel}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button>
+  </div>
+  <div class="bs-body"><slot /></div>
+</div>

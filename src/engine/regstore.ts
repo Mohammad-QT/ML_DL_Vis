@@ -42,7 +42,10 @@ export class RegStore {
 
   split(r: Rng = rng(randomSeed())): void { this.points.forEach(p => (p.test = r() < this.testFrac)); }
   resplit(): void { this.split(); this.emit(); }
-  add(x: number, y: number): void { this.points.push({ x, y, c: 0, test: false }); this.emit(); }
+  /** Add a training point; returns it so Undo can take it back. */
+  add(x: number, y: number): Point { const p: Point = { x, y, c: 0, test: false }; this.points.push(p); this.emit(); return p; }
+  /** Take one point out (by identity). Returns false when it was not in the data. */
+  remove(p: Point): boolean { const i = this.points.indexOf(p); if (i < 0) return false; this.points.splice(i, 1); this.emit(); return true; }
   /** Replace the data with uploaded points (already scaled to [0, 1]) and make a fresh split. */
   load(points: Sample[], seed: number = randomSeed()): void {
     this.presetName = null;

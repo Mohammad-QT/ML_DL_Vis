@@ -49,6 +49,8 @@ export const common = {
     copyright: '© 2026 Mohammad Ismael Al-Qatameen. All rights reserved.',
     site_desc: 'Learn machine learning by watching real models fit your data live. Interactive lessons, English and Arabic, with Google Colab notebooks.',
     nf_h: 'This page is not here', nf_p: 'The link may be old or mistyped. Try the home page or the course route.', nf_home: 'Go to the home page', skip: 'Skip to content',
+    undo: 'Undo', full: 'Full screen', full_exit: 'Exit full screen', close: 'Close', data_more: 'Data',
+    flip: 'Adding {c}. Tap to switch class.', tip_dock: 'Tap the board to add a point. The bar at the bottom holds the setting, the class and the data.',
   },
   ar: {
     brand: 'ML Visual', nav_course: 'الدورة', nav_pick: 'اختر خوارزمية', nav_compare: 'قارن',
@@ -79,6 +81,8 @@ export const common = {
     copyright: '© 2026 محمد إسماعيل القطامين. جميع الحقوق محفوظة.',
     site_desc: 'تعلّم تعلّم الآلة بمشاهدة نماذج حقيقية تتكيّف مع بياناتك مباشرة. دروس تفاعلية بالإنجليزية والعربية، مع دفاتر Google Colab.',
     nf_h: 'هذه الصفحة غير موجودة', nf_p: 'قد يكون الرابط قديمًا أو مكتوبًا بخطأ. جرّب الصفحة الرئيسية أو مسار الدورة.', nf_home: 'اذهب إلى الصفحة الرئيسية', skip: 'تخطَّ إلى المحتوى',
+    undo: 'تراجع', full: 'ملء الشاشة', full_exit: 'الخروج من ملء الشاشة', close: 'إغلاق', data_more: 'البيانات',
+    flip: 'تضيف الآن: {c}. المس للتبديل بين الصنفين.', tip_dock: 'المس اللوحة لإضافة نقطة. الشريط في الأسفل فيه الإعداد والصنف والبيانات.',
   },
 };
 

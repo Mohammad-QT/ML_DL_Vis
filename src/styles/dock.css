@@ -1,0 +1,94 @@
+/* Phone layout shared by the lesson Play boards (.pg) and Compare: thumb dock, bottom sheets, score HUD,
+   full-screen board. Everything here is phone-only ((max-width: 760px), (max-height: 480px));
+   desktop keeps the approved layout, so the dock, sheets and HUD stay hidden there. */
+
+.dock, .bsheet, .bscrim, .hud, .pg .tip { display: none; }
+.vh { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+/* buttons in the dock and sheets: 44px tap targets, chunky like the site's other buttons */
+.dbtn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 44px; min-width: 44px; padding: 0 13px;
+  border: 1.5px solid var(--rule); background: var(--paper); color: var(--ink); border-radius: 12px; font: 700 15px var(--body);
+  cursor: pointer; box-shadow: 0 3px 0 var(--lift); white-space: nowrap; transition: transform .12s, border-color .12s; }
+.dbtn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--lift); }
+.dbtn:hover { border-color: var(--muted); }
+.dbtn:disabled { opacity: .42; cursor: default; transform: none; }
+.dbtn[aria-pressed="true"], .dbtn.on { background: var(--ink); color: var(--sheet); border-color: var(--ink); }
+.dbtn svg { width: 19px; height: 19px; flex: none; }
+.dbtn .caret { width: 14px; height: 14px; }
+.dbtn .swatch { width: 14px; height: 14px; margin: 0; box-shadow: 0 0 0 2px var(--sheet), 0 0 0 3.5px currentColor; }
+
+@media (max-width: 760px), (max-height: 480px) {
+  /* the dock floats above the bottom edge, clear of the iPhone home bar */
+  .dock.show { display: flex; flex-direction: column; gap: 9px; position: fixed; z-index: 30;
+    inset-inline: 8px; bottom: calc(8px + env(safe-area-inset-bottom)); padding: 10px 12px 11px;
+    background: var(--sheet); border: 1.5px solid var(--rule); border-radius: 18px;
+    box-shadow: 0 5px 0 var(--lift), 0 12px 32px rgba(8, 14, 20, .22); }
+  body.docked .site-foot { padding-bottom: calc(var(--dock-h, 110px) + 26px + env(safe-area-inset-bottom)); }
+  .dk-row { display: flex; gap: 8px; align-items: center; }
+  .dk-row .grow { flex: 1; min-width: 0; }
+  .dk-param .label { display: flex; justify-content: space-between; gap: 8px; margin: 0 2px 0; }
+  .dk-param .label .sep { display: none; }
+  .dk-param .label b { color: var(--ink); font-size: 14px; }
+  .dk-param input[type="range"] { display: block; height: 30px; margin: 0; }
+  .dk-param .hint { display: none; }
+
+  .bscrim { display: block; position: fixed; inset: 0; z-index: 41; background: rgba(8, 14, 20, .3); opacity: 0; pointer-events: none; transition: opacity .2s; }
+  .bscrim.open { opacity: 1; pointer-events: auto; }
+  .bscrim.clear { background: transparent; }
+  .bsheet { display: block; position: fixed; z-index: 42; inset-inline: 0; bottom: 0; max-height: var(--sheet-max, 64dvh); overflow-y: auto; overscroll-behavior: contain;
+    background: var(--sheet); border: 1.5px solid var(--rule); border-bottom: 0; border-radius: 22px 22px 0 0;
+    box-shadow: 0 -4px 0 var(--lift), 0 -14px 40px rgba(8, 14, 20, .25);
+    padding: 8px 16px calc(18px + env(safe-area-inset-bottom));
+    transform: translateY(105%); visibility: hidden; transition: transform .26s cubic-bezier(.3, .7, .3, 1), visibility 0s linear .26s; }
+  .bsheet.open { transform: none; visibility: visible; transition: transform .26s cubic-bezier(.3, .7, .3, 1); }
+  .bs-head { display: flex; align-items: center; gap: 10px; position: sticky; top: -8px; z-index: 1; background: var(--sheet); padding: 8px 0 10px; }
+  .bs-head::before { content: ""; position: absolute; top: 0; left: 50%; width: 40px; height: 4px; margin-left: -20px; border-radius: 4px; background: var(--rule); }
+  .bs-title { flex: 1; font: 750 20px var(--display); letter-spacing: -.01em; padding-top: 6px; }
+  html[dir="rtl"] .bs-title { letter-spacing: 0; }
+  .bs-x { padding: 0; box-shadow: none; background: none; border-color: transparent; }
+  .bs-body .label { margin-top: 4px; }
+  .bs-body .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .bs-body .chip { min-height: 44px; padding: 6px 14px; font-size: 15px; }
+
+  /* score HUD: a small badge in the board's corner instead of the separate score box */
+  .hud { display: flex; position: absolute; z-index: 2; top: 12px; inset-inline-end: 12px; gap: 10px; align-items: baseline; pointer-events: none;
+    padding: 4px 9px; border-radius: 9px; border: 1.5px solid var(--rule); background: color-mix(in srgb, var(--sheet) 88%, transparent);
+    font: 600 11.5px var(--mono); color: var(--muted); text-transform: uppercase; }
+  html[dir="rtl"] .hud { text-transform: none; font-family: var(--body); }
+  .hud b { font: 700 15px var(--mono); color: var(--ink); margin-inline-start: 4px; }
+
+  /* lesson Play boards: the board pins to the top of the card, controls scroll underneath and live in the dock */
+  body .pg { display: contents; }
+  body .pg .frame { position: sticky; top: 6px; z-index: 6; padding: 6px; box-shadow: 0 -8px 0 var(--sheet), 0 5px 0 var(--lift); margin-top: 14px; }
+  body .pg .frame canvas.board { height: 45svh !important; min-height: 210px; }
+  body .pg .under, body .pg .side .scores, body .pg .side .clsbox { display: none; }
+  body .pg .side { margin-top: 16px; }
+  body .pg .pbox:not(:has(input)):has(.hint:empty) { display: none; }
+  body .pg .tip { display: block; font-size: 14px; color: var(--muted); line-height: 1.45; }
+  body .pg .side .databox { display: none; }
+  body .bsheet .databox { display: block; background: none; padding: 0; }
+  body .bsheet .databox > .label { display: none; }
+  body .bsheet .databox + .databox { margin-top: 14px; }
+  body .bsheet [data-role="undo"] { display: none; }
+}
+
+/* a phone held sideways: one dock row, a board that fills the height left over */
+@media (max-height: 480px) {
+  .dock.show { flex-direction: row; align-items: center; inset-inline: 10px; padding: 7px 10px; }
+  .dock .dk-param { flex: 1; min-width: 0; }
+  .bsheet { --sheet-max: 86dvh; max-width: 560px; margin-inline: auto; }
+  body .pg .frame canvas.board { height: calc(100svh - var(--dock-h, 64px) - 44px) !important; min-height: 160px; }
+}
+
+/* full-screen board (button in the dock) */
+html.mlv-full, html.mlv-full body { overflow: hidden; }
+body .pg.full { display: flex !important; flex-direction: column; position: fixed; inset: 0; z-index: 35; margin: 0; background: var(--paper);
+  padding: calc(8px + env(safe-area-inset-top)) calc(8px + env(safe-area-inset-right)) calc(var(--dock-h, 64px) + 26px + env(safe-area-inset-bottom)) calc(8px + env(safe-area-inset-left)); }
+body .pg.full .frame { position: relative; top: 0; flex: 1; min-height: 0; display: flex; flex-direction: column; margin: 0; }
+body .pg.full .frame canvas.board { flex: 1; height: auto !important; min-height: 0; }
+body .pg.full .side { display: none; }
+
+/* the undo arrow points backwards in reading order */
+html[dir="rtl"] [data-role="undo"] svg { transform: scaleX(-1); }
+
+.dbtn[hidden] { display: none; }
