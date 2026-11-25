@@ -83,10 +83,11 @@ You can also upload your own CSV on the Compare page. The file stays in your bro
 | **2 · Regression** | Simple linear · Multiple linear · Polynomial · SVR · Decision tree · Random forest |
 | **3 · Classification** | Logistic regression · K-NN · SVM · Kernel SVM · Naive Bayes · Decision tree · Random forest |
 | **4 · Clustering** | K-Means · Hierarchical clustering |
+| **6 · Reinforcement learning** | Upper confidence bound · Thompson sampling |
 | **9 · Dimensionality reduction** | PCA · LDA · Kernel PCA |
 | **10 · Pick the best model** | k-fold cross-validation · Grid search · Gradient boosting (XGBoost) |
 
-Parts 5 to 8 (association rules, reinforcement learning, NLP and deep learning) come later.
+Parts 5, 7 and 8 (association rules, NLP and deep learning) come later.
 
 ## How a lesson works
 

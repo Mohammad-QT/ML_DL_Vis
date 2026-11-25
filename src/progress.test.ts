@@ -138,24 +138,28 @@ describe('storage', () => {
 });
 
 describe('course', () => {
-  it('has 26 lessons with unique keys and a notebook each', () => {
-    expect(LESSONS).toHaveLength(26);
-    expect(new Set(KEYS).size).toBe(26);
+  it('has 28 lessons with unique keys and a notebook each', () => {
+    expect(LESSONS).toHaveLength(28);
+    expect(new Set(KEYS).size).toBe(28);
     for (const l of LESSONS) expect(l.notebook).toMatch(/^notebooks\/.+\.ipynb$/);
   });
   it('runs part by part, with no next lesson after the last', () => {
-    expect(PARTS.map(p => p.id)).toEqual(['0', '1', '2', '3', '4', '9', '10']);
+    expect(PARTS.map(p => p.id)).toEqual(['0', '1', '2', '3', '4', '6', '9', '10']);
     expect(nextLesson('0/start')?.key).toBe('1/missing');
     expect(nextLesson('2/forest')?.key).toBe('3/logistic');
     expect(nextLesson('3/forest')?.key).toBe('4/kmeans');
     expect(nextLesson('4/kmeans')?.key).toBe('4/hierarchical');
-    expect(nextLesson('4/hierarchical')?.key).toBe('9/pca');
+    expect(nextLesson('4/hierarchical')?.key).toBe('6/ucb');
+    expect(nextLesson('6/ucb')?.key).toBe('6/thompson');
+    expect(nextLesson('6/thompson')?.key).toBe('9/pca');
     expect(nextLesson('9/pca')?.key).toBe('9/lda');
     expect(nextLesson('9/lda')?.key).toBe('9/kernel-pca');
     expect(nextLesson('9/kernel-pca')?.key).toBe('10/cv');
     expect(previousLesson('4/kmeans')?.key).toBe('3/forest');
     expect(previousLesson('4/hierarchical')?.key).toBe('4/kmeans');
-    expect(previousLesson('9/pca')?.key).toBe('4/hierarchical');
+    expect(previousLesson('6/ucb')?.key).toBe('4/hierarchical');
+    expect(previousLesson('6/thompson')?.key).toBe('6/ucb');
+    expect(previousLesson('9/pca')?.key).toBe('6/thompson');
     expect(previousLesson('10/cv')?.key).toBe('9/kernel-pca');
     expect(nextLesson('10/boost')).toBeUndefined();
   });

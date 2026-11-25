@@ -78,3 +78,13 @@ on the Compare page serve them. Keep the copies in sync if you change the origin
 | Columns | `x`, `y` (coordinates on the same scale; no group labels) |
 | Source | Original to ML Visual. Generated in JavaScript with a Park–Miller generator (seed 2026) and Box–Muller normal draws (standard deviation 0.045) around `(0.21, 0.29)`, `(0.75, 0.28)`, and `(0.51, 0.74)`. Rounded to five decimals and shuffled with the same generator. |
 | License | CC0 1.0 (public domain dedication) |
+
+## `ad_clicks.csv`
+
+| | |
+|---|---|
+| Used by | `notebooks/6-rl/*.ipynb` |
+| Rows | 10,000 simulated rounds, with independent Bernoulli outcomes |
+| Columns | `ad_1` through `ad_5`: `1` for a click, `0` otherwise. A policy may read only the cell for the ad it chose on that round. |
+| Source | Original to ML Visual. Generated with NumPy using `np.random.default_rng(2026).random((10_000, 5)) < [0.12, 0.31, 0.75, 0.47, 0.24]`. The hidden rates, in column order, are 12%, 31%, 75%, 47%, and 24%. |
+| License | CC0 1.0 (public domain dedication) |

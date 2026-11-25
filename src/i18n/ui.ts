@@ -184,6 +184,19 @@ export const dimred = {
   },
 } as const;
 
+export const rl = {
+  en: {
+    part: 'Reinforcement learning', kicker: 'Part 6 · Reinforcement learning · lesson {n} of 2',
+    n_ucb: 'Upper confidence bound', n_thompson: 'Thompson sampling',
+    code_p: 'Replay 10,000 rounds from the example CSV. Open the notebook to compare policies and plot the results.',
+  },
+  ar: {
+    part: 'التعلّم المعزّز', kicker: 'الجزء 6 · التعلّم المعزّز · الدرس {n} من 2',
+    n_ucb: 'الحد الأعلى للثقة', n_thompson: 'أخذ العينات بطريقة تومبسون',
+    code_p: 'أعِد تشغيل 10,000 جولة من ملف البيانات. افتح الدفتر لمقارنة السياسات ورسم النتائج.',
+  },
+} as const;
+
 /** Course navigation, progress, code options and the offline app. */
 export const nav = {
   en: {
