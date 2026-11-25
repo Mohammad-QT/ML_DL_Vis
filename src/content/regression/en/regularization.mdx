@@ -1,0 +1,58 @@
+---
+id: regularization
+model: polynomial
+short: Ridge and Lasso
+title: Ridge and Lasso regularisation
+lede: Penalize large weights so the curve follows the pattern instead of the noise.
+figure: { preset: sine, seed: 16, caption: 'A high-degree curve with a Ridge penalty' }
+steps:
+  - 'Turn x into polynomial features up to the chosen degree.'
+  - 'Scale each feature using the training points so the penalty treats the weights on the same footing.'
+  - 'Fit the curve while penalizing large weights. Ridge adds their squares; Lasso adds their absolute values.'
+  - 'Raise <b>alpha</b> to make the penalty stronger, and compare the error on training and test points.'
+caution:
+  h: Too much penalty can hide the pattern
+  p: 'A larger alpha can make the curve nearly flat. Judge it on new points, not just on how smooth it looks.'
+play:
+  p: 'Start at degree 9 with alpha at zero. Raise alpha slightly and watch the ends of the curve and the test error. Switch to Lasso and look for weights on the zero line. Then try a very large alpha.'
+  preset: sine
+  seed: 16
+ui:
+  degree: Degree
+  penalty: Penalty
+  ridge: Ridge
+  lasso: Lasso
+  alpha: Alpha
+  curve: Regression curve
+  weights: Weights by feature degree
+  legend: Rings are held-out test points.
+  zeros: Weights exactly zero
+  train: Train MSE
+  test: Test MSE
+quiz:
+  - q: Which penalty can remove a feature by giving it a weight of exactly zero?
+    a: ['Lasso', 'Ridge', 'Both always remove features']
+    correct: 0
+    right: Right. Lasso can set weights to zero, while Ridge usually only shrinks them.
+    wrong: Lasso can give some weights an exact zero. Ridge generally makes them smaller without removing them.
+  - q: What happens at alpha zero?
+    a: ['The polynomial degree drops to one', 'The penalty disappears', 'The intercept is forced to zero']
+    correct: 1
+    right: Right. The fit then minimizes training error alone, just like ordinary least squares.
+    wrong: Alpha zero turns the penalty off. It does not change the polynomial degree.
+code: |
+  from sklearn.pipeline import make_pipeline
+  from sklearn.preprocessing import PolynomialFeatures, StandardScaler
+  from sklearn.linear_model import Ridge, Lasso
+
+  alpha = 0.01
+  for model in (Ridge(alpha=alpha * len(X_train)), Lasso(alpha=alpha)):
+      regressor = make_pipeline(PolynomialFeatures(9, include_bias=False),
+                                StandardScaler(), model)
+      regressor.fit(X_train, y_train)
+      y_pred = regressor.predict(X_test)
+compare: polynomial
+---
+A bendy curve can fit the training points closely but swing away from new points. <mark>Regularisation</mark> adds a cost for large weights. This gives the fit a reason to give up a little training accuracy if it can use smaller weights.
+
+The board uses scaled Chebyshev polynomial features, a more numerically stable way to build a polynomial. Each bar shows the weight on one scaled feature, not the curve’s intercept. Both errors are <b>mean squared errors</b>: smaller is better.

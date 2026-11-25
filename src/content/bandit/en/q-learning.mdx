@@ -1,0 +1,96 @@
+---
+id: q-learning
+short: "Q-learning"
+title: "Q-learning"
+lede: "Help an agent cross a grid. It starts without a map and learns which way to move from rewards."
+figure:
+  caption: "After training, arrows show the best known move in each visited cell. Green shows positive expected return and pink shows negative."
+steps_h: "How Q-learning improves a move"
+steps:
+  - "Start with four scores in each cell: one for each direction. Set them all to zero."
+  - "Usually pick the highest-scoring move. With probability epsilon, pick a random move instead."
+  - "Use the reward and the best score in the next cell to update the score for the move you just made."
+  - "Start a new episode when the agent reaches the goal, falls into a pit, or takes 72 steps."
+caution:
+  h: "A short episode is not always a win"
+  p: "A pit can end an episode faster than the goal does. Look at the outcome as well as the step count. If you block every route, the step cap still ends each episode."
+play:
+  p: "Train one episode and watch the agent move. Then train 100 more and compare the arrows and the steps chart. Click a cell to toggle a wall; changing the map clears what the agent learned."
+  p_touch: "Train one episode and watch the agent move. Then train 100 more and compare the arrows and the steps chart. Tap a cell to toggle a wall; changing the map clears what the agent learned."
+ui:
+  legend: "○ Start · +1 goal · −1 pit · ■ wall. Each other move costs 0.04. The dot marks the agent."
+  epsilon: "Exploration (ε)"
+  rate: "Learning rate"
+  discount: "Discount"
+  train1: "Train 1 episode"
+  train100: "Train 100 episodes"
+  reset: "Reset"
+  ready: "Ready to train."
+  edited: "Map changed. Training starts over."
+  running: "Replaying the episode…"
+  result: "Episode {total} · {steps} steps · {outcome}"
+  outcome_goal: "Reached the goal"
+  outcome_pit: "Fell into a pit"
+  outcome_cap: "Reached the step limit"
+  chart: "Steps per episode"
+  chartHint: "Up to 72 steps on the vertical axis. Recent episodes run left to right. The thicker line averages the last 10 episodes."
+  open: "Open"
+  wall: "Wall"
+  start: "Start"
+  goal: "Goal"
+  pit: "Pit"
+  up: "Up"
+  right: "Right"
+  down: "Down"
+  left: "Left"
+  value: "Value"
+  agent: "Agent"
+quiz:
+  - q: "What happens more often when you raise epsilon?"
+    a: ["The agent tries a random move", "The goal moves", "Future rewards count more"]
+    correct: 0
+    right: "Epsilon is the chance of taking a random move instead of the best known one."
+    wrong: "Epsilon changes how often the agent explores, not the rewards or the map."
+  - q: "Which score does the agent update after moving right?"
+    a: ["Every score in the next cell", "The right-move score in the cell it left", "The right-move score in every cell"]
+    correct: 1
+    right: "The next cell helps set the target, but only the move just taken changes."
+    wrong: "Think about which cell and action produced the new experience."
+code: |
+  import numpy as np
+  from sklearn.metrics import mean_absolute_error
+
+  grid = ["......", ".##.X.", "...#..", ".X.#..", "..#...", "S....G"]
+  moves = [(-1, 0), (0, 1), (1, 0), (0, -1)]
+  rng = np.random.default_rng(2026)
+  q = np.zeros((6, 6, 4))
+  steps, goal_steps = [], []
+
+  for episode in range(400):
+      row, col = 5, 0
+      for count in range(1, 73):
+          values = q[row, col]
+          best = np.flatnonzero(values == values.max())
+          action = rng.integers(4) if rng.random() < .2 else rng.choice(best)
+          dr, dc = moves[action]
+          nr, nc = row + dr, col + dc
+          if not (0 <= nr < 6 and 0 <= nc < 6) or grid[nr][nc] == "#":
+              nr, nc = row, col
+          tile = grid[nr][nc]
+          reward = {"G": 1, "X": -1}.get(tile, -.04)
+          terminal = tile in "GX"
+          future = 0 if terminal else q[nr, nc].max()
+          q[row, col, action] += .5 * (reward + .95 * future - values[action])
+          row, col = nr, nc
+          if terminal:
+              break
+      steps.append(count)
+      if tile == "G":
+          goal_steps.append(count)
+
+  recent = goal_steps[-30:]
+  print(mean_absolute_error([5] * len(recent), recent))
+---
+A bandit choice ends with a reward. A move in a grid also changes where the agent will be next. The agent may spend several moves going around a wall before it gets the reward at the goal.
+
+Q-learning keeps a <mark>score for every cell and move</mark>. It updates one score at a time: it nudges the score toward the reward it just got plus the best score it sees ahead. The learning rate controls the size of that nudge. The discount controls how much future rewards count. Reaching a pit or the goal ends the episode, so there is no future score to add.

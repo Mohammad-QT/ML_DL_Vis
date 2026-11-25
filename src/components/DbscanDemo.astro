@@ -1,0 +1,89 @@
+---
+import { dbscan } from '../engine/dbscan';
+import { DBSCAN_INITIAL, DBSCAN_MARKS, DBSCAN_PRESETS, DBSCAN_SIZE, dbscanInk, dbscanPoints } from '../clustering/dbscan';
+import type { Lang } from '../i18n/ui';
+
+interface Props { lang: Lang; ui: Record<string, string>; figure?: boolean }
+const { lang, ui, figure = false } = Astro.props;
+const { preset, eps, minPts } = DBSCAN_INITIAL;
+const points = dbscanPoints(preset);
+const result = dbscan(points, eps, minPts);
+const integer = new Intl.NumberFormat(lang);
+const decimal = new Intl.NumberFormat(lang, { minimumFractionDigits: 2 });
+const grid = Array.from({ length: 9 }, (_, index) => (index + 1) * DBSCAN_SIZE / 10)
+  .map(offset => `M${offset} 0V${DBSCAN_SIZE}M0 ${offset}H${DBSCAN_SIZE}`).join('');
+---
+<div class:list={['dbscan-demo', { figure }]} data-dbscan={figure ? undefined : ''} data-dbscan-figure={figure ? '' : undefined} data-dbscan-lang={lang}>
+  {!figure && <div class="controls">
+    <label>{ui.preset}
+      <select data-dbscan-preset>
+        {DBSCAN_PRESETS.map(id => <option value={id} selected={id === preset}>{ui[id]}</option>)}
+      </select>
+    </label>
+    <label>{ui.eps} <input type="range" min=".02" max=".30" step=".01" value={eps} dir="ltr" data-dbscan-eps />
+      <output data-dbscan-eps-value>{decimal.format(eps)}</output>
+    </label>
+    <label>{ui.minpts} <input type="range" min="2" max="12" step="1" value={minPts} dir="ltr" data-dbscan-minpts />
+      <output data-dbscan-minpts-value>{integer.format(minPts)}</output>
+    </label>
+    <button class="btn ghost" type="button" data-dbscan-reset>{ui.reset}</button>
+  </div>}
+  <div class="plots">
+    <svg class="board" viewBox={`0 0 ${DBSCAN_SIZE} ${DBSCAN_SIZE}`} data-dbscan-board
+      role="img" aria-label={figure ? ui.figure_board : ui.board} tabindex={figure ? undefined : 0}>
+      <path class="grid" d={grid}></path>
+      {!figure && <circle class="radius" cx="0" cy="0" r="0" data-dbscan-hidden data-dbscan-radius></circle>}
+      <g data-dbscan-marks>
+        {points.map((point, index) => {
+          const type = result.types[index];
+          const color = dbscanInk(result.labels[index]);
+          return <path d={DBSCAN_MARKS[type]} transform={`translate(${point.x * DBSCAN_SIZE} ${point.y * DBSCAN_SIZE})`}
+            data-dbscan-type={type} fill={type === 'core' ? color : type === 'border' ? 'var(--sheet)' : 'none'}
+            stroke={type === 'core' ? 'var(--sheet)' : color}></path>;
+        })}
+      </g>
+    </svg>
+    {!figure && <div class="key">
+      <div class="state" role="status">
+        <div>{ui.clusters}: <b data-dbscan-clusters>{integer.format(result.count)}</b></div>
+        <div>{ui.noise_count}: <b data-dbscan-noise>{integer.format(result.noise)}</b></div>
+      </div>
+      <ul class="muted">
+        {Object.entries(DBSCAN_MARKS).map(([type, path]) => <li>
+          <svg viewBox="-6 -6 12 12" aria-hidden="true">
+            <path d={path} fill={type === 'core' ? 'var(--a)' : 'none'} stroke={type === 'noise' ? 'var(--muted)' : 'var(--a)'}></path>
+          </svg>
+          {ui[type]}
+        </li>)}
+      </ul>
+    </div>}
+  </div>
+</div>
+
+<style>
+  .plots { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 14px; margin-top: 12px; align-items: start; }
+  .figure .plots { display: block; margin: 0; }
+  .board { display: block; width: 100%; height: auto; aspect-ratio: 1; border: 1.5px solid var(--rule); background: var(--sheet); }
+  .figure .board { cursor: default; }
+  .dbscan-demo:not(.figure) .board { cursor: crosshair; touch-action: none; }
+  .grid { fill: none; stroke: var(--muted); opacity: .15; }
+  .radius { fill: var(--a); fill-opacity: .1; stroke: var(--ink); stroke-dasharray: 4 3; }
+  .radius[data-dbscan-hidden] { display: none; }
+  .controls { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+  .controls label { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+  .controls .btn { padding: 6px 12px; font-size: 14px; }
+  .controls select { color: var(--ink); background: var(--sheet); border: 1px solid var(--rule); border-radius: 7px; padding: 5px; font: inherit; }
+  input { width: 96px; accent-color: var(--a); }
+  output, .state { font: 600 13px var(--mono); }
+  .state { display: flex; flex-wrap: wrap; gap: 6px 16px; }
+  .key { background: var(--paper); border: 1.5px solid var(--rule); border-radius: 12px; padding: 10px; min-width: 0; }
+  ul { display: flex; flex-wrap: wrap; list-style: none; margin: 8px 0 0; padding: 0; gap: 6px 10px; }
+  li { display: flex; align-items: center; gap: 3px; }
+  li svg { width: 16px; }
+  @media (max-width: 650px) { .plots { grid-template-columns: minmax(0, 1fr); } }
+</style>
+
+<script>
+  import { mountDbscan } from '../clustering/dbscan';
+  document.querySelectorAll<HTMLElement>('[data-dbscan]').forEach(mountDbscan);
+</script>

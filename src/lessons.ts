@@ -15,15 +15,15 @@ export const prepPath = (id: PrepId) => (id === 'start' ? 'learn/0-start/' : `le
 export const prepNotebookUrl = (id: PrepId) =>
   `https://colab.research.google.com/github/Mohammad-QT/ML_DL_Vis/blob/main/notebooks/${id === 'start' ? '0-start/hello' : `1-data/${id}`}.ipynb`;
 
-/** The 6 regression lessons in course order. `multiple` has no board: its Play tab is a small feature-weights interactive. */
-export const REGRESSION = ['linear', 'multiple', 'polynomial', 'svr', 'tree', 'forest'] as const;
+/** Regression lessons in course order. */
+export const REGRESSION = ['linear', 'multiple', 'polynomial', 'svr', 'tree', 'forest', 'gradient-descent', 'regularization'] as const;
 export type RegId = (typeof REGRESSION)[number];
 
 export const regPath = (id: RegId) => `learn/2-regression/${id}/`;
 export const regNotebookUrl = (id: RegId) =>
   `https://colab.research.google.com/github/Mohammad-QT/ML_DL_Vis/blob/main/notebooks/2-regression/${id}.ipynb`;
 
-export const CLUSTERING = ['kmeans', 'hierarchical'] as const;
+export const CLUSTERING = ['kmeans', 'hierarchical', 'dbscan'] as const;
 export type ClusterId = (typeof CLUSTERING)[number];
 export const clusterPath = (id: ClusterId) => `learn/4-clustering/${id}/`;
 
@@ -35,8 +35,8 @@ export const DIMRED = ['pca', 'lda', 'kernel-pca'] as const;
 export type DimredId = (typeof DIMRED)[number];
 export const dimredPath = (id: DimredId) => `learn/9-dimred/${id}/`;
 
-/** The 3 model-selection lessons (Part 10), in course order. They live under `learn/10-selection/`. */
-export const SELECTION = ['cv', 'grid', 'boost'] as const;
+/** Model-selection lessons (Part 10), in course order. They live under `learn/10-selection/`. */
+export const SELECTION = ['metrics', 'cv', 'grid', 'boost'] as const;
 export type SelId = (typeof SELECTION)[number];
 
 export const selPath = (id: SelId) => `learn/10-selection/${id}/`;

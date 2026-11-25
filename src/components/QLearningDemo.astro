@@ -1,0 +1,86 @@
+---
+import { DEFAULT_TRAINING, gridWorld } from '../engine/q-learning';
+import type { Lang } from '../i18n/ui';
+
+interface Props { lang: Lang; ui: Record<string, string>; figure?: boolean }
+const { lang, ui, figure = false } = Astro.props;
+const world = gridWorld();
+if (figure) for (let episode = 0; episode < 250; episode++) world.episode(DEFAULT_TRAINING);
+const arrows = ['↑', '→', '↓', '←'];
+const marks = { start: '○', goal: '+1', pit: '−1', wall: '■', open: '' };
+const settings = [
+  { key: 'epsilon', min: 0, max: 1 },
+  { key: 'rate', min: 0.05, max: 1 },
+  { key: 'discount', min: 0, max: 1 },
+] as const;
+const number = new Intl.NumberFormat(lang, { maximumFractionDigits: 2 });
+---
+<div class="q-world" data-q-world={figure ? undefined : ''} data-q-lang={lang} data-q-ui={JSON.stringify(ui)}>
+  <div class="q-grid" dir="ltr" style={`--columns:${world.width}`}>
+    {world.cells.map((cell, index) => {
+      const action = world.bestAction(index);
+      const value = world.visited[index] ? world.table[index][action] : 0;
+      const tint = value ? `--q-tint:${Math.round(Math.min(1, Math.abs(value)) * 55)}%;--q-color:var(${value < 0 ? '--b' : '--ok'})` : undefined;
+      return figure ? (
+        <span class="q-cell" data-q-tile={cell} style={tint} aria-hidden="true">
+          {marks[cell]}{world.visited[index] && arrows[action]}
+        </span>
+      ) : (
+        <button type="button" class="q-cell" data-q-cell={index} data-q-tile={cell} disabled={cell !== 'open' && cell !== 'wall'}>
+          <span data-q-mark>{marks[cell]}</span><span data-q-arrow></span>
+        </button>
+      );
+    })}
+  </div>
+  {!figure && <>
+    <p class="muted q-hint">{ui.legend}</p>
+    <div class="q-settings">
+      {settings.map(({ key, min, max }) => (
+        <label>
+          <span>{ui[key]}: <output data-q-output={key}>{number.format(DEFAULT_TRAINING[key])}</output></span>
+          <input type="range" dir="ltr" min={min} max={max} step="0.05" value={DEFAULT_TRAINING[key]} data-q-setting={key} />
+        </label>
+      ))}
+    </div>
+    <div class="q-actions">
+      <button type="button" class="btn" data-q-train="1">{ui.train1}</button>
+      <button type="button" class="btn ghost" data-q-train="100">{ui.train100}</button>
+      <button type="button" class="btn ghost" data-q-reset>{ui.reset}</button>
+    </div>
+    <p class="q-status" data-q-status role="status">{ui.ready}</p>
+    <h3 class="display">{ui.chart}</h3>
+    <p class="muted q-hint">{ui.chartHint}</p>
+    <svg data-q-chart direction="ltr" viewBox="0 0 360 110" role="img" aria-label={ui.chart}>
+      <path d="M 8 8 V 102 H 352" stroke="var(--rule)" fill="none" />
+      <polyline data-q-steps stroke="var(--a)" stroke-opacity=".45" fill="none" />
+      <polyline data-q-average stroke="var(--a)" stroke-width="2" fill="none" />
+      <circle data-q-latest r="2.5" fill="var(--a)" visibility="hidden" />
+    </svg>
+  </>}
+</div>
+
+<style>
+  .q-world { min-inline-size: 0; }
+  .q-grid { display: grid; grid-template-columns: repeat(var(--columns), minmax(0, 1fr)); gap: 3px; max-inline-size: 360px; margin-inline: auto; }
+  .q-cell { position: relative; display: flex; align-items: center; justify-content: center; gap: 2px; min-inline-size: 0; aspect-ratio: 1; border: 1.5px solid var(--rule); border-radius: 6px; padding: 0; color: var(--ink); background: color-mix(in srgb, var(--q-color, var(--ok)) var(--q-tint, 0%), var(--paper)); font: 600 clamp(.8rem, 3vw, 1.2rem) var(--mono); }
+  button.q-cell { cursor: pointer; touch-action: manipulation; }
+  button.q-cell:disabled { cursor: default; opacity: 1; }
+  .q-cell[data-q-tile="wall"] { background: var(--rule); color: var(--muted); }
+  .q-cell[data-q-tile="goal"] { color: var(--ok); }
+  .q-cell[data-q-tile="pit"] { color: var(--b); }
+  .q-cell[data-q-agent] { box-shadow: inset 0 0 0 2px var(--a); }
+  .q-cell[data-q-agent]::after { content: ''; position: absolute; top: 4px; left: 4px; width: 6px; height: 6px; border-radius: 50%; background: var(--a); }
+  .q-settings { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 148px), 1fr)); gap: 8px 16px; margin-block: 12px; }
+  .q-settings label, .q-settings input { display: block; min-inline-size: 0; }
+  .q-settings input { inline-size: 100%; min-height: 36px; margin: 0; accent-color: var(--a); }
+  .q-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+  .q-actions button { min-height: 44px; white-space: normal; }
+  .q-hint, .q-status { margin-block: 10px; }
+  .q-status { font-weight: bold; }
+  .q-world svg { display: block; inline-size: 100%; max-inline-size: 460px; background: var(--paper); border: 1.5px solid var(--rule); border-radius: 8px; }
+</style>
+
+<script>
+  import { mountQLearning } from '../rl/q-learning';
+  document.querySelectorAll<HTMLElement>('[data-q-world]').forEach(mountQLearning);
+</script>

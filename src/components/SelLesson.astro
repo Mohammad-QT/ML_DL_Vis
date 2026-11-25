@@ -9,14 +9,17 @@ import CodeOptions from './CodeOptions.astro';
 import NextLesson from './NextLesson.astro';
 import Board from './Board.astro';
 import SelDemo from './SelDemo.astro';
+import MetricsDemo from './MetricsDemo.astro';
 import ClusterDemo from './ClusterDemo.astro';
+import DbscanDemo from './DbscanDemo.astro';
 import DimredDemo from './DimredDemo.astro';
 import RulesDemo from './RulesDemo.astro';
 import RulesFigure from './RulesFigure.astro';
 import BanditDemo from './BanditDemo.astro';
+import QLearningDemo from './QLearningDemo.astro';
 import NlpDemo from './NlpDemo.astro';
-import { href, common, lesson, cluster as clusterText, dimred as dimredText, rules as rulesText, rl as rlText, nlp as nlpText, sel as selText, type Lang } from '../i18n/ui';
-import { PARTS, lessonName, previousLesson } from '../course';
+import { href, common, extras, lesson, cluster as clusterText, dimred as dimredText, rules as rulesText, rl as rlText, nlp as nlpText, sel as selText, type Lang } from '../i18n/ui';
+import { PARTS, findLesson, lessonName, previousLesson } from '../course';
 
 interface Props { lang: Lang; entry: CollectionEntry<'selection'> | CollectionEntry<'clustering'> | CollectionEntry<'dimred'> | CollectionEntry<'rules'> | CollectionEntry<'bandit'> | CollectionEntry<'nlp'> }
 const { lang, entry } = Astro.props;
@@ -32,7 +35,10 @@ const pt = clustering ? clusterText[lang] : rules ? rulesText[lang] : bandit ? r
 const fill = (s: string, vars: Record<string, string | number>) => s.replace(/\{(\w+)\}/g, (_, k) => String(vars[k]));
 const partId = clustering ? '4' : rules ? '5' : bandit ? '6' : nlp ? '7' : dimred ? '9' : '10';
 const key = `${partId}/${d.id}`;
-const n = PARTS.find(part => part.id === partId)!.lessons.findIndex(item => item.key === key) + 1;
+const partLessons = PARTS.find(part => part.id === partId)!.lessons;
+const n = partLessons.findIndex(item => item.key === key) + 1;
+const extra = findLesson(key)?.extra;
+const extraText = extras[lang];
 const prev = previousLesson(key);
 const steps = [t.s1, t.s2, t.s3, t.s4];
 const hl = (code: string) => code.replace(/&/g, '&amp;').replace(/</g, '&lt;')
@@ -46,15 +52,15 @@ const play = d.play;
 
   <section class="hero">
     <div>
-      <div class="kicker">{fill(pt.kicker, { n })}</div>
+      <div class="kicker">{fill(pt.kicker, { n, total: partLessons.length })}</div>
       <h1 class="display" set:html={d.title} />
       <p class="lede">{d.lede}</p>
     </div>
     <figure class="sheet fp">
       {entry.collection === 'clustering'
-        ? <ClusterDemo demo={entry.data.id} ui={entry.data.ui} figure />
+        ? entry.data.id === 'dbscan' ? <DbscanDemo lang={lang} ui={entry.data.ui} figure /> : <ClusterDemo demo={entry.data.id} ui={entry.data.ui} figure />
         : entry.collection === 'bandit'
-          ? <BanditDemo lang={lang} demo={entry.data.id} ui={entry.data.ui} figure />
+          ? entry.data.id === 'q-learning' ? <QLearningDemo lang={lang} ui={entry.data.ui} figure /> : <BanditDemo lang={lang} demo={entry.data.id} ui={entry.data.ui} figure />
         : entry.collection === 'dimred'
           ? <DimredDemo lang={lang} demo={entry.data.id} ui={entry.data.ui} figure />
         : entry.collection === 'rules'
@@ -91,16 +97,16 @@ const play = d.play;
     <h2 class="display">{t.play_h}</h2>
     <p class="muted read"><span class="on-mouse">{play.p}</span><span class="on-touch">{play.p_touch ?? play.p}</span></p>
     {entry.collection === 'clustering'
-      ? <ClusterDemo demo={entry.data.id} ui={entry.data.ui} />
+      ? entry.data.id === 'dbscan' ? <DbscanDemo lang={lang} ui={entry.data.ui} /> : <ClusterDemo demo={entry.data.id} ui={entry.data.ui} />
       : entry.collection === 'bandit'
-        ? <BanditDemo lang={lang} demo={entry.data.id} ui={entry.data.ui} />
+        ? entry.data.id === 'q-learning' ? <QLearningDemo lang={lang} ui={entry.data.ui} /> : <BanditDemo lang={lang} demo={entry.data.id} ui={entry.data.ui} />
       : entry.collection === 'dimred'
         ? <DimredDemo lang={lang} demo={entry.data.id} ui={entry.data.ui} />
       : entry.collection === 'rules'
         ? <RulesDemo lang={lang} demo={entry.data.id} />
         : entry.collection === 'nlp'
           ? <NlpDemo lang={lang} demo={entry.data.id} ui={entry.data.ui} />
-          : <SelDemo lang={lang} demo={entry.data.id} ui={entry.data.ui} />}
+          : entry.data.id === 'metrics' ? <MetricsDemo lang={lang} ui={entry.data.ui} /> : <SelDemo lang={lang} demo={entry.data.id} ui={entry.data.ui} />}
     <div class="navrow"><button class="btn ghost" data-goto="0"><span class="arr">←</span> <span>{t.s1}</span></button><button class="btn" data-goto="2"><span>{t.s3}</span> <span class="arr">→</span></button></div>
   </section>
 
@@ -121,7 +127,7 @@ const play = d.play;
   <section class="sheet card" role="tabpanel">
     <div class="read">
       <h2 class="display">{t.code_h}</h2>
-      <p class="muted">{pt.code_p}</p>
+      <p class="muted">{extra === 'q-learning' ? extraText.qCode : pt.code_p}</p>
 <pre set:html={hl(d.code)} />
       <CodeOptions lang={lang} current={key}></CodeOptions>
     </div>
