@@ -1,0 +1,32 @@
+---
+id: "sentiment"
+short: "Sentiment classifier"
+title: "Train a sentiment classifier"
+lede: "Turn reviews into counts and teach Naive Bayes to predict “liked it” or “didn’t like it.”"
+figure: {"caption":"Illustration: smooth pushes toward liked it, while burnt pushes the other way."}
+steps_h: "How the classifier learns"
+steps: ["Split the reviews once into training and test sets. Build the vocabulary from training reviews only.","For each class, tally the training words. Add one to every word’s tally so an unseen word does not get zero probability.","For a new review, combine the evidence from its word counts with how common each class is.","Measure accuracy on the held-out reviews. The confusion matrix shows which mistakes the model makes."]
+caution: {"h":"A strong prediction can still be wrong","p":"“Not good” still contains “good”. The model sees each word separately. These reviews are fictional; the test score does not tell you how the model will do on real café reviews."}
+play: {"p":"Type an English review or tap an example. Change the settings to retrain on the same training reviews and compare accuracy on the same test reviews."}
+ui: {"input":"Your review (English)","try":"Try to fool it: start with “Not good.” Then compare the last two examples. Can it tell which item you liked?","stop":"Remove stop words","stem":"Strip suffixes","vocab":"Vocabulary size","empty":"—","liked":"Liked it","disliked":"Didn’t like it","prediction":"Prediction: {label} · {probability}","prior":"No vocabulary words found. From class frequency alone: {label} · {probability}","legend":"Green (+) pushes toward liked it; red (−) pushes toward didn’t like it. The number shows the strength per occurrence. Zero means no push, including words the model ignores.","accuracy":"Test accuracy: {score} across {total} held-out reviews","table":"Confusion matrix: actual labels down, predicted labels across","actual":"Actual"}
+quiz: [{"q":"Why add 1 to every word tally in each class?","a":["To make all reviews the same length.","To make the classes equally frequent.","To give a word a nonzero chance even if that class never used it."],"correct":2,"right":"Laplace smoothing avoids a zero probability for a vocabulary word.","wrong":"Think about what would happen if a class had never used a word."},{"q":"When we change the vocabulary size, what should stay fixed to compare scores fairly?","a":["Which reviews are in the test set.","The model’s predictions.","The number of columns in every version."],"correct":0,"right":"Use the same unseen reviews to compare the settings.","wrong":"Change the settings, not the reviews you use to measure the result."}]
+code: |
+  import pandas as pd
+  from sklearn.feature_extraction.text import CountVectorizer
+  from sklearn.model_selection import train_test_split
+  from sklearn.naive_bayes import MultinomialNB
+  
+  url = "https://raw.githubusercontent.com/Mohammad-QT/ML_DL_Vis/main/datasets/cafe_reviews.csv"
+  reviews = pd.read_csv(url)
+  train, test = train_test_split(
+      reviews, test_size=0.25, stratify=reviews.liked, random_state=42
+  )
+  vectorizer = CountVectorizer(max_features=120)
+  X_train = vectorizer.fit_transform(train.review)
+  X_test = vectorizer.transform(test.review)
+  model = MultinomialNB(alpha=1).fit(X_train, train.liked)
+  print(model.score(X_test, test.liked))
+---
+In Part 3, Naive Bayes predicts a class from features. Here those features are counts, so we use <mark>multinomial Naive Bayes</mark>. It learns which words are more typical of each class. A word like “smooth” may push toward “liked it”; “burnt” may push the other way.
+
+Each repeated word adds the same push again. The number on a chip is a <mark>log-likelihood ratio</mark>: a positive value favors “liked it”; a negative value favors “didn’t like it”. The model also starts with a small bias if one class is more common in training. Adding one to each word tally is called <mark>Laplace smoothing</mark>.

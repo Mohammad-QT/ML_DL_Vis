@@ -1,0 +1,77 @@
+---
+id: ucb
+short: "Upper confidence bound"
+title: "Upper confidence bound (UCB)"
+lede: "Try five ads with hidden click rates. Can you find the best ad without wasting too many chances to get a click?"
+figure:
+  caption: "Each dot is the observed click rate. Each bar adds an exploration bonus. The outlined ad has the highest score."
+steps_h: "How UCB chooses an ad"
+steps:
+  - "Show each ad once. Record which ones get a click."
+  - "For each ad, divide clicks by times shown. That is its observed mean."
+  - "Add a bonus: the square root of twice the natural log of rounds so far divided by times this ad was shown."
+  - "Show the ad with the highest sum. Update only that ad and repeat."
+caution:
+  h: "A score is not a probability"
+  p: "The bonus can push the score above 1. UCB uses the score to choose an ad, not to predict a click. With the round count held fixed, more plays mean a smaller bonus."
+play:
+  p: "Pick ads yourself for 30 rounds. Then watch UCB on the same ads and compare its clicks with random selection and a policy that already knows the best ad. Reset starts a new set of ads."
+ui:
+  plotHint: "The dot and bar show what UCB knew just before the last choice. The click counts include that choice."
+  ad: "Ad"
+  pick: "Show ad"
+  pickShort: "Show"
+  manualHint: "You try: show one ad each round. Can you find the best one in 30 rounds?"
+  humanScore: "Round {0} of 30 · {1} clicks"
+  yourScore: "Your score: {0} clicks in 30 rounds. The policies start from round one with the same hidden rates."
+  start: "Try UCB on these ads"
+  step: "Step"
+  run100: "Run 100"
+  run1000: "Run 1000"
+  reset: "Reset"
+  reveal: "Reveal rates"
+  hide: "Hide rates"
+  tally: "{0}/{1} clicks"
+  bound: "Bound: {0}"
+  unplayed: "Not tried yet"
+  sample: "Draw: {0}"
+  score: "Round {0} · {1} clicks"
+  click: "Ad {0} got a click"
+  miss: "Ad {0} got no click"
+  chart: "Total clicks over rounds"
+  axes: "Clicks (vertical): 0 to {0} · Rounds (horizontal): 0 to {1}"
+  ucb: "UCB"
+  thompson: "Thompson"
+  random: "Random"
+  oracle: "Best ad (known)"
+quiz:
+  - q: "Two ads have the same observed click rate. Which gets the bigger bonus?"
+    a: ["The one shown fewer times", "The one shown more times", "Both get the same bonus"]
+    correct: 0
+    right: "Fewer plays leave more uncertainty, so UCB adds a bigger bonus."
+    wrong: "The bonus divides by the number of times that ad was shown."
+  - q: "Which outcome can you observe when you show ad 3?"
+    a: ["Whether all five ads would get clicks", "Whether ad 3 got a click", "The true click rate of ad 3"]
+    correct: 1
+    right: "You see the result of the ad you showed, not the other four."
+    wrong: "A single round shows only one result, not the ad's true rate."
+code: |
+  import numpy as np
+  url = "https://raw.githubusercontent.com/Mohammad-QT/ML_DL_Vis/main/datasets/ad_clicks.csv"
+  clicks = np.loadtxt(url, delimiter=",", skiprows=1, dtype=int)
+  plays = np.zeros(clicks.shape[1], dtype=int)
+  wins = np.zeros_like(plays)
+  for t in range(len(clicks)):
+      if t < len(plays):
+          ad = t
+      else:
+          scores = wins / plays + np.sqrt(2 * np.log(t) / plays)
+          ad = np.argmax(scores)
+      reward = clicks[t, ad]
+      plays[ad] += 1
+      wins[ad] += reward
+  print(wins.sum())
+---
+You have five ads and room to show one each round. Each ad has a hidden chance of getting a click. A click counts as 1 and no click counts as 0. You only learn what happens for the ad you show. This is a <mark>multi-armed bandit</mark>: think of five slot machines, but you only get to pull one lever per round.
+
+Do you keep showing the ad that looks best so far, or try an ad you know less about? The first is <mark>exploitation</mark>; the second is <mark>exploration</mark>. UCB balances them by giving less-tested ads a bigger bonus. A click still depends on chance: even the best ad can miss, and the policy that knows the best ad is a benchmark, not a guarantee of the most clicks in every run.

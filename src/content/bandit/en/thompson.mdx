@@ -1,0 +1,75 @@
+---
+id: thompson
+short: "Thompson sampling"
+title: "Thompson sampling"
+lede: "Pick one of five ads by drawing a possible click rate for each. Which ad wins this round?"
+figure:
+  caption: "Each curve shows plausible click rates, from 0 to 1. Dots mark the draws. The outlined ad drew the highest rate."
+steps_h: "How Thompson sampling chooses an ad"
+steps:
+  - "Start with a flat Beta(1, 1) curve for each ad: all click rates are equally plausible."
+  - "Draw one possible click rate from each curve. Show the ad with the highest draw."
+  - "Add 1 to the first Beta parameter for a click, or to the second for no click. Update only the ad you showed."
+  - "Draw again next round. The curve gets narrower as evidence builds up."
+caution:
+  h: "A draw is not a forecast"
+  p: "An ad with a wide curve can draw a high rate by chance. That is how Thompson sampling explores. A single draw does not tell you the true click rate."
+play:
+  p: "Step through a few rounds and look for the furthest-right draw, then run 100 or 1000 more rounds. Reveal the true rates to see which ad the policies are learning to favor."
+ui:
+  plotHint: "The curves and draws are from just before the last choice. Each curve is scaled to its own peak; compare widths and dot positions, not heights."
+  ad: "Ad"
+  pick: "Show ad"
+  pickShort: "Show"
+  manualHint: "You try: show one ad each round. Can you find the best one in 30 rounds?"
+  humanScore: "Round {0} of 30 · {1} clicks"
+  yourScore: "Your score: {0} clicks in 30 rounds. The policies start from round one with the same hidden rates."
+  start: "Try UCB on these ads"
+  step: "Step"
+  run100: "Run 100"
+  run1000: "Run 1000"
+  reset: "Reset"
+  reveal: "Reveal rates"
+  hide: "Hide rates"
+  tally: "{0}/{1} clicks"
+  bound: "Bound: {0}"
+  unplayed: "Not tried yet"
+  sample: "Draw: {0}"
+  score: "Round {0} · {1} clicks"
+  click: "Ad {0} got a click"
+  miss: "Ad {0} got no click"
+  chart: "Total clicks over rounds"
+  axes: "Clicks (vertical): 0 to {0} · Rounds (horizontal): 0 to {1}"
+  ucb: "UCB"
+  thompson: "Thompson"
+  random: "Random"
+  oracle: "Best ad (known)"
+quiz:
+  - q: "Which ad does Thompson sampling show this round?"
+    a: ["The ad with the widest curve", "The ad with the most clicks so far", "The ad with the highest sampled rate"]
+    correct: 2
+    right: "It draws once per ad and chooses the highest draw."
+    wrong: "Look for the dot furthest to the right on the 0–1 axes."
+  - q: "An ad has 3 clicks and 2 misses. What is its Beta distribution?"
+    a: ["Beta(3, 2)", "Beta(4, 3)", "Beta(4, 2)"]
+    correct: 1
+    right: "Start at Beta(1, 1), then add clicks to the first parameter and misses to the second."
+    wrong: "Both parameters start at 1, not 0."
+code: |
+  import numpy as np
+  url = "https://raw.githubusercontent.com/Mohammad-QT/ML_DL_Vis/main/datasets/ad_clicks.csv"
+  clicks = np.loadtxt(url, delimiter=",", skiprows=1, dtype=int)
+  plays = np.zeros(clicks.shape[1], dtype=int)
+  wins = np.zeros_like(plays)
+  rng = np.random.default_rng(2026)
+  for t in range(len(clicks)):
+      samples = rng.beta(1 + wins, 1 + plays - wins)
+      ad = np.argmax(samples)
+      reward = clicks[t, ad]
+      plays[ad] += 1
+      wins[ad] += reward
+  print(wins.sum())
+---
+Imagine trying a new ad. After a single click, its true rate could still be low or high. Instead of giving the ad one fixed score, Thompson sampling keeps a <mark>distribution</mark>: a curve that describes which click rates are plausible given the results so far.
+
+Each round, sample a possible rate from every curve and show the ad with the highest draw. An ad you have barely tried can draw a high rate and get another chance. As you collect evidence, good ads usually draw high rates more often. Like UCB, this policy only learns from the ad it shows.

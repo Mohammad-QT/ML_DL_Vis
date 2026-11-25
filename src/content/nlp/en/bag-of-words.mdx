@@ -1,0 +1,24 @@
+---
+id: "bag-of-words"
+short: "Bag of words"
+title: "Text to numbers: bag of words"
+lede: "A model can’t read a review. Give it a row of word counts instead."
+figure: {"caption":"Each column is a word. The second review has two coffees and no cake."}
+steps_h: "How a review becomes a row"
+steps: ["Lowercase the text and replace punctuation and digits with spaces.","Split at spaces. Drop common words such as “the” and “and”.","Strip a few endings. For example, “cakes” becomes “cake”.","Keep the most frequent words as columns. Count each one in every review."]
+caution: {"h":"Counts do not record order","p":"“Good coffee, bad cake” and “Bad coffee, good cake” give the same counts. This stemmer just strips a few endings. It is not Porter and may produce fragments such as “lik”."}
+play: {"p":"Type or pick an English sentence. Compare each row of chips, then shrink the vocabulary and watch columns disappear. The examples set the vocabulary; your review adds a count row, not new columns."}
+ui: {"input":"Your review (English)","original":"Original","cleaned":"Cleaned","words":"Words","filtered":"Without stop words","stems":"Stems","empty":"—","vocab":"Vocabulary size","review":"Review","yours":"Your review","table":"Word counts (scroll for more columns)"}
+quiz: [{"q":"What does the entry 2 in the coffee column mean?","a":["It is the second word in the review.","The review contains coffee twice.","The café serves two kinds of coffee."],"correct":1,"right":"The entry records how many times coffee appears.","wrong":"A count is a frequency, not a position."},{"q":"What happens to a word outside the vocabulary?","a":["It has no column.","It creates a new column for this review.","It fills the first column."],"correct":0,"right":"Every row uses the same vocabulary, so that word contributes no count.","wrong":"The training reviews set the columns. A new review does not change them."}]
+code: |
+  from sklearn.feature_extraction.text import CountVectorizer
+  
+  reviews = ["Cake and coffee.", "Coffee, coffee!"]
+  vectorizer = CountVectorizer(stop_words=["and"])
+  counts = vectorizer.fit_transform(reviews)
+  print(vectorizer.get_feature_names_out())
+  print(counts.toarray())
+---
+Imagine writing one review on each slip of paper. A model needs numbers, so give each word in your <mark>vocabulary</mark> its own column. For “cake and coffee” the counts for “cake” and “coffee” are both 1. For “coffee, coffee!” they are 0 and 2. This is called a <mark>bag of words</mark> because you keep what was in the review, but not its order.
+
+Cleaning makes “Coffee!” and “coffee” match. Many common words add little information; we call them <mark>stop words</mark>. A <mark>stem</mark> is what remains after trimming an ending. The demo keeps “not”, because even short words can change the meaning. Ties when choosing the vocabulary are broken alphabetically.

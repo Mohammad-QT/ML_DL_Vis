@@ -3,6 +3,10 @@ import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
 import { MODEL_NAMES, REG_NAMES, REG_PRESETS } from './engine';
 import { CLUSTERING, DIMRED, PREP, REGRESSION, SELECTION } from './lessons';
+import { RULES } from './rules/lessons';
+
+import { RL } from './rl/lessons';
+import { NLP } from './lessons';
 
 const model = z.enum(MODEL_NAMES as [string, ...string[]]);
 const preset = z.enum(['blobs', 'moons', 'circles', 'xor']);
@@ -154,4 +158,19 @@ const dimred = defineCollection({
   schema: customBoardLesson.extend({ id: z.enum(DIMRED) }),
 });
 
-export const collections = { lessons, prep, regression, clustering, selection, dimred };
+const rules = defineCollection({
+  loader: glob({ pattern: '**/*.mdx', base: './src/content/rules' }),
+  schema: customBoardLesson.extend({ id: z.enum(RULES) }),
+});
+
+const bandit = defineCollection({
+  loader: glob({ pattern: '**/*.mdx', base: './src/content/bandit' }),
+  schema: customBoardLesson.extend({ id: z.enum(RL) }),
+});
+
+const nlp = defineCollection({
+  loader: glob({ pattern: '**/*.mdx', base: './src/content/nlp' }),
+  schema: customBoardLesson.extend({ id: z.enum(NLP) }),
+});
+
+export const collections = { lessons, prep, regression, clustering, rules, bandit, nlp, selection, dimred };

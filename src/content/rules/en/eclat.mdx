@@ -1,0 +1,41 @@
+---
+id: eclat
+short: Eclat
+title: Eclat
+lede: Give each basket a number. Find items bought together by seeing which numbers their lists share.
+figure: { caption: 'The top rows show two items’ basket IDs. The green marks show the IDs in both rows.' }
+steps_h: How Eclat works
+steps:
+  - Read the baskets once. For each item, record the IDs of baskets that contain it.
+  - Intersect two lists to keep only shared IDs. Divide their count by the total number of baskets to get support.
+  - Extend groups that pass minimum support. Intersect their shared IDs with the next item’s IDs instead of reading the baskets again.
+caution:
+  h: A frequent pair is not a rule
+  p: Support only tells you how often the pair occurs. To say pasta → sauce and judge how useful that rule is, also check how often sauce occurs among pasta baskets and among all baskets.
+play:
+  p: 'Pick two items, or choose a pair from the table. The highlights show the basket IDs in both lists. Edit a basket or load Pasta night to change the overlap.'
+ui: {}
+quiz:
+  - q: Pasta is in baskets 1, 2 and 5. Sauce is in baskets 2, 3 and 5. Which baskets have both?
+    a: ['1 and 3', '2 and 5', '1, 2, 3 and 5']
+    correct: 1
+    right: Yes. Only 2 and 5 are in both lists.
+    wrong: Keep the IDs shared by the lists, not all the IDs from either list.
+  - q: Why can Eclat be faster than Apriori?
+    a: [It lowers the support threshold, It uses only the first few baskets, It reuses ID lists instead of scanning all baskets for each new level]
+    correct: 2
+    right: Yes. After Eclat builds the ID lists, it can count support by intersecting them.
+    wrong: Eclat uses the same baskets and threshold. The difference is how it counts support.
+code: |
+  baskets = [['pasta', 'sauce'], ['pasta'], ['pasta', 'sauce'], ['cheese']]
+  tids = {}
+  for basket_id, basket in enumerate(baskets, start=1):
+      for item in basket:
+          tids.setdefault(item, set()).add(basket_id)
+
+  shared = tids['pasta'] & tids['sauce']
+  print(sorted(shared), len(shared) / len(baskets))
+---
+Instead of storing a list of **items in each basket**, Eclat stores a list of **basket IDs for each item**. These are called <mark>transaction ID lists</mark>, or tid-lists. To count baskets with both pasta and sauce, keep only the IDs that appear in both lists. This is their intersection.
+
+With the same minimum support, Eclat finds the same frequent groups as Apriori. Eclat can be faster when repeated passes over the baskets are expensive and the ID lists are small enough to intersect quickly. Long lists can take more memory and more work to intersect.

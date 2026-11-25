@@ -1,0 +1,68 @@
+---
+import type { Lang } from '../i18n/ui';
+import type { BanditLesson } from '../rl/lessons';
+
+interface Props { demo: BanditLesson; lang: Lang; ui: Record<string, string>; figure?: boolean }
+const { demo, lang, ui, figure = false } = Astro.props;
+const number = new Intl.NumberFormat(lang);
+---
+<div class="bandit" data-bandit={demo} data-bandit-ui={JSON.stringify(ui)} data-bandit-lang={lang} data-bandit-figure={figure ? '' : undefined}>
+  {!figure && <p class="muted bandit-hint" data-bandit-hint></p>}
+  <div class="arms">
+    {Array.from({ length: 5 }, (_, index) => (
+      <div class="arm" data-bandit-arm>
+        <b>{ui.ad} {number.format(index + 1)}</b>
+        <div data-bandit-plot></div>
+        {!figure && <button class="btn ghost pick" data-bandit-pick hidden aria-label={`${ui.pick} ${number.format(index + 1)}`}>{ui.pickShort}</button>}
+        <span data-bandit-tally></span>
+        <span data-bandit-value></span>
+        <strong data-bandit-rate></strong>
+      </div>
+    ))}
+  </div>
+  {!figure && <>
+    <p class="bandit-status" data-bandit-status role="status"></p>
+    <p class="muted bandit-hint" data-bandit-your-score></p>
+    <button class="btn" data-bandit-start hidden>{ui.start}</button>
+    <div class="bandit-actions" data-bandit-actions hidden>
+      <button class="btn" data-bandit-run="1">{ui.step}</button>
+      <button class="btn ghost" data-bandit-run="100">{ui.run100}</button>
+      <button class="btn ghost" data-bandit-run="1000">{ui.run1000}</button>
+      <button class="btn ghost" data-bandit-reveal aria-pressed="false">{ui.reveal}</button>
+    </div>
+    <button class="btn ghost" data-bandit-reset>{ui.reset}</button>
+    <div class="bandit-comparison" data-bandit-comparison hidden>
+      <h3 class="display">{ui.chart}</h3>
+      <p class="muted" data-bandit-axes></p>
+      <div class="bandit-chart" data-bandit-chart dir="ltr"></div>
+      <div class="bandit-legend">{[0, 1, 2].map(() => <span data-bandit-legend></span>)}</div>
+    </div>
+  </>}
+</div>
+
+<style>
+  .bandit { min-inline-size: 0; }
+  .bandit [hidden], .bandit :global(svg[hidden]) { display: none; }
+  .arms { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; }
+  .arm { display: flex; flex-direction: column; align-items: center; min-inline-size: 0; padding: 6px 2px; gap: 3px;
+    border: 1.5px solid var(--rule); border-radius: 8px; background: var(--paper); text-align: center;
+    font-size: .78rem; overflow-wrap: anywhere; }
+  .arm.picked { border-color: var(--a); box-shadow: inset 0 0 0 1px var(--a); }
+  .arm [data-bandit-plot] { width: 100%; max-width: 100px; direction: ltr; }
+  .bandit :global(svg) { display: block; }
+  .pick { padding: 4px 1px; width: 100%; min-height: 44px; font-size: inherit; justify-content: center; }
+  .bandit-hint:empty { display: none; }
+  .bandit-status { font-weight: bold; }
+  .bandit-actions, .bandit-legend { display: flex; flex-wrap: wrap; gap: 8px; margin-block: 10px; }
+  .bandit-actions .btn, [data-bandit-reset], [data-bandit-start] { min-height: 44px; white-space: normal; }
+  .bandit-comparison { margin-block-start: 22px; }
+  .bandit-chart { background: var(--paper); border: 1.5px solid var(--rule); border-radius: 8px; }
+  .bandit-legend span { border-block-start: 2px solid var(--a); }
+  .bandit-legend span:nth-child(2) { border-block-start: 2px dashed var(--b); }
+  .bandit-legend span:nth-child(3) { border-block-start: 2px dotted var(--ok); }
+</style>
+
+<script>
+  import { mountBandit } from '../rl/demos';
+  document.querySelectorAll<HTMLElement>('[data-bandit]').forEach(mountBandit);
+</script>

@@ -27,6 +27,10 @@ export const CLUSTERING = ['kmeans', 'hierarchical'] as const;
 export type ClusterId = (typeof CLUSTERING)[number];
 export const clusterPath = (id: ClusterId) => `learn/4-clustering/${id}/`;
 
+export const NLP = ['bag-of-words', 'sentiment'] as const;
+export type NlpId = (typeof NLP)[number];
+export const nlpPath = (id: NlpId) => `learn/7-nlp/${id}/`;
+
 export const DIMRED = ['pca', 'lda', 'kernel-pca'] as const;
 export type DimredId = (typeof DIMRED)[number];
 export const dimredPath = (id: DimredId) => `learn/9-dimred/${id}/`;

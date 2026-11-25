@@ -1,0 +1,47 @@
+---
+id: apriori
+short: Apriori
+title: Apriori
+lede: Find items people buy together. Then check whether one item makes the other any more likely.
+figure: { caption: 'Two of these three baskets contain both marked items. The pair has support of two thirds.' }
+steps_h: How Apriori works
+steps:
+  - Count each item. Keep only those that meet the minimum support.
+  - Join frequent groups to make larger candidates. If any smaller subset failed, skip counting that candidate.
+  - Scan the baskets for the remaining candidates. Repeat until no larger group can qualify.
+  - Split each frequent group into a rule with two sides. Filter by confidence and sort by lift.
+caution:
+  h: High confidence can be misleading
+  p: If 80% of all shoppers buy milk, a rule that predicts milk with 80% confidence is no better than that baseline. Its lift is 1. Even a high lift does not prove cause and effect.
+play:
+  p: 'Choose a basket, then toggle its items in the editor. Try Pasta night and raise minimum support: which groups disappear first? Select a rule to see the baskets that contain both sides.'
+ui: {}
+quiz:
+  - q: Bread and milk fail minimum support as a pair. What can Apriori skip?
+    a: [Every candidate containing both bread and milk, All candidates containing milk, Only the pair itself]
+    correct: 0
+    right: Yes. A larger group cannot appear in more baskets than a subset of that group.
+    wrong: Any basket with the larger group must already contain the pair.
+  - q: 60% of baskets with cereal contain milk. Overall, 30% contain milk. What is the lift of cereal → milk?
+    a: ['0.5', '1', '2']
+    correct: 2
+    right: Yes. Divide 60% by the 30% baseline to get 2.
+    wrong: Divide the rule’s confidence by the overall share of baskets with milk.
+code: |
+  import pandas as pd
+  from mlxtend.preprocessing import TransactionEncoder
+  from mlxtend.frequent_patterns import apriori, association_rules
+
+  baskets = [['bread', 'milk'], ['bread', 'milk'], ['bread'], ['tea']]
+  encoder = TransactionEncoder()
+  encoded = encoder.fit(baskets).transform(baskets)
+  table = pd.DataFrame(encoded, columns=encoder.columns_)
+  groups = apriori(table, min_support=0.5, use_colnames=True)
+  rules = association_rules(groups, metric='confidence', min_threshold=0.6)
+  print(rules[['antecedents', 'consequents', 'support', 'confidence', 'lift']])
+---
+Imagine four baskets. Three contain bread, and two of those also contain milk. For the rule **bread → milk**, the <mark>support</mark> is the share of all baskets with both items: 2 out of 4. The <mark>confidence</mark> is the share of bread baskets that also have milk: 2 out of 3.
+
+To get <mark>lift</mark>, divide the confidence by the overall share of baskets with milk. Here that is ½, so the lift is about 1.33. Lift above 1 means milk is more common in bread baskets than it is overall. Lift below 1 means it is less common.
+
+Apriori saves work with one observation: any basket containing bread, milk and eggs must contain bread and milk. If the pair is too rare, the triple cannot pass the same support cutoff.
