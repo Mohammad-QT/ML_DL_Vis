@@ -78,3 +78,13 @@ on the Compare page serve them. Keep the copies in sync if you change the origin
 | Columns | `x`, `y` (coordinates on the same scale; no group labels) |
 | Source | Original to ML Visual. Generated in JavaScript with a Park–Miller generator (seed 2026) and Box–Muller normal draws (standard deviation 0.045) around `(0.21, 0.29)`, `(0.75, 0.28)`, and `(0.51, 0.74)`. Rounded to five decimals and shuffled with the same generator. |
 | License | CC0 1.0 (public domain dedication) |
+
+## `grocery_baskets.csv`
+
+| | |
+|---|---|
+| Used by | `notebooks/5-rules/*.ipynb` |
+| Rows | 500 synthetic shopping baskets, no header |
+| Columns | One item per field, with a variable number of comma-separated fields per row |
+| Source | Original to ML Visual. The [NumPy generator](generate_grocery_baskets.py) uses seed 0 and plants cereal with milk, bread with eggs, and pasta with sauce and cheese, alongside background purchases. |
+| License | CC0 1.0 (public domain dedication) |

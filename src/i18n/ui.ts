@@ -171,6 +171,41 @@ export const cluster = {
   },
 } as const;
 
+export const rules = {
+  en: {
+    part: 'Association rules', kicker: 'Part 5 · Association rules · lesson {n} of 2',
+    n_apriori: 'Apriori', n_eclat: 'Eclat', code_p: 'Run the example, or open the notebook to mine and plot rules from 500 baskets.',
+    presets: 'Basket presets', breakfast: 'Breakfast shop', pasta_night: 'Pasta night', random: 'Random',
+    min_support: 'Minimum support', min_confidence: 'Minimum confidence', baskets: 'Baskets', items: 'Basket items',
+    edit_basket: 'Edit basket {id}', empty_basket: 'Empty',
+    bread: 'Bread', milk: 'Milk', eggs: 'Eggs', coffee: 'Coffee', tea: 'Tea', cereal: 'Cereal', pasta: 'Pasta', sauce: 'Sauce', cheese: 'Cheese',
+    levels: 'Apriori levels', levels_help: 'Counts cover candidates Apriori generates. A missing subset lets it skip counting a candidate’s baskets.',
+    level_size: 'Size {n}', level_frequent: 'Frequent: {n}', level_subset: 'Missing subset: {n}', level_support: 'Below support: {n}',
+    tid_lists: 'Basket IDs by item', first_item: 'First item', second_item: 'Second item',
+    intersection: 'Shared basket IDs: {ids} · support {support}', none: 'None',
+    rule_table: 'Rules by lift', pair_table: 'Pairs by support', rule: 'Rule', pair: 'Pair', support: 'Support', confidence: 'Confidence', lift: 'Lift',
+    rule_help: 'Hover over a rule or select it to highlight baskets containing both sides. Select it again to clear.',
+    pair_help: 'Select a pair to compare its two ID lists.',
+    no_rules: 'No rules meet both thresholds.', no_pairs: 'No pairs meet the support threshold.', separator: ', ', arrow: '→',
+  },
+  ar: {
+    part: 'قواعد الارتباط', kicker: 'الجزء 5 · قواعد الارتباط · الدرس {n} من 2',
+    n_apriori: 'أبريوري', n_eclat: 'إكلات', code_p: 'شغّل المثال أو افتح الدفتر لاستخراج القواعد من 500 سلّة ورسمها.',
+    presets: 'مجموعات السلال الجاهزة', breakfast: 'متجر الإفطار', pasta_night: 'ليلة المعكرونة', random: 'عشوائي',
+    min_support: 'الحد الأدنى للدعم', min_confidence: 'الحد الأدنى للثقة', baskets: 'السلال', items: 'عناصر السلّة',
+    edit_basket: 'تعديل السلّة {id}', empty_basket: 'فارغة',
+    bread: 'خبز', milk: 'حليب', eggs: 'بيض', coffee: 'قهوة', tea: 'شاي', cereal: 'حبوب الإفطار', pasta: 'معكرونة', sauce: 'صلصة', cheese: 'جبن',
+    levels: 'مستويات أبريوري', levels_help: 'تحسب الأعداد المجموعات التي ترشّحها الخوارزمية فقط. إذا غابت مجموعة فرعية، تتجاوز الخوارزمية عدّ سلال المجموعة المرشّحة.',
+    level_size: 'الحجم {n}', level_frequent: 'متكرّرة: {n}', level_subset: 'مجموعة فرعية غائبة: {n}', level_support: 'دون حد الدعم: {n}',
+    tid_lists: 'أرقام السلال لكل عنصر', first_item: 'العنصر الأول', second_item: 'العنصر الثاني',
+    intersection: 'أرقام السلال المشتركة: {ids} · الدعم {support}', none: 'لا يوجد',
+    rule_table: 'القواعد حسب الرفع', pair_table: 'الأزواج حسب الدعم', rule: 'القاعدة', pair: 'الزوج', support: 'الدعم', confidence: 'الثقة', lift: 'الرفع',
+    rule_help: 'مرّر المؤشر فوق قاعدة أو اخترها لإبراز السلال التي تضمّ طرفيها. اخترها مجددًا لإلغاء التحديد.',
+    pair_help: 'اختر زوجًا لمقارنة قائمتي أرقام سلاله.',
+    no_rules: 'لا توجد قواعد تستوفي الحدّين.', no_pairs: 'لا توجد أزواج تستوفي حد الدعم.', separator: '، ', arrow: '←',
+  },
+} as const;
+
 export const dimred = {
   en: {
     part: 'Dimensionality reduction', kicker: 'Part 9 · Dimensionality reduction · lesson {n} of 3',
@@ -189,7 +224,7 @@ export const nav = {
   en: {
     course: 'Course', toc: 'Course contents', close: 'Close the course menu',
     part: 'Part {n}', count: '{d} of {n}', overall: '{d} of {n} lessons done', bar: '{p} · {d} of {n} done',
-    later: 'Parts 5–8', later_d: 'Coming later',
+    later: 'Parts 6–8', later_d: 'Coming later',
     here: 'You are here', st_none: 'Not started', st_started: 'In progress', st_done: 'Done',
     saved: 'Progress is saved in this browser only.',
     reset: 'Reset progress', reset_q: 'Erase all your progress on this device?', reset_yes: 'Yes, erase it', cancel: 'Cancel',
@@ -198,7 +233,7 @@ export const nav = {
     step: 'Step {n} of 4',
     next_h: 'Next lesson', next_part: 'Part {n} · {p}',
     end_h: 'You reached the end of the course for now',
-    end_p: 'Parts 5–8 come later. Go back to the route to revisit any lesson.', end_cta: 'Back to the route',
+    end_p: 'Parts 6–8 come later. Go back to the route to revisit any lesson.', end_cta: 'Back to the route',
     cont: 'Continue where you left off', cont_part: 'Part {n} · {p}',
     collapse: 'Collapse the course menu', expand: 'Expand the course menu',
     show_all: 'Show all parts', focus: 'Show only my part', cont_tag: 'Continue here',
@@ -217,7 +252,7 @@ export const nav = {
   ar: {
     course: 'الدورة', toc: 'محتويات الدورة', close: 'أغلق قائمة الدورة',
     part: 'الجزء {n}', count: '{d} من {n}', overall: 'أنهيت {d} من {n} درسًا', bar: '{p} · أنهيت {d} من {n}',
-    later: 'الأجزاء 5–8', later_d: 'لاحقًا',
+    later: 'الأجزاء 6–8', later_d: 'لاحقًا',
     here: 'أنت هنا', st_none: 'لم تبدأ', st_started: 'قيد التعلّم', st_done: 'مكتمل',
     saved: 'يُحفظ تقدّمك في هذا المتصفح فقط.',
     reset: 'إعادة ضبط التقدّم', reset_q: 'هل تريد مسح كل تقدّمك على هذا الجهاز؟', reset_yes: 'نعم، امسحه', cancel: 'إلغاء',
@@ -226,7 +261,7 @@ export const nav = {
     step: 'الخطوة {n} من 4',
     next_h: 'الدرس التالي', next_part: 'الجزء {n} · {p}',
     end_h: 'وصلت إلى نهاية الدورة حاليًا',
-    end_p: 'الأجزاء 5–8 تأتي لاحقًا. عد إلى المسار لتراجع أي درس.', end_cta: 'العودة إلى المسار',
+    end_p: 'الأجزاء 6–8 تأتي لاحقًا. عد إلى المسار لتراجع أي درس.', end_cta: 'العودة إلى المسار',
     cont: 'تابع من حيث توقفت', cont_part: 'الجزء {n} · {p}',
     collapse: 'صغّر قائمة الدورة', expand: 'وسّع قائمة الدورة',
     show_all: 'أظهر كل الأجزاء', focus: 'أظهر جزئي فقط', cont_tag: 'تابع من هنا',

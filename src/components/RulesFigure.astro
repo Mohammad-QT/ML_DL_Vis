@@ -1,0 +1,23 @@
+---
+interface Props { eclat: boolean }
+const { eclat } = Astro.props;
+---
+<svg class="rules-figure" viewBox="0 0 80 48" aria-hidden="true" fill="none" stroke-width="1.5">
+  {eclat ? <>
+    <path d="M9 14H71M9 30H71" stroke="var(--rule)" />
+    <path d="M26 14V40M54 14V40" stroke="var(--ok)" stroke-dasharray="2 2" />
+    <g fill="var(--a)">{[12, 26, 40, 54].map(x => <circle cx={x} cy="14" r="2.8" />)}</g>
+    <g fill="var(--b)">{[26, 54, 68].map(x => <circle cx={x} cy="30" r="2.8" />)}</g>
+    <g fill="var(--ok)">{[26, 54].map(x => <circle cx={x} cy="40" r="2.8" />)}</g>
+  </> : <>
+    <rect x="8" y="7" width="64" height="10" rx="4" stroke="var(--ok)" />
+    <rect x="8" y="19" width="64" height="10" rx="4" stroke="var(--ok)" />
+    <rect x="8" y="31" width="64" height="10" rx="4" stroke="var(--rule)" />
+    <path d="M15 12h13m-13 12h13m-13 12h13" stroke="var(--a)" stroke-width="3" stroke-linecap="round" />
+    <path d="M37 12h13m-13 12h13" stroke="var(--b)" stroke-width="3" stroke-linecap="round" />
+  </>}
+</svg>
+
+<style>
+  svg { display: block; width: 100%; }
+</style>

@@ -1,0 +1,88 @@
+---
+import { rules, type Lang } from '../i18n/ui';
+import type { RulesId } from '../rules/lessons';
+
+interface Props { lang: Lang; demo: RulesId }
+const { lang, demo } = Astro.props;
+const ui = rules[lang];
+const isApriori = demo === 'apriori';
+---
+<div class="rules-demo" data-rules={demo} data-rules-lang={lang}>
+  <div class="rules-controls" role="group" aria-label={ui.presets}>
+    <button type="button" class="chip" data-rules-preset="breakfast" aria-pressed="true">{ui.breakfast}</button>
+    <button type="button" class="chip" data-rules-preset="pasta" aria-pressed="false">{ui.pasta_night}</button>
+    <button type="button" class="chip" data-rules-preset="random" aria-pressed="false">{ui.random}</button>
+  </div>
+  <div class="rules-controls settings">
+    <label>{ui.min_support} <input type="range" min="5" max="100" step="5" value="20" data-rules-support /><output data-rules-support-value></output></label>
+    {isApriori && <label>{ui.min_confidence} <input type="range" min="0" max="100" step="5" value="50" data-rules-confidence /><output data-rules-confidence-value></output></label>}
+  </div>
+  <h3 class="display">{ui.baskets}</h3>
+  <div class="basket-board" role="group" aria-label={ui.baskets} data-rules-board></div>
+  <div class="rules-editor">
+    <p data-rules-edit-label aria-live="polite"></p>
+    <div class="rules-controls" role="group" aria-label={ui.items} data-rules-editor></div>
+  </div>
+  {isApriori ? <>
+    <h3 class="display">{ui.levels}</h3>
+    <p class="muted">{ui.levels_help}</p>
+    <ul class="rules-levels" data-rules-levels aria-label={ui.levels}></ul>
+  </> : <>
+    <h3 class="display">{ui.tid_lists}</h3>
+    <dl class="tid-lists" data-rules-tids></dl>
+    <div class="rules-controls">
+      <label>{ui.first_item} <select data-rules-first></select></label>
+      <label>{ui.second_item} <select data-rules-second></select></label>
+    </div>
+    <p class="rules-shared" data-rules-shared aria-live="polite"></p>
+  </>}
+  <h3 class="display">{isApriori ? ui.rule_table : ui.pair_table}</h3>
+  <p class="muted">{isApriori ? ui.rule_help : ui.pair_help}</p>
+  <table aria-label={isApriori ? ui.rule_table : ui.pair_table}>
+    <thead><tr>
+      <th scope="col">{isApriori ? ui.rule : ui.pair}</th>
+      <th scope="col" aria-sort={isApriori ? undefined : 'descending'}>{ui.support}</th>
+      {isApriori && <><th scope="col">{ui.confidence}</th><th scope="col" aria-sort="descending">{ui.lift}</th></>}
+    </tr></thead>
+    <tbody data-rules-results></tbody>
+  </table>
+  <p class="muted" data-rules-empty role="status" hidden>{isApriori ? ui.no_rules : ui.no_pairs}</p>
+</div>
+
+<style>
+  .rules-demo { min-width: 0; overflow-wrap: anywhere; }
+  .rules-demo h3 { margin-block: 20px 6px; }
+  .rules-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+  .rules-controls label { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
+  .rules-controls input { width: 106px; }
+  .rules-controls output { font: 600 13px var(--mono); }
+  .rules-controls select { font: inherit; color: var(--ink); background: var(--sheet); border: 1.5px solid var(--rule); border-radius: 8px; min-height: 36px; }
+  .settings { margin-top: 12px; }
+  .basket-board { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; }
+  .rules-editor { background: var(--paper); border: 1.5px solid var(--rule); border-radius: 12px; padding: 10px; margin-block: 8px; }
+  .rules-editor p { margin-bottom: 6px; font-weight: 700; }
+  .rules-controls :global(button[aria-pressed="true"]) { border-color: var(--a); box-shadow: inset 0 -2px var(--a); }
+  .basket-board :global(button) { display: flex; flex-wrap: wrap; align-content: start; align-items: center; gap: 4px; min-height: 44px; min-width: 0; text-align: start; font: inherit; color: var(--ink); background: var(--paper); border: 1.5px solid var(--rule); border-radius: 10px; padding: 5px; cursor: pointer; }
+  .basket-board :global(button[aria-pressed="true"]) { border-color: var(--a); }
+  .basket-board :global(button.rules-match) { border-color: var(--ok); box-shadow: inset 0 -3px var(--ok); }
+  .basket-board :global(button.rules-match[aria-pressed="true"]) { border-color: var(--a); }
+  .basket-board :global(.rules-item) { font-size: 13px; background: var(--sheet); border-radius: 5px; padding-inline: 4px; }
+  .rules-levels { padding: 0; list-style: none; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 145px), 1fr)); gap: 6px; margin-block: 8px; }
+  .rules-levels :global(li) { background: var(--paper); border: 1.5px solid var(--rule); border-radius: 10px; padding: 8px; }
+  .tid-lists { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 3px 8px; margin: 0 0 10px; }
+  .tid-lists :global(dd) { margin: 0; display: flex; flex-wrap: wrap; gap: 3px; }
+  .tid-lists :global(dd span) { font: 500 13px var(--mono); padding-inline: 4px; border-radius: 5px; background: var(--paper); }
+  .tid-lists :global(dd span.rules-common) { box-shadow: inset 0 -2px var(--ok); font-weight: 700; }
+  .rules-shared { margin-top: 8px; font-weight: 700; }
+  table { width: 100%; table-layout: fixed; border-collapse: collapse; margin-block: 6px; font-size: 14px; }
+  th, tbody :global(td) { text-align: start; padding: 5px 3px; border-bottom: 1px solid var(--rule); }
+  th:first-child { width: 44%; }
+  tbody :global(button) { text-align: start; font: inherit; color: var(--ink); background: var(--paper); border: 1.5px solid var(--rule); border-radius: 8px; min-height: 36px; width: 100%; overflow-wrap: anywhere; cursor: pointer; }
+  tbody :global(button:hover), tbody :global(button[aria-pressed="true"]) { border-color: var(--ok); }
+  @media (max-width: 650px) { .basket-board { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+</style>
+
+<script>
+  import { mountRules } from '../rules/demos';
+  document.querySelectorAll<HTMLElement>('[data-rules]').forEach(mountRules);
+</script>

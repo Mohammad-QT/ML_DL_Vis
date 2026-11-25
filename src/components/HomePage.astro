@@ -3,6 +3,7 @@
 import Base from '../layouts/Base.astro';
 import NavLinks from './NavLinks.astro';
 import CourseNav from './CourseNav.astro';
+import RulesFigure from './RulesFigure.astro';
 import { common, href, fill, nav, prep, sel, type Lang } from '../i18n/ui';
 import { PARTS, LESSONS, lessonName, partName } from '../course';
 import { home } from '../i18n/pages';
@@ -16,6 +17,7 @@ const pn = prep[lang];
 const sn = sel[lang];
 const SEL = SELECTION;
 const clustering = PARTS.find(part => part.id === '4')!.lessons;
+const rules = PARTS.find(part => part.id === '5')!.lessons;
 const dimred = PARTS.find(part => part.id === '9')!.lessons;
 const PART1: PrepId[] = ['missing', 'categories', 'split', 'scaling'];
 const m = (n: string) => t[`m_${n}` as keyof typeof t];
@@ -124,7 +126,14 @@ const REG: Array<[keyof typeof t, string]> = [
           </a>
         ))}</div>
       </div></li>
-      <li class="stop later"><div class="pt">5–8</div><div class="sheet body"><h3 class="display"><span>{t.later}</span></h3><p>{t.later_d}</p></div></li>
+      <li class="stop"><div class="pt">5</div><div class="sheet body"><h3 class="display"><span>{t.p5}</span><small>{rules.length} {t.lessons}</small></h3><p>{t.p5_d}</p>
+        <div class="minis">{rules.map(item => (
+          <a class="mini" href={href(lang, item.path)} data-lesson={item.key}>
+            <RulesFigure eclat={item.id === 'eclat'} /><span><bdi>{lessonName(lang, item)}</bdi></span>
+          </a>
+        ))}</div>
+      </div></li>
+      <li class="stop later"><div class="pt">6–8</div><div class="sheet body"><h3 class="display"><span>{t.later}</span></h3><p>{t.later_d}</p></div></li>
       <li class="stop"><div class="pt">9</div><div class="sheet body"><h3 class="display"><span>{t.p9}</span><small>{dimred.length} {t.lessons}</small></h3><p>{t.p9_d}</p>
         <div class="minis">{dimred.map(item => (
           <a class="mini" href={href(lang, item.path)} data-lesson={item.key}>
@@ -235,6 +244,7 @@ const REG: Array<[keyof typeof t, string]> = [
   .mini { text-decoration: none; border: 1.5px solid var(--rule); border-radius: 12px; padding: 6px; background: var(--paper); transition: border-color .12s, transform .12s; }
   a.mini:hover { border-color: var(--ink); transform: translateY(-2px); }
   .mini canvas, .mini svg { width: 100%; height: 62px; display: block; border-radius: 7px; background: var(--sheet); }
+  .mini :global(.rules-figure) { height: 62px; border-radius: 7px; background: var(--sheet); }
   a.mini canvas, a.mini svg { cursor: pointer; }
   .mini.soon canvas, .mini.soon svg { cursor: default; opacity: .7; }
   .mini span { display: block; font-size: 13px; font-weight: 700; padding: 6px 2px 1px; line-height: 1.25; }
