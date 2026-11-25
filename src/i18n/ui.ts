@@ -102,7 +102,7 @@ export const lesson = {
     colab: 'Open in Colab', compare_cta: 'See {m} next to another algorithm',
     next: 'Next: {m}', prev: 'Previous: {m}', route: 'Back to the route',
     progress: 'Classification · {n} of 7 done',
-    r_crumb_part: 'Regression', r_kicker: 'Part 2 · Regression · lesson {n} of 6', r_progress: 'Regression · {n} of 6 done',
+    r_crumb_part: 'Regression', r_kicker: 'Part 2 · Regression · lesson {n} of {total}', r_progress: 'Regression · {n} of 8 done',
     beat_r2_p: 'The data and the split are fixed. Move the sliders until the test R² reaches the goal.',
     compare_reg: 'See {m} next to another regressor',
   },
@@ -120,7 +120,7 @@ export const lesson = {
     colab: 'افتح في Colab', compare_cta: 'شاهد {m} بجانب خوارزمية أخرى',
     next: 'التالي: {m}', prev: 'السابق: {m}', route: 'العودة إلى المسار',
     progress: 'التصنيف · أنهيت {n} من 7',
-    r_crumb_part: 'الانحدار', r_kicker: 'الجزء 2 · الانحدار · الدرس {n} من 6', r_progress: 'الانحدار · أنهيت {n} من 6',
+    r_crumb_part: 'الانحدار', r_kicker: 'الجزء 2 · الانحدار · الدرس {n} من {total}', r_progress: 'الانحدار · أنهيت {n} من 8',
     beat_r2_p: 'البيانات والتقسيم ثابتان. حرّك المنزلقات حتى يصل R² الاختبار إلى الهدف.',
     compare_reg: 'شاهد {m} بجانب نموذج انحدار آخر',
   },
@@ -147,12 +147,12 @@ export const prep = {
 /** Extra text for the Part 10 lesson template (it reuses `lesson` for the tabs and buttons). */
 export const sel = {
   en: {
-    part: 'Model selection', kicker: 'Part 10 · Model selection · lesson {n} of 3', progress: 'Model selection · {n} of 3',
+    part: 'Model selection', kicker: 'Part 10 · Model selection · lesson {n} of {total}', progress: 'Model selection · {n} of 4',
     n_cv: 'k-fold cross-validation', n_grid: 'Grid search', n_boost: 'XGBoost',
     code_p: 'This is the core of the notebook. Open the full notebook to run it, change it, or download it. Nothing to install.',
   },
   ar: {
-    part: 'اختيار النموذج', kicker: 'الجزء 10 · اختيار النموذج · الدرس {n} من 3', progress: 'اختيار النموذج · أنهيت {n} من 3',
+    part: 'اختيار النموذج', kicker: 'الجزء 10 · اختيار النموذج · الدرس {n} من {total}', progress: 'اختيار النموذج · أنهيت {n} من 4',
     n_cv: 'التحقق المتقاطع k-fold', n_grid: 'البحث الشبكي', n_boost: 'XGBoost',
     code_p: 'هذا هو جوهر الدفتر. افتح الدفتر كاملًا لتشغيله أو تعديله أو تنزيله. لا حاجة لتثبيت أي شيء.',
   },
@@ -160,12 +160,12 @@ export const sel = {
 
 export const cluster = {
   en: {
-    part: 'Clustering', kicker: 'Part 4 · Clustering · lesson {n} of 2',
+    part: 'Clustering', kicker: 'Part 4 · Clustering · lesson {n} of {total}',
     n_kmeans: 'K-Means', n_hierarchical: 'Hierarchical clustering',
     code_p: 'Run this on the example points, or open the notebook to see the plots and change the settings.',
   },
   ar: {
-    part: 'التجميع', kicker: 'الجزء 4 · التجميع · الدرس {n} من 2',
+    part: 'التجميع', kicker: 'الجزء 4 · التجميع · الدرس {n} من {total}',
     n_kmeans: 'كي-مينز', n_hierarchical: 'التجميع الهرمي',
     code_p: 'شغّل الكود على نقاط المثال، أو افتح الدفتر لترى الرسوم وتغيّر الإعدادات.',
   },
@@ -232,14 +232,27 @@ export const dimred = {
   },
 } as const;
 
+export const extras = {
+  en: {
+    'gradient-descent': 'Gradient descent', regularization: 'Ridge and Lasso', dbscan: 'DBSCAN',
+    'q-learning': 'Q-learning', metrics: 'Precision, recall and the ROC curve',
+    qCode: 'Train the grid-world agent from scratch. Open the notebook to plot what it learns.',
+  },
+  ar: {
+    'gradient-descent': 'الانحدار التدرّجي', regularization: 'تنظيم ريدج ولاسو', dbscan: 'التجميع الكثافي DBSCAN',
+    'q-learning': 'تعلّم Q', metrics: 'الإحكام والاستدعاء ومنحنى ROC',
+    qCode: 'درّب وكيل الشبكة من البداية. افتح الدفتر لرسم ما يتعلّمه.',
+  },
+} as const;
+
 export const rl = {
   en: {
-    part: 'Reinforcement learning', kicker: 'Part 6 · Reinforcement learning · lesson {n} of 2',
+    part: 'Reinforcement learning', kicker: 'Part 6 · Reinforcement learning · lesson {n} of {total}',
     n_ucb: 'Upper confidence bound', n_thompson: 'Thompson sampling',
     code_p: 'Replay 10,000 rounds from the example CSV. Open the notebook to compare policies and plot the results.',
   },
   ar: {
-    part: 'التعلّم المعزّز', kicker: 'الجزء 6 · التعلّم المعزّز · الدرس {n} من 2',
+    part: 'التعلّم المعزّز', kicker: 'الجزء 6 · التعلّم المعزّز · الدرس {n} من {total}',
     n_ucb: 'الحد الأعلى للثقة', n_thompson: 'أخذ العينات بطريقة تومبسون',
     code_p: 'أعِد تشغيل 10,000 جولة من ملف البيانات. افتح الدفتر لمقارنة السياسات ورسم النتائج.',
   },
@@ -273,6 +286,7 @@ export const nav = {
     local_2: 'Open a terminal and install the libraries:',
     local_3: 'Open the downloaded <code>.ipynb</code> file in VS Code (with the Jupyter extension) or in Jupyter, then run the cells from top to bottom.',
     local_builtin: 'The notebook gets its data from scikit-learn, so you can run it offline after installing the libraries.',
+    local_generated: 'The notebook creates its own example, so you can run it offline after installing the libraries.',
     local_net: 'The notebook reads its data from GitHub, so keep the internet on when you run it. To work fully offline, also download the <a href="{u}" target="_blank" rel="noopener">datasets folder</a> and change the URL in the notebook to the local file name.',
   },
   ar: {
@@ -301,6 +315,7 @@ export const nav = {
     local_2: 'افتح الطرفية (Terminal) وثبّت المكتبات:',
     local_3: 'افتح ملف <code>.ipynb</code> الذي نزّلته في VS Code (مع إضافة Jupyter) أو في Jupyter، ثم شغّل الخلايا من الأعلى إلى الأسفل.',
     local_builtin: 'يحصل الدفتر على بياناته من <bdi>scikit-learn</bdi>، لذا يمكنك تشغيله دون إنترنت بعد تثبيت المكتبات.',
+    local_generated: 'ينشئ الدفتر مثاله بنفسه، لذا يمكنك تشغيله دون إنترنت بعد تثبيت المكتبات.',
     local_net: 'يقرأ الدفتر بياناته من GitHub، لذا أبقِ الإنترنت متصلًا عند تشغيله. لتعمل دون إنترنت تمامًا، نزّل أيضًا <a href="{u}" target="_blank" rel="noopener">مجلد البيانات</a> وغيّر الرابط في الدفتر إلى اسم الملف المحلي.',
   },
 };

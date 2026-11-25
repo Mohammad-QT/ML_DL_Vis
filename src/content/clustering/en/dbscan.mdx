@@ -1,0 +1,58 @@
+---
+id: dbscan
+short: DBSCAN
+title: DBSCAN
+lede: Find clusters by following chains of nearby points. Leave isolated points out instead of forcing them into a group.
+figure: { caption: 'Filled dots are core points, rings are border points, and grey crosses are noise.' }
+steps_h: How DBSCAN works
+steps:
+  - Draw a circle of radius eps around a point. Count every point in or on the circle, including the centre point.
+  - Mark a point as core if its count reaches minPts.
+  - Join nearby core points into clusters. A chain of core points can bend around a curve.
+  - Attach any remaining point within eps of a core point as a border point. Mark the rest as noise.
+caution:
+  h: One radius for all clusters
+  p: A small radius can break up a sparse group. A large radius can connect groups you meant to keep separate. If your features use different units, scale them before choosing the radius.
+play:
+  p: 'Hover over the board to see the radius around the closest point. Move the sliders, watch the counts, then try Moons and see how the two clusters bend.'
+  p_touch: 'Touch and drag on the board to see the radius around the closest point. Move the sliders, watch the counts, then try Moons and see how the two clusters bend.'
+ui:
+  preset: Points
+  noisy: Noisy blobs
+  three: Three blobs
+  five: Five blobs
+  uneven: Uneven blobs
+  moons: Moons
+  eps: Radius
+  minpts: Minimum points
+  reset: Reset settings
+  board: Cluster board. Use the arrow keys to inspect points.
+  figure_board: Three groups of colored points with a few scattered crosses.
+  clusters: Clusters
+  noise_count: Noise points
+  core: Core
+  border: Border
+  noise: Noise
+quiz:
+  - q: The radius around a point includes the point itself and three neighbors. Minimum points is four. What kind of point is it?
+    a: [Core, Border, Noise]
+    correct: 0
+    right: Yes. The point itself counts, which brings the total to four.
+    wrong: Count the centre point too. Four points meet the minimum, so this is a core point.
+  - q: Two dense groups sit far apart. What might happen if you increase the radius too much?
+    a: [Every point becomes noise, The groups join into one, The two groups always stay separate]
+    correct: 1
+    right: Yes. A large radius can let a chain of core points connect both groups.
+    wrong: A larger radius reaches farther. It can connect core points that used to be in separate groups.
+code: |
+  from sklearn.cluster import DBSCAN
+  from sklearn.datasets import make_moons
+
+  points, _ = make_moons(n_samples=240, noise=0.06, random_state=42)
+  model = DBSCAN(eps=0.18, min_samples=5)
+  labels = model.fit_predict(points)
+  print("Noise points:", (labels == -1).sum())
+---
+K-Means assigns every point to its nearest centre. That can cut one crescent into pieces when two crescents wrap around each other. DBSCAN instead finds <mark>dense neighborhoods</mark> and connects them. You choose a neighborhood size, not a cluster count.
+
+A core point has enough neighbors to continue a cluster. A border point can belong to a cluster, but it cannot extend it. If no core point reaches a point, DBSCAN labels it noise.

@@ -1,0 +1,69 @@
+---
+import type { Lang } from '../i18n/ui';
+
+interface Props { lang: Lang; ui: Record<string, string>; figure?: boolean }
+const { lang, ui, figure = false } = Astro.props;
+---
+<div class:list={['gd-demo', { figure }]} data-gd-demo data-gd-ui={JSON.stringify(ui)} data-gd-lang={lang} data-gd-figure={figure ? '' : undefined}>
+  {!figure && <div class="controls">
+    <label>{ui.rate} <input type="range" min="-3" max="0.55" value="-0.7" step="0.05" dir="ltr" data-gd-rate />
+      <output data-gd-rate-value></output>
+    </label>
+    <div class="chips">
+      <button type="button" class="chip" data-gd-step>{ui.step}</button>
+      <button type="button" class="chip" data-gd-run>{ui.run}</button>
+      <button type="button" class="chip" data-gd-reset>{ui.reset}</button>
+    </div>
+  </div>}
+  <div class:list={['plots', { pair: !figure }]}>
+    <div class="plot">
+      {!figure && <p>{ui.board}</p>}
+      <canvas class="board" role="img" aria-label={ui.board} data-gd-board></canvas>
+    </div>
+    {!figure && <div class="plot">
+      <p>{ui.contour}</p>
+      <div class="contour">
+        <svg viewBox="0 0 300 210" role="img" aria-label={ui.contour} data-gd-contour>
+          <path d="M12 105H288 M150 12V198" stroke="var(--rule)" fill="none" />
+          <path fill="none" stroke="var(--muted)" stroke-opacity=".55" data-gd-contours />
+          <g data-gd-dots></g>
+        </svg>
+        <span class="intercept">{ui.intercept}</span><span class="slope">{ui.slope}</span>
+      </div>
+    </div>}
+  </div>
+  {!figure && <div class="summary">
+    <div><span>{ui.loss} <bdi data-gd-loss-value></bdi></span> · <span>{ui.steps} <bdi data-gd-step-value></bdi></span></div>
+    <svg viewBox="0 0 300 60" role="img" aria-label={ui.loss_chart}>
+      <path d="M8 8V52H292" stroke="var(--rule)" fill="none" />
+      <polyline fill="none" stroke="var(--a)" stroke-width="2" data-gd-loss-trace />
+    </svg>
+    <p class="muted" data-gd-status role="status"></p>
+  </div>}
+</div>
+
+<style>
+  .gd-demo { min-width: 0; }
+  .controls, .controls label, .chips { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 12px; }
+  .controls { margin-block-end: 14px; }
+  input { width: 112px; }
+  output, bdi { font: 600 13px var(--mono); }
+  .plots.pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+  .plot { min-width: 0; }
+  .plot p { margin: 0 0 4px; }
+  canvas, svg { display: block; width: 100%; max-width: 100%; }
+  canvas { aspect-ratio: 10 / 7; height: auto; cursor: default; }
+  .contour { position: relative; direction: ltr; }
+  .contour, .summary svg { background: var(--sheet); border: 1.5px solid var(--rule); border-radius: 14px; }
+  .intercept, .slope { position: absolute; background: var(--sheet); color: var(--muted); font-size: .8rem; }
+  .intercept { top: 5%; left: 52%; }
+  .slope { right: 5%; bottom: 51%; }
+  .summary { margin-block-start: 12px; }
+  .summary svg { max-width: 300px; margin-block-start: 4px; }
+  @media (max-width: 700px) { .plots.pair { grid-template-columns: minmax(0, 1fr); } }
+</style>
+
+<script>
+  import { mountGradientDescent } from '../regression/gradient-descent';
+  document.querySelectorAll<HTMLElement>('[data-gd-demo]').forEach(mountGradientDescent);
+</script>

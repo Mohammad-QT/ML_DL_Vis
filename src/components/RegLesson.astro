@@ -10,9 +10,12 @@ import CodeOptions from './CodeOptions.astro';
 import NextLesson from './NextLesson.astro';
 import RegBoard from './RegBoard.astro';
 import MultiLinear from './MultiLinear.astro';
+import GradientDescentDemo from './GradientDescentDemo.astro';
+import RegularizationDemo from './RegularizationDemo.astro';
 import { href, common, lesson, type Lang } from '../i18n/ui';
+import { findLesson, lessonName, previousLesson } from '../course';
 import type { RegModelName } from '../engine';
-import { REGRESSION, regPath, prepPath } from '../lessons';
+import { REGRESSION } from '../lessons';
 
 interface Props { lang: Lang; entry: CollectionEntry<'regression'> }
 const { lang, entry } = Astro.props;
@@ -20,13 +23,14 @@ const d = entry.data;
 const c = common[lang];
 const t = lesson[lang];
 const fill = (s: string, vars: Record<string, string | number>) => s.replace(/\{(\w+)\}/g, (_, k) => String(vars[k]));
-const name = (id: string) => c[`m_${id}` as keyof typeof c];
 const n = REGRESSION.indexOf(d.id) + 1;
-const prev = REGRESSION[n - 2];
 const model = d.model as RegModelName;
 const multiple = d.id === 'multiple';
 const steps = [t.s1, t.s2, t.s3, t.s4];
 const key = `2/${d.id}`;
+const prev = previousLesson(key)!;
+const extra = findLesson(key)?.extra;
+const ExtraDemo = d.id === 'gradient-descent' ? GradientDescentDemo : d.id === 'regularization' ? RegularizationDemo : null;
 const partId = '2' as const;
 const shape = c[`rs_${d.model}` as keyof typeof c];
 const play = d.play;
@@ -40,12 +44,12 @@ const hl = (code: string) => code.replace(/&/g, '&amp;').replace(/</g, '&lt;')
 
   <section class="hero">
     <div>
-      <div class="kicker">{fill(t.r_kicker, { n })}</div>
+      <div class="kicker">{fill(t.r_kicker, { n, total: REGRESSION.length })}</div>
       <h1 class="display" set:html={d.title} />
       <p class="lede">{d.lede}</p>
     </div>
     <figure class="sheet fp">
-      <RegBoard lang={lang} model={model} variant="figure" preset={d.figure.preset as never} seed={d.figure.seed} />
+      {ExtraDemo ? <ExtraDemo lang={lang} ui={d.ui} figure /> : <RegBoard lang={lang} model={model} variant="figure" preset={d.figure.preset as never} seed={d.figure.seed} />}
       <figcaption><span>{t.fp_cap}</span> <b>{d.figure.caption ?? shape}</b></figcaption>
     </figure>
   </section>
@@ -66,9 +70,7 @@ const hl = (code: string) => code.replace(/&/g, '&amp;').replace(/</g, '&lt;')
     <ol class="how" style={`--cols:${d.steps.length}`}>{d.steps.map(s => <li set:html={s} />)}</ol>
     <div class="note read"><h3 class="display" style="margin-top:0" set:html={d.caution.h} /><p set:html={d.caution.p} /></div>
     <div class="navrow">
-      {prev
-        ? <a class="btn ghost" href={href(lang, regPath(prev))}><span class="arr">←</span> <span>{fill(t.prev, { m: name(prev) })}</span></a>
-        : <a class="btn ghost" href={href(lang, prepPath('scaling'))}><span class="arr">←</span> <span>{fill(t.prev, { m: lang === 'ar' ? 'توحيد المقياس' : 'Feature scaling' })}</span></a>}
+      <a class="btn ghost" href={href(lang, prev.path)}><span class="arr">←</span> <span>{fill(t.prev, { m: lessonName(lang, prev) })}</span></a>
       <button class="btn" data-goto="1"><span>{t.s2}</span> <span class="arr">→</span></button>
     </div>
   </section>
@@ -76,7 +78,7 @@ const hl = (code: string) => code.replace(/&/g, '&amp;').replace(/</g, '&lt;')
   <section class="sheet card" role="tabpanel">
     <h2 class="display">{t.play_h}</h2>
     <p class="muted read"><span class="on-mouse">{play.p}</span><span class="on-touch">{play.p_touch ?? play.p}</span></p>
-    {multiple
+    {ExtraDemo ? <ExtraDemo lang={lang} ui={d.ui} /> : multiple
       ? <MultiLinear ui={d.ui} />
       : <RegBoard lang={lang} model={model} preset={play.preset as never} seed={play.seed}
           hints={{ low: play.hints.low && { max: play.hints.low.max, text: play.hints.low.text }, high: play.hints.high && { min: play.hints.high.min, text: play.hints.high.text } }} />}
@@ -110,7 +112,7 @@ const hl = (code: string) => code.replace(/&/g, '&amp;').replace(/</g, '&lt;')
       <p class="muted">{t.code_p}</p>
 <pre set:html={hl(d.code)} />
       <CodeOptions lang={lang} current={key}>
-        <a class="btn ghost" href={href(lang, `compare/?task=reg&a=${d.model}&b=${d.compare}`)}><span>{fill(t.compare_reg, { m: d.short })}</span> <span class="arr">→</span></a>
+        {!extra && <a class="btn ghost" href={href(lang, `compare/?task=reg&a=${d.model}&b=${d.compare}`)}><span>{fill(t.compare_reg, { m: d.short })}</span> <span class="arr">→</span></a>}
       </CodeOptions>
     </div>
     <NextLesson lang={lang} current={key} />

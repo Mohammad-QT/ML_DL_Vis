@@ -5,7 +5,7 @@ import { afterEach, expect, inject, it, vi } from 'vitest';
 import { empty } from '../progress';
 import { paint } from '../progressui';
 import { mountBandit } from './demos';
-import { RL, rlPath } from './lessons';
+import { BANDITS, rlPath } from './lessons';
 
 const out = inject('siteDir');
 
@@ -14,7 +14,7 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-it.each(RL)('mounts the %s boards and runs their controls on both lesson pages', id => {
+it.each(BANDITS)('mounts the %s boards and runs their controls on both lesson pages', id => {
   vi.spyOn(Math, 'random').mockReturnValueOnce(0.125).mockReturnValueOnce(0.75)
     .mockReturnValueOnce(0.125).mockReturnValueOnce(0.75);
   for (const lang of ['en', 'ar']) {

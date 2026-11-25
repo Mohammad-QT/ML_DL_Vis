@@ -80,14 +80,14 @@ You can also upload your own CSV on the Compare page. The file stays in your bro
 |---|---|
 | **0 · Start here** | How the site works, what Colab is, how to read a board |
 | **1 · Prepare the data** | Missing values · Text categories · Train/test split · Feature scaling |
-| **2 · Regression** | Simple linear · Multiple linear · Polynomial · SVR · Decision tree · Random forest |
+| **2 · Regression** | Simple linear · Multiple linear · Polynomial · SVR · Decision tree · Random forest · Gradient descent · Ridge and Lasso |
 | **3 · Classification** | Logistic regression · K-NN · SVM · Kernel SVM · Naive Bayes · Decision tree · Random forest |
-| **4 · Clustering** | K-Means · Hierarchical clustering |
+| **4 · Clustering** | K-Means · Hierarchical clustering · DBSCAN |
 | **5 · Association rules** | Apriori · Eclat |
-| **6 · Reinforcement learning** | Upper confidence bound · Thompson sampling |
+| **6 · Reinforcement learning** | Upper confidence bound · Thompson sampling · Q-learning |
 | **7 · Natural language processing** | Bag of words · Sentiment classifier |
 | **9 · Dimensionality reduction** | PCA · LDA · Kernel PCA |
-| **10 · Pick the best model** | k-fold cross-validation · Grid search · Gradient boosting (XGBoost) |
+| **10 · Pick the best model** | k-fold cross-validation · Grid search · Gradient boosting (XGBoost) · Precision, recall and the ROC curve |
 
 Part 8 (deep learning) comes later.
 

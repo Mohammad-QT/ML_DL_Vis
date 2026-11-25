@@ -2,7 +2,7 @@
 // "next lesson" and "continue where you left off". Built from the per-part lists in `lessons.ts`.
 import { CLASSIFICATION, CLUSTERING, DIMRED, PREP, REGRESSION, SELECTION, clusterPath, dimredPath, lessonPath, prepPath, regPath, selPath } from './lessons';
 import { RULES, rulesPath } from './rules/lessons';
-import { cluster, common, dimred, prep, rules, sel, type Lang } from './i18n/ui';
+import { cluster, common, dimred, extras, prep, rules, sel, type Lang } from './i18n/ui';
 import { NLP, nlpPath } from './lessons';
 import { nlp } from './i18n/ui';
 import { home } from './i18n/pages';
@@ -10,6 +10,9 @@ import { rl } from './i18n/ui';
 import { RL, rlPath } from './rl/lessons';
 
 export type PartId = '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '9' | '10';
+
+const EXTRA_IDS = ['gradient-descent', 'regularization', 'dbscan', 'q-learning', 'metrics'] as const;
+type ExtraId = (typeof EXTRA_IDS)[number];
 
 export interface CourseLesson {
   /** Progress key, unique across parts: `<part>/<id>`, e.g. `3/tree` vs `2/tree`. */
@@ -20,12 +23,13 @@ export interface CourseLesson {
   path: string;
   /** Notebook path inside the repo, e.g. `notebooks/3-classification/knn.ipynb`. */
   notebook: string;
+  extra?: ExtraId;
 }
 
 export interface CoursePart { id: PartId; lessons: CourseLesson[] }
 
 const mk = (part: PartId, id: string, path: string, nb: string): CourseLesson =>
-  ({ key: `${part}/${id}`, part, id, path, notebook: `notebooks/${nb}.ipynb` });
+  ({ key: `${part}/${id}`, part, id, path, notebook: `notebooks/${nb}.ipynb`, extra: EXTRA_IDS.find(extra => extra === id) });
 
 export const PARTS: CoursePart[] = [
   { id: '0', lessons: [mk('0', 'start', prepPath('start'), '0-start/hello')] },
@@ -54,6 +58,7 @@ export const githubUrl = (path: string) => `https://github.com/${REPO}/tree/main
 
 /** Lesson name in the given language (the same names the home route and the lesson buttons use). */
 export function lessonName(lang: Lang, l: CourseLesson): string {
+  if (l.extra) return extras[lang][l.extra];
   if (l.part === '0' || l.part === '1') return prep[lang][`n_${l.id}` as keyof (typeof prep)['en']];
   if (l.part === '4') return cluster[lang][`n_${l.id}` as keyof (typeof cluster)['en']];
   if (l.part === '5') return rules[lang][`n_${l.id}` as keyof (typeof rules)['en']];

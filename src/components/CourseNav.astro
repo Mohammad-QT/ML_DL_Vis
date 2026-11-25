@@ -53,7 +53,7 @@ const chev = '<svg class="chev" viewBox="0 0 24 24" width="16" height="16" fill=
             {p.lessons.map(l => (
               <li><a href={href(lang, l.path)} data-lesson={l.key} aria-current={l.key === current ? 'page' : undefined}>
                 <span class="dot" aria-hidden="true"></span>
-                <span class="ln">{lessonName(lang, l)}{l.key === current && <small class="here">{t.here}</small>}<small class="here resume">{t.cont_tag}</small></span>
+                <span class="ln"><bdi>{lessonName(lang, l)}</bdi>{l.key === current && <small class="here">{t.here}</small>}<small class="here resume">{t.cont_tag}</small></span>
                 <span class="sr" data-st></span>
               </a></li>
             ))}

@@ -10,7 +10,8 @@ import NextLesson from './NextLesson.astro';
 import Board from './Board.astro';
 import { href, common, lesson, type Lang } from '../i18n/ui';
 import { MODELS, type ModelName } from '../engine';
-import { CLASSIFICATION, lessonPath, regPath } from '../lessons';
+import { CLASSIFICATION } from '../lessons';
+import { lessonName, previousLesson } from '../course';
 
 interface Props { lang: Lang; entry: CollectionEntry<'lessons'> }
 const { lang, entry } = Astro.props;
@@ -20,10 +21,10 @@ const t = lesson[lang];
 const name = (id: string) => c[`m_${id}` as keyof typeof c];
 const fill = (s: string, vars: Record<string, string | number>) => s.replace(/\{(\w+)\}/g, (_, k) => String(vars[k]));
 const n = CLASSIFICATION.indexOf(d.model as never) + 1;
-const prev = CLASSIFICATION[n - 2];
 const paramName = Object.keys(MODELS[d.model as ModelName].params)[0] ?? '';
 const steps = [t.s1, t.s2, t.s3, t.s4];
 const key = `3/${d.model}`;
+const prev = previousLesson(key)!;
 const partId = '3' as const;
 const shape = c[`s_${d.model}` as keyof typeof c];
 const play = d.play;
@@ -63,9 +64,7 @@ const hl = (code: string) => code.replace(/&/g, '&amp;').replace(/</g, '&lt;')
     <ol class="how" style={`--cols:${d.steps.length}`}>{d.steps.map(s => <li set:html={s} />)}</ol>
     <div class="note read"><h3 class="display" style="margin-top:0" set:html={d.caution.h} /><p set:html={d.caution.p} /></div>
     <div class="navrow">
-      {prev
-        ? <a class="btn ghost" href={href(lang, lessonPath(prev))}><span class="arr">←</span> <span>{fill(t.prev, { m: name(prev) })}</span></a>
-        : <a class="btn ghost" href={href(lang, regPath('forest'))}><span class="arr">←</span> <span>{fill(t.prev, { m: name('forest') })}</span></a>}
+      <a class="btn ghost" href={href(lang, prev.path)}><span class="arr">←</span> <span>{fill(t.prev, { m: lessonName(lang, prev) })}</span></a>
       <button class="btn" data-goto="1"><span>{t.s2}</span> <span class="arr">→</span></button>
     </div>
   </section>

@@ -1,0 +1,60 @@
+---
+id: metrics
+short: Precision, recall and the ROC curve
+title: Precision, recall and the ROC curve
+lede: A classifier gives each point a score. Where you put the cutoff decides which mistakes it makes.
+figure: { preset: blobs, seed: 9, model: logistic, caption: The decision line marks the score cutoff }
+steps_h: From a score to a decision
+steps:
+  - Score points that the model did not train on.
+  - Call a point positive if its score meets or exceeds the threshold.
+  - Count correct positives, false alarms, missed positives and correct negatives.
+  - Sweep the threshold to trace the ROC curve. Each point compares the hit rate with the false alarm rate.
+caution:
+  h: Accuracy can hide missed positives
+  p: If only 8 out of 120 points are positive, calling every point negative is 93% accurate, but catches none of the positives. Check recall alongside accuracy.
+play:
+  p: Drag the threshold to move the decision line and the dot on the ROC curve. Try Rare positives, then lower the cutoff until you catch more pink points. Watch what happens to false alarms.
+ui:
+  preset: Data
+  balanced: Balanced
+  rare: Rare positives
+  overlap: Overlapping
+  threshold: Threshold
+  board: Classification board with a movable score boundary
+  legend: Pink filled points are actual positives. Blue rings are actual negatives. The pink region is what the model calls positive. All points shown are held out.
+  matrix: Confusion matrix
+  pred_pos: Predicted positive
+  pred_neg: Predicted negative
+  actual_pos: Actual positive
+  actual_neg: Actual negative
+  precision: Precision
+  recall: Recall
+  accuracy: Accuracy
+  roc: ROC curve
+  axes: Horizontal — false positive rate. Vertical — recall.
+quiz:
+  - q: A model flags ten emails as spam, and six of those really are spam. What is its precision?
+    a: ['60%', '40%', You need the total number of spam emails]
+    correct: 0
+    right: Right. Six of its ten positive predictions are correct.
+    wrong: Precision divides correct positive predictions by all positive predictions. Here that is six out of ten.
+  - q: You lower the threshold without retraining. Which statement is true?
+    a: [Recall cannot decrease, AUC must increase, False alarms must decrease]
+    correct: 0
+    right: Right. Lowering the cutoff does not take any existing positive predictions away, so it cannot lose a hit.
+    wrong: Lowering the cutoff can add hits or false alarms, not remove them. The curve and AUC use all thresholds, so they do not change.
+code: |
+  from sklearn.metrics import confusion_matrix, precision_recall_fscore_support, roc_auc_score
+
+  scores = model.predict_proba(X_test)[:, 1]
+  predictions = scores >= 0.35
+  print(confusion_matrix(y_test, predictions))
+  print(precision_recall_fscore_support(y_test, predictions, average="binary", zero_division=0)[:3])
+  print(roc_auc_score(y_test, scores))
+---
+Say you flag emails as spam. The <mark>threshold</mark> is the smallest score that counts as spam. Lower the threshold and you may catch more spam, but you may also flag more real mail.
+
+**Precision** asks: of the emails you flagged, how many really were spam? **Recall** asks: of all the spam, how much did you catch? **F1** combines those two numbers and stays low if either one is low. Here we show zero when a ratio has nothing to divide by.
+
+The **ROC curve** shows this trade-off across all thresholds. It plots recall against the fraction of real mail wrongly flagged. **AUC** is the area under that curve. The diagonal has area 0.5; a perfect ranking has area 1. Changing the cutoff moves the dot, not the curve, because the model’s scores stay the same. When positives are rare, also look at the precision–recall curve in the notebook: it shows how many of your alerts are right at each recall level.

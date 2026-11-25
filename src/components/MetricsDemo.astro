@@ -1,0 +1,80 @@
+---
+import type { Lang } from '../i18n/ui';
+import { METRIC_PRESETS } from '../selection/metrics';
+
+interface Props { lang: Lang; ui: Record<string, string> }
+const { lang, ui } = Astro.props;
+---
+<div class="metrics" lang={lang} data-metrics-demo>
+  <div class="controls">
+    <label>{ui.preset} <select data-metrics-preset>{METRIC_PRESETS.map(id => <option value={id}>{ui[id]}</option>)}</select></label>
+    <label class="threshold">{ui.threshold} <span data-metrics-threshold-value aria-hidden="true"></span>
+      <input type="range" min="0" max="100" value="50" data-metrics-threshold />
+    </label>
+  </div>
+  <div class="plots">
+    <div>
+      <svg class="classification" viewBox="0 0 240 240" role="img" aria-label={ui.board}>
+        <rect width="240" height="240" fill="var(--a)" opacity=".07" />
+        <polygon data-metrics-region fill="var(--b)" opacity=".17" />
+        <path d="M0 48H240 M0 96H240 M0 144H240 M0 192H240 M48 0V240 M96 0V240 M144 0V240 M192 0V240" stroke="var(--rule)" />
+        <polyline data-metrics-boundary fill="none" stroke="var(--ink)" stroke-width="2" />
+        <g data-metrics-points />
+      </svg>
+      <p class="muted">{ui.legend}</p>
+    </div>
+    <div>
+      <table>
+        <caption>{ui.matrix}</caption>
+        <thead><tr><td></td><th scope="col">{ui.pred_pos}</th><th scope="col">{ui.pred_neg}</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">{ui.actual_pos}</th><td data-metrics-tp></td><td data-metrics-fn></td></tr>
+          <tr><th scope="row">{ui.actual_neg}</th><td data-metrics-fp></td><td data-metrics-tn></td></tr>
+        </tbody>
+      </table>
+      <dl>
+        <div><dt>{ui.precision}</dt><dd data-metrics-precision></dd></div>
+        <div><dt>{ui.recall}</dt><dd data-metrics-recall></dd></div>
+        <div><dt><bdi>F1</bdi></dt><dd data-metrics-f1></dd></div>
+        <div><dt>{ui.accuracy}</dt><dd data-metrics-accuracy></dd></div>
+      </dl>
+      <figure>
+        <svg viewBox="0 0 216 208" role="img" aria-label={ui.roc}>
+          <path d="M28 12V188H204" fill="none" stroke="var(--muted)" />
+          <path d="M28 188L204 12" stroke="var(--rule)" stroke-dasharray="4 4" />
+          <polyline data-metrics-roc-line fill="none" stroke="var(--a)" stroke-width="2" />
+          <circle data-metrics-roc-point r="4.5" fill="var(--b)" stroke="var(--sheet)" />
+          <g fill="var(--muted)" font-size="11" direction="ltr"><text x="15" y="16">1</text><text x="15" y="192">0</text><text x="201" y="203">1</text></g>
+        </svg>
+        <figcaption>{ui.roc} · <bdi>AUC <strong data-metrics-auc></strong></bdi><br />{ui.axes}</figcaption>
+      </figure>
+    </div>
+  </div>
+</div>
+
+<style>
+  .metrics { min-width: 0; }
+  .controls { display: flex; flex-wrap: wrap; gap: 12px 24px; align-items: start; margin-block: 16px; }
+  select { max-width: 100%; font: inherit; color: var(--ink); background: var(--sheet); border: 1px solid var(--rule); border-radius: 6px; padding: 6px; }
+  .threshold { flex: 1 1 180px; }
+  [data-metrics-threshold-value], dd, td { font-family: var(--mono); }
+  input { display: block; width: 100%; min-height: 28px; accent-color: var(--a); direction: ltr; }
+  .plots { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; align-items: start; }
+  svg { display: block; width: 100%; }
+  .classification { border: 1px solid var(--rule); border-radius: 8px; background: var(--sheet); }
+  table { width: 100%; border-collapse: collapse; text-align: center; font-size: .84rem; overflow-wrap: anywhere; }
+  caption { text-align: start; font-weight: 700; margin-bottom: 6px; }
+  td, th { padding: 5px; border: 1px solid var(--rule); }
+  dl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-block: 12px; }
+  dd { margin: 0; font-weight: 700; }
+  figure { margin: 0; }
+  figure svg { max-width: 220px; margin-inline: auto; }
+  figcaption { font-size: .82rem; color: var(--muted); }
+  @media (max-width: 720px) { .plots { grid-template-columns: minmax(0, 1fr); } }
+</style>
+
+<script>
+  import { mountMetrics } from '../selection/metrics';
+
+  document.querySelectorAll<HTMLElement>('[data-metrics-demo]').forEach(mountMetrics);
+</script>

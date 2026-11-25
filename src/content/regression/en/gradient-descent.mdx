@@ -1,0 +1,61 @@
+---
+id: gradient-descent
+model: linear
+short: Gradient descent
+title: Gradient descent
+lede: Fit a line by taking one step at a time toward lower error.
+figure: { preset: line, seed: 8, caption: 'The fitted line after 25 updates' }
+steps:
+  - 'Start with a slope and an intercept. Together, they define the line.'
+  - 'Use all the training points to measure the mean squared error and its gradient.'
+  - 'Move the slope and intercept against the gradient. The <b>learning rate</b> scales that move.'
+  - 'Repeat. The dots on the contour plot show the line’s settings at each step.'
+caution:
+  h: The step size can make or break the fit
+  p: 'A tiny learning rate barely moves the line. A large one can step past the bottom, making the loss grow instead of shrink.'
+play:
+  p: 'Press Step and watch the line and the contour dot move together. Reset and try Run at each end of the learning-rate slider. Does the loss fall faster, or does it grow?'
+  preset: line
+  seed: 8
+ui:
+  rate: Learning rate
+  step: Step
+  steps: Steps
+  run: Run
+  pause: Pause
+  reset: Reset
+  board: Regression line
+  contour: Loss contours
+  slope: Slope
+  intercept: Intercept
+  loss: Mean squared error
+  loss_chart: Loss over steps, earliest at left
+  ready: Each ring joins settings with the same loss. Look for the dots to move toward the center.
+  slow: This rate takes tiny steps. Run several updates and watch the loss crawl down.
+  overshoot: The last step increased the loss. The rate is too large for this step.
+  diverged: Stopped because the loss grew too large. Lower the rate or reset to try again.
+  capped: Reached the 200-step limit. Reset to compare another rate.
+quiz:
+  - q: What tells the line which way to move?
+    a: ['The direction opposite the gradient', 'The learning rate alone', 'The last training point alone']
+    correct: 0
+    right: Right. The gradient points toward steepest increase, so the update goes the other way.
+    wrong: The gradient gives the direction. The learning rate sets how far the update moves.
+  - q: What can happen when the learning rate is too large?
+    a: ['The line always settles sooner', 'The updates overshoot and the loss grows', 'The gradient becomes exactly zero']
+    correct: 1
+    right: Right. Overshooting can take the line to settings with worse error.
+    wrong: A bigger step can jump past the best settings and increase the loss.
+code: |
+  from sklearn.linear_model import SGDRegressor
+
+  regressor = SGDRegressor(loss="squared_error", penalty=None,
+                           learning_rate="constant", eta0=0.02,
+                           max_iter=500, random_state=8)
+  regressor.fit(X_train, y_train)
+  y_pred = regressor.predict(X_test)
+compare: linear
+---
+In linear regression, every slope and intercept gives a different line and a different error. Picture all those errors as heights on a hill map. <mark>Gradient descent</mark> starts at one spot and takes steps downhill. Close to the best line, the map levels out and the steps shrink.
+
+This demo uses <b>batch</b> updates: each step checks every training point. The scikit-learn example uses stochastic gradient descent, which updates on one training point at a time.

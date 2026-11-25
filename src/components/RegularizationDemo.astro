@@ -1,0 +1,69 @@
+---
+import type { Lang } from '../i18n/ui';
+
+interface Props { lang: Lang; ui: Record<string, string>; figure?: boolean }
+const { lang, ui, figure = false } = Astro.props;
+---
+<div class:list={['regz-demo', { figure }]} data-regz-demo data-regz-lang={lang} data-regz-figure={figure ? '' : undefined}>
+  {!figure && <div class="controls">
+    <label>{ui.degree} <input type="range" min="1" max="10" value="9" dir="ltr" data-regz-degree />
+      <output data-regz-degree-value></output>
+    </label>
+    <label>{ui.penalty}
+      <select data-regz-penalty>
+        <option value="ridge">{ui.ridge}</option><option value="lasso">{ui.lasso}</option>
+      </select>
+    </label>
+    <label>{ui.alpha} <input type="range" min="-4.1" max="1" value="-4.1" step="0.1" dir="ltr" data-regz-alpha />
+      <output data-regz-alpha-value></output>
+    </label>
+  </div>}
+  <div class:list={['plots', { pair: !figure }]}>
+    <div class="plot">
+      {!figure && <p>{ui.curve}</p>}
+      <canvas class="board" role="img" aria-label={ui.curve} data-regz-board></canvas>
+      {!figure && <p class="muted legend"><span class="swatch ring"></span>{ui.legend}</p>}
+    </div>
+    {!figure && <div class="plot">
+      <p>{ui.weights}</p>
+      <svg viewBox="0 0 300 158" role="img" aria-label={ui.weights} direction="ltr">
+        <path d="M44 13V137 M44 75H295" stroke="var(--rule)" fill="none" />
+        <text x="43" y="17" text-anchor="end" data-regz-axis-high></text>
+        <text x="43" y="79" text-anchor="end">0</text>
+        <text x="43" y="137" text-anchor="end" data-regz-axis-low></text>
+        <g data-regz-bars></g>
+      </svg>
+      <p class="muted">{ui.zeros} <bdi data-regz-zeros></bdi></p>
+    </div>}
+  </div>
+  {!figure && <div class="scores" aria-live="polite">
+    <p>{ui.train} <bdi data-regz-train></bdi></p>
+    <p>{ui.test} <bdi data-regz-test></bdi></p>
+  </div>}
+</div>
+
+<style>
+  .regz-demo { min-width: 0; }
+  .controls, .controls label { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 10px; }
+  .controls { margin-block-end: 14px; }
+  input { width: 110px; }
+  select { font: inherit; background: var(--sheet); color: var(--ink); border: 1px solid var(--rule); border-radius: 8px; padding: 4px 8px; }
+  output, bdi { font: 600 13px var(--mono); }
+  .plots.pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+  .plot { min-width: 0; }
+  .plot p { margin: 0 0 4px; }
+  canvas, svg { display: block; width: 100%; max-width: 100%; }
+  canvas { aspect-ratio: 10 / 7; height: auto; cursor: default; }
+  svg { background: var(--sheet); border: 1.5px solid var(--rule); border-radius: 14px; }
+  svg :global(text) { fill: var(--muted); font: 10px var(--mono); }
+  .scores { display: flex; flex-wrap: wrap; gap: 0 20px; margin-block-start: 8px; }
+  .scores p { margin: 0; }
+  .legend { margin-block-start: 6px; }
+  .legend .ring { margin-inline-end: 6px; }
+  @media (max-width: 700px) { .plots.pair { grid-template-columns: minmax(0, 1fr); } }
+</style>
+
+<script>
+  import { mountRegularization } from '../regression/regularization';
+  document.querySelectorAll<HTMLElement>('[data-regz-demo]').forEach(mountRegularization);
+</script>
