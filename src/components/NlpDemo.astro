@@ -1,0 +1,111 @@
+---
+import csv from '../../datasets/cafe_reviews.csv?raw';
+import { parseCsv } from '../engine/csv';
+import { BAG_EXAMPLES, SENTIMENT_EXAMPLES, type Review } from '../nlp/demos';
+import type { NlpId } from '../lessons';
+import type { Lang } from '../i18n/ui';
+
+interface Props { demo: NlpId; lang: Lang; ui: Record<string, string>; figure?: boolean }
+const { demo, lang, ui, figure = false } = Astro.props;
+const bag = demo === 'bag-of-words';
+const examples = bag ? BAG_EXAMPLES : SENTIMENT_EXAMPLES;
+const reviews: Review[] = !bag && !figure ? parseCsv(csv).slice(1)
+  .filter((_, index) => Math.floor(index / 2) % 2 === 0)
+  .map(([text, label]) => ({ text, liked: label === '1' ? 1 : 0 })) : [];
+const json = (data: unknown) => JSON.stringify(data).replace(/</g, '\\u003c');
+---
+{figure ? (
+  <div class="nlp-figure" lang="en" dir="ltr" aria-hidden="true">
+    {bag ? (
+      <table><thead><tr><th></th><th>cake</th><th>coffee</th></tr></thead><tbody>
+        <tr><th>Cake and coffee</th><td>1</td><td>1</td></tr>
+        <tr><th>Coffee, coffee!</th><td>0</td><td>2</td></tr>
+      </tbody></table>
+    ) : (
+      <div class="nlp-hero-chips">
+        <span data-nlp-direction="liked" style="--nlp-strength: 35%">smooth +1.4</span>
+        <span data-nlp-direction="disliked" style="--nlp-strength: 50%">burnt −2.1</span>
+      </div>
+    )}
+  </div>
+) : (
+  <div class="nlp-demo" data-nlp={demo} data-nlp-lang={lang}>
+    <script type="application/json" data-nlp-ui set:html={json(ui)} is:inline></script>
+    {!bag && <script type="application/json" data-nlp-reviews set:html={json(reviews)} is:inline></script>}
+    <label class="review-label">{ui.input}
+      <textarea data-nlp-input lang="en" dir="ltr" rows="2" maxlength="280">{examples[0]}</textarea>
+    </label>
+    {!bag && <p class="muted">{ui.try}</p>}
+    <div class="examples">
+      {examples.map(text => <button type="button" data-nlp-example={text} lang="en" dir="ltr">{text}</button>)}
+    </div>
+    <div class="settings">
+      {!bag && <>
+        <label><input data-nlp-stop type="checkbox" checked /> {ui.stop}</label>
+        <label><input data-nlp-stem type="checkbox" /> {ui.stem}</label>
+      </>}
+      <label>{ui.vocab}
+        <input data-nlp-vocab type="range" min={bag ? 1 : 10} max={bag ? 5 : 200} value={bag ? 5 : 120} dir="ltr" />
+        <output data-nlp-size></output>
+      </label>
+    </div>
+    {bag ? (
+      <dl class="pipeline">
+        {['original', 'cleaned', 'words', 'filtered', 'stems'].map(stage => <div>
+          <dt>{ui[stage]}</dt><dd data-nlp-stage={stage} dir="ltr" lang="en"></dd>
+        </div>)}
+      </dl>
+    ) : (
+      <div class="evidence">
+        <p class="prediction" data-nlp-prediction aria-live="polite"></p>
+        <p class="muted">{ui.legend}</p>
+        <div data-nlp-evidence dir="ltr" lang="en"></div>
+        <p data-nlp-score aria-live="polite"></p>
+      </div>
+    )}
+    <div class="table-scroll" role="region" aria-label={ui.table} tabindex="0">
+      <table data-nlp-board><caption>{ui.table}</caption><thead></thead><tbody></tbody></table>
+    </div>
+  </div>
+)}
+<style>
+  .nlp-demo, .nlp-figure { min-width: 0; max-width: 100%; overflow-wrap: anywhere; }
+  .nlp-demo { display: grid; gap: 12px; grid-template-columns: minmax(0, 1fr); }
+  .review-label { display: grid; gap: 5px; font-weight: 700; }
+  textarea { width: 100%; resize: vertical; padding: 10px; background: var(--paper); color: var(--ink); border: 1px solid var(--rule); border-radius: 10px; font: 16px var(--body); }
+  .examples, .settings, .nlp-hero-chips { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .examples button { font: 600 14px var(--body); min-height: 44px; padding: 6px 10px; border: 1px solid var(--rule); border-radius: 10px; background: var(--sheet); box-shadow: 0 2px var(--lift); color: var(--ink); cursor: pointer; }
+  .examples button:hover { border-color: var(--a); }
+  .settings { padding: 8px 10px; border-radius: 10px; background: var(--paper); }
+  .settings label { min-height: 44px; display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+  input { accent-color: var(--a); }
+  input[type="range"] { width: min(120px, 32vw); min-height: 36px; }
+  output { font-family: var(--mono); min-width: 3ch; }
+  .pipeline, .evidence { display: grid; gap: 8px; background: var(--paper); border-radius: 10px; padding: 10px; }
+  .pipeline > div { display: grid; grid-template-columns: minmax(0, 10em) minmax(0, 1fr); gap: 6px; }
+  dt, .prediction { font-weight: 700; }
+  dd, [data-nlp-evidence] { display: flex; flex-wrap: wrap; gap: 5px; }
+  .nlp-demo :global(.nlp-token), .nlp-hero-chips span {
+    display: inline-block; max-width: 100%; padding: 3px 7px; border-radius: 6px; border: 1px solid var(--rule);
+    font: 500 13px/1.45 var(--mono); white-space: pre-wrap; background: var(--sheet);
+  }
+  .nlp-demo :global([data-nlp-direction="liked"]), .nlp-hero-chips [data-nlp-direction="liked"] { --nlp-tone: var(--ok); }
+  .nlp-demo :global([data-nlp-direction="disliked"]), .nlp-hero-chips [data-nlp-direction="disliked"] { --nlp-tone: var(--bad); }
+  .nlp-demo :global([data-nlp-direction]), .nlp-hero-chips [data-nlp-direction] {
+    background: color-mix(in srgb, var(--nlp-tone, var(--sheet)) var(--nlp-strength), var(--sheet));
+  }
+  .table-scroll { max-width: 100%; overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font: 500 13px/1.45 var(--mono); }
+  caption { text-align: start; color: var(--muted); padding-block: 4px; }
+  table :global(th), table :global(td) { padding: 6px; border: 1px solid var(--rule); text-align: center; }
+  table :global(th:first-child) { text-align: start; }
+  table :global(th) { background: var(--paper); }
+  table :global(.nlp-own td), table :global(.nlp-own th) { background: color-mix(in srgb, var(--a) 14%, var(--sheet)); }
+  [data-nlp="bag-of-words"] table { min-width: max-content; }
+  [data-nlp="bag-of-words"] table :global(tbody th) { max-width: 155px; unicode-bidi: plaintext; }
+  @media (max-width: 560px) { .pipeline > div { grid-template-columns: minmax(0, 1fr); } }
+</style>
+<script>
+  import { mountNlp } from '../nlp/demos';
+  document.querySelectorAll<HTMLElement>('[data-nlp]').forEach(mountNlp);
+</script>

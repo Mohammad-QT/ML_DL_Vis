@@ -9,7 +9,7 @@ import { PARTS, KEYS, lessonName, partName } from '../course';
 interface Props { lang: Lang; current?: string }
 const { lang, current = '' } = Astro.props;
 const t = nav[lang];
-const later = PARTS.findIndex(p => p.id === '9');
+const later = PARTS.findIndex(p => p.id === '7');
 const chev = '<svg class="chev" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>';
 ---
 <aside class="rail" id="rail" data-current={current} aria-label={t.toc}
@@ -40,7 +40,8 @@ const chev = '<svg class="chev" viewBox="0 0 24 24" width="16" height="16" fill=
       const keys = p.lessons.map(l => l.key).join(',');
       const mine = p.lessons.some(l => l.key === current);
       return <>
-        {i === later && <li class="part later"><div class="ph static" title={`${t.later} · ${t.later_d}`}><span class="pt">5–8</span><span class="pn">{t.later}</span><small>{t.later_d}</small></div></li>}
+        {p.id === '9' && <li class="part later"><div class="ph static"><span class="pt">8</span><span class="pn">{t.later8}</span><small>{t.later_d}</small></div></li>}
+        {i === later && <li class="part later"><div class="ph static" title={`${t.later} · ${t.later_d}`}><span class="pt">5–6</span><span class="pn">{t.later}</span><small>{t.later_d}</small></div></li>}
         <li class:list={['part', { mine, open: mine }]} data-part={p.id}>
           <button class="ph" type="button" aria-expanded={mine ? 'true' : 'false'} aria-controls={`rail-p${p.id}`} title={partName(lang, p.id)}>
             <span class="pt">{p.id}<i class="mbar"><i data-bar data-keys={keys}></i></i></span>

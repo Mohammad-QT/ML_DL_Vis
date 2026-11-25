@@ -16,6 +16,7 @@ const pn = prep[lang];
 const sn = sel[lang];
 const SEL = SELECTION;
 const clustering = PARTS.find(part => part.id === '4')!.lessons;
+const nlp = PARTS.find(part => part.id === '7')!.lessons;
 const dimred = PARTS.find(part => part.id === '9')!.lessons;
 const PART1: PrepId[] = ['missing', 'categories', 'split', 'scaling'];
 const m = (n: string) => t[`m_${n}` as keyof typeof t];
@@ -124,7 +125,19 @@ const REG: Array<[keyof typeof t, string]> = [
           </a>
         ))}</div>
       </div></li>
-      <li class="stop later"><div class="pt">5–8</div><div class="sheet body"><h3 class="display"><span>{t.later}</span></h3><p>{t.later_d}</p></div></li>
+      <li class="stop later"><div class="pt">5–6</div><div class="sheet body"><h3 class="display"><span>{t.later}</span></h3><p>{t.later_d}</p></div></li>
+      <li class="stop"><div class="pt">7</div><div class="sheet body"><h3 class="display"><span>{t.p7}</span><small>{nlp.length} {t.lessons}</small></h3><p>{t.p7_d}</p>
+        <div class="minis">{nlp.map(item => (
+          <a class="mini" href={href(lang, item.path)} data-lesson={item.key}>
+            <svg viewBox="0 0 80 48" preserveAspectRatio="none" aria-hidden="true" fill="none" stroke-width="2">
+              {item.id === 'bag-of-words'
+                ? <><path d="M8 13H72V42H8ZM8 23H72M8 33H72M28 13V42M50 13V42" stroke="var(--rule)" /><path d="M13 18h8m14 10h8m13 10h10" stroke="var(--a)" /></>
+                : <><path d="M40 8V40" stroke="var(--rule)" /><path d="M38 16H15M38 32H26" stroke="var(--bad)" /><path d="M42 24H67M42 40H56" stroke="var(--ok)" /></>}
+            </svg><span><bdi>{lessonName(lang, item)}</bdi></span>
+          </a>
+        ))}</div>
+      </div></li>
+      <li class="stop later"><div class="pt">8</div><div class="sheet body"><h3 class="display"><span>{t.later8}</span></h3><p>{t.later8_d}</p></div></li>
       <li class="stop"><div class="pt">9</div><div class="sheet body"><h3 class="display"><span>{t.p9}</span><small>{dimred.length} {t.lessons}</small></h3><p>{t.p9_d}</p>
         <div class="minis">{dimred.map(item => (
           <a class="mini" href={href(lang, item.path)} data-lesson={item.key}>
