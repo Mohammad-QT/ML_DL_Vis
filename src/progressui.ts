@@ -16,7 +16,7 @@ export function paint(p: Progress = load(), root: ParentNode = document) {
     const words = el.closest<HTMLElement>('[data-st-none]')?.dataset;
     if (sr && words) sr.textContent = words[`st${st[0].toUpperCase()}${st.slice(1)}`] ?? '';
   });
-  root.querySelectorAll<HTMLElement>('[data-count]').forEach(el => {
+  root.querySelectorAll<HTMLElement>('[data-count][data-keys][data-tpl]').forEach(el => {
     const keys = keysOf(el);
     el.textContent = (el.dataset.tpl ?? '{d}/{n}').replace('{d}', String(countDone(p, keys))).replace('{n}', String(keys.length));
   });

@@ -1,0 +1,67 @@
+﻿---
+import { CLUSTER_PRESETS } from '../engine/clustering';
+import type { ClusterId } from '../lessons';
+interface Props { demo: ClusterId; ui: Record<string, string>; figure?: boolean }
+const { demo, ui, figure = false } = Astro.props;
+const means = demo === 'kmeans';
+---
+<div class:list={['cluster-demo', { figure }]} data-cluster={demo} data-figure={figure ? '' : undefined}
+  data-status={ui.status} data-done={ui.done} data-count={ui.count} data-limit={ui.limit}>
+  {!figure && <div class="controls">
+    {means && <label>{ui.preset} <select data-preset>{CLUSTER_PRESETS.map(id => <option value={id}>{ui[id]}</option>)}</select></label>}
+    {means && <label dir="auto">{ui.k} <input type="range" min="1" max="8" value="3" data-k /><output data-k-value>3</output></label>}
+    {means && <button class="btn ghost" data-step-once>{ui.step}</button>}
+    {means && <button class="btn ghost" data-run>{ui.run}</button>}
+    {means && <button class="btn ghost" data-reseed>{ui.reseed}</button>}
+    <button class="btn ghost" data-reset>{ui.reset}</button>
+  </div>}
+  <div class="plots">
+    <canvas class="board" aria-label={figure && !means ? ui.figure_board : ui.board} role={figure ? 'img' : undefined}></canvas>
+    {(!figure || !means) && <div class="plot">
+      <b>{ui.chart}</b>
+      {means
+        ? <svg viewBox="0 0 300 210" role="img" aria-label={ui.chart} data-elbow></svg>
+        : <svg viewBox="0 0 300 210" role={figure ? 'img' : undefined} aria-label={ui.chart} data-tree>
+            <g data-branches></g>
+            <g data-cut role={figure ? undefined : 'slider'} tabindex={figure ? undefined : 0} aria-label={figure ? undefined : ui.cut} aria-orientation={figure ? undefined : 'vertical'} aria-valuemin={figure ? undefined : 0} aria-valuemax={figure ? undefined : 100}>
+              {!figure && <line class="cut-hit" x1="12" x2="288"></line>}
+              <line class="cut-ink" x1="12" x2="288"></line>
+              {!figure && <circle class="cut-knob" cx="288" r="5"></circle>}
+            </g>
+          </svg>}
+      {!figure && <small class="muted" data-plot-detail>{ui.chart_note}</small>}
+    </div>}
+  </div>
+  {!figure && <p class="muted state" data-state role="status"></p>}
+</div>
+
+<style>
+  .cluster-demo { --cluster-amber: #986016; --cluster-violet: #7646a4; --cluster-cyan: #007389; --cluster-rose: #a1422b; --cluster-olive: #656c1e; }
+  :global(:root[data-theme="dark"]) .cluster-demo { --cluster-amber: #e9ab59; --cluster-violet: #cb9beb; --cluster-cyan: #65c7dc; --cluster-rose: #ff987f; --cluster-olive: #c1ca70; }
+  .plots { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 14px; margin-top: 12px; align-items: start; }
+  .figure .plots { margin: 0; }
+  .figure[data-cluster="kmeans"] .plots { display: block; }
+  canvas { border: 1.5px solid var(--rule); aspect-ratio: 1; }
+  .figure canvas { cursor: default; aspect-ratio: 1.65; }
+  .controls { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+  .controls label { display: flex; align-items: center; gap: 6px; }
+  .controls .btn { padding: 6px 12px; font-size: 14px; }
+  .controls select { color: var(--ink); background: var(--sheet); border: 1px solid var(--rule); border-radius: 7px; padding: 5px; font: inherit; }
+  input { width: 96px; accent-color: var(--a); }
+  output, .state { font: 600 13px var(--mono); }
+  .state { margin-top: 12px; }
+  .plot { background: var(--paper); border: 1.5px solid var(--rule); border-radius: 12px; padding: 10px; min-width: 0; }
+  .plot svg { display: block; width: 100%; margin-block: 4px; }
+  .cluster-demo:not(.figure) [data-tree] { touch-action: none; }
+  [data-cut][role="slider"] { cursor: ns-resize; }
+  [data-cut]:focus-visible .cut-ink { stroke-width: 3; }
+  .cut-hit { stroke: transparent; stroke-width: 22; }
+  .cut-ink { stroke: var(--ink); stroke-width: 1.5; stroke-dasharray: 5 3; }
+  .cut-knob { fill: var(--hl); stroke: var(--ink); }
+  @media (max-width: 650px) { .plots { grid-template-columns: 1fr; } }
+</style>
+
+<script>
+  import { mountCluster } from '../clustering/demos';
+  document.querySelectorAll<HTMLElement>('[data-cluster]').forEach(mountCluster);
+</script>

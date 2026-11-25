@@ -23,6 +23,10 @@ export const regPath = (id: RegId) => `learn/2-regression/${id}/`;
 export const regNotebookUrl = (id: RegId) =>
   `https://colab.research.google.com/github/Mohammad-QT/ML_DL_Vis/blob/main/notebooks/2-regression/${id}.ipynb`;
 
+export const CLUSTERING = ['kmeans', 'hierarchical'] as const;
+export type ClusterId = (typeof CLUSTERING)[number];
+export const clusterPath = (id: ClusterId) => `learn/4-clustering/${id}/`;
+
 /** The 3 model-selection lessons (Part 10), in course order. They live under `learn/10-selection/`. */
 export const SELECTION = ['cv', 'grid', 'boost'] as const;
 export type SelId = (typeof SELECTION)[number];

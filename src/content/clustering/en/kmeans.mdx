@@ -1,0 +1,59 @@
+﻿---
+id: kmeans
+short: K-Means
+title: K-Means
+lede: Give K-Means points with no labels and a number of groups. Watch it move the group centres until they settle.
+figure: { caption: 'The crosses are centres. Each shaded region belongs to the nearest cross.' }
+steps_h: How K-Means works
+steps:
+  - 'Pick <b>K</b>, the number of centres. K-means++ picks the first centre at random, then favours points far from the centres already picked.'
+  - Assign each point to its nearest centre.
+  - Move each centre to the average position of its assigned points. The dashed trail shows where it moved.
+  - Repeat until the centres stop moving.
+caution:
+  h: A small error does not guarantee useful groups
+  p: 'Try Moons with two centres. Each region has a straight edge, so it splits the curved groups instead of following them.'
+play:
+  p: 'Click the board to add a point. Set K, then press Step to update the centres once or Run to finish. Re-seed picks new starting crosses without changing the points. Try Three blobs and look for a bend near K = 3.'
+  p_touch: 'Tap the board to add a point. Set K, then press Step to update the centres once or Run to finish. Re-seed picks new starting crosses without changing the points. Try Three blobs and look for a bend near K = 3.'
+ui:
+  preset: Points
+  three: Three blobs
+  five: Five blobs
+  uneven: Uneven sizes
+  moons: Moons
+  k: Centres (K)
+  step: Step
+  run: Run
+  reseed: Re-seed
+  reset: Reset points
+  board: 'K-Means board. Use arrow keys to move the cursor and Enter to add a point.'
+  chart: Elbow chart (WCSS vs K)
+  chart_note: Look for a bend where adding another centre starts to help much less.
+  status: 'Iterations: {n}'
+  done: Centres settled
+  limit: 120 points max. Reset points to start again.
+quiz:
+  - q: After assigning the points, where does each centre move?
+    a: [To the average position of its points, To the farthest point, To a random point]
+    correct: 0
+    right: Yes. The mean of the assigned points becomes the new centre.
+    wrong: Take the average of the assigned points, not an extreme or random point.
+  - q: What does a bend in the elbow chart suggest?
+    a: [The points now have known labels, Adding more centres starts to help much less, The algorithm always finds the best groups]
+    correct: 1
+    right: Yes. The error can still fall, but the extra improvement is smaller.
+    wrong: Check how much the error drops from one K to the next. The bend is a clue, not a guarantee.
+code: |
+  import pandas as pd
+  from sklearn.cluster import KMeans
+
+  url = "https://raw.githubusercontent.com/Mohammad-QT/ML_DL_Vis/main/datasets/clustering_points.csv"
+  X = pd.read_csv(url)[["x", "y"]]
+  model = KMeans(n_clusters=3, init="k-means++", n_init=10, random_state=42)
+  groups = model.fit_predict(X)
+  print(model.cluster_centers_, model.inertia_)
+---
+When your points have no labels, you can still ask which ones belong together. K-Means draws groups around <mark>centres</mark>. It does not know what any group means; it uses only the distances between points and centres.
+
+The elbow chart shows **WCSS**, the within-cluster sum of squares: square each point's distance to its nearest centre, then add those squares. The chart tries several starts for each K and keeps the lowest score it finds. Use the bend as a clue, not as proof that you have found the right number of groups.

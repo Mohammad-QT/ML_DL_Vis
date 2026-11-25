@@ -1,9 +1,9 @@
 import type { APIRoute } from 'astro';
-import { CLASSIFICATION, PREP, REGRESSION, SELECTION, lessonPath, prepPath, regPath, selPath } from '../lessons';
+import { LESSONS } from '../course';
 import { href } from '../i18n/ui';
 
 /** Every public page in both languages, each with hreflang alternates. */
-const PATHS = ['', 'compare/', ...PREP.map(prepPath), ...REGRESSION.map(regPath), ...CLASSIFICATION.map(lessonPath), ...SELECTION.map(selPath)];
+const PATHS = ['', 'compare/', ...LESSONS.map(lesson => lesson.path)];
 
 export const GET: APIRoute = ({ site }) => {
   const abs = (lang: 'en' | 'ar', p: string) => new URL(href(lang, p), site).href;

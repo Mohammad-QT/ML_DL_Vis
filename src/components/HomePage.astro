@@ -4,7 +4,7 @@ import Base from '../layouts/Base.astro';
 import NavLinks from './NavLinks.astro';
 import CourseNav from './CourseNav.astro';
 import { common, href, fill, nav, prep, sel, type Lang } from '../i18n/ui';
-import { LESSONS, lessonName, partName } from '../course';
+import { PARTS, LESSONS, lessonName, partName } from '../course';
 import { home } from '../i18n/pages';
 import { MODEL_NAMES } from '../engine';
 import { CLASSIFICATION, REGRESSION, SELECTION, lessonPath, prepPath, regPath, selPath, type PrepId } from '../lessons';
@@ -15,6 +15,7 @@ const t = { ...common[lang], ...home[lang] };
 const pn = prep[lang];
 const sn = sel[lang];
 const SEL = SELECTION;
+const clustering = PARTS.find(part => part.id === '4')!.lessons;
 const PART1: PrepId[] = ['missing', 'categories', 'split', 'scaling'];
 const m = (n: string) => t[`m_${n}` as keyof typeof t];
 const lessonHref: Record<string, string> = Object.fromEntries(CLASSIFICATION.map(id => [id, href(lang, lessonPath(id))]));
@@ -105,7 +106,24 @@ const REG: Array<[keyof typeof t, string]> = [
           : <div class="mini soon"><canvas class="board" data-m={n} aria-hidden="true"></canvas><span>{m(n)}</span><small>{t.soon}</small></div>
         )}</div>
       </div></li>
-      <li class="stop later"><div class="pt">4–9</div><div class="sheet body"><h3 class="display"><span>{t.later}</span></h3><p>{t.later_d}</p></div></li>
+      <li class="stop"><div class="pt">4</div><div class="sheet body"><h3 class="display"><span>{t.p4}</span><small>{clustering.length} {t.lessons}</small></h3><p>{t.p4_d}</p>
+        <div class="minis">{clustering.map(item => (
+          <a class="mini" href={href(lang, item.path)} data-lesson={item.key}>
+            <svg viewBox="0 0 80 48" preserveAspectRatio="none" aria-hidden="true" fill="none" stroke-width="1.5">
+              {item.id === 'kmeans' ? <>
+                <path d="M0 29L35 24L44 0M35 24L58 48" stroke="var(--rule)" />
+                <path d="M14 15h8m-4-4v8" stroke="var(--a)" /><path d="M56 13h8m-4-4v8" stroke="var(--b)" /><path d="M31 36h8m-4-4v8" stroke="var(--ok)" />
+                <g fill="var(--ink)" stroke="none">{[[11, 12], [24, 10], [16, 21], [65, 17], [55, 8], [64, 7], [28, 35], [36, 29], [42, 39]].map(([x, y]) => <circle cx={x} cy={y} r="1.6" />)}</g>
+              </> : <>
+                <path d="M19 29V8H60V23M39.5 8V4" stroke="var(--muted)" />
+                <path d="M10 43V29H28V43" stroke="var(--a)" /><path d="M48 43V23H72V43" stroke="var(--b)" />
+                <path d="M5 17H75" stroke="var(--ink)" stroke-dasharray="3 2" />
+              </>}
+            </svg><span><bdi>{lessonName(lang, item)}</bdi></span>
+          </a>
+        ))}</div>
+      </div></li>
+      <li class="stop later"><div class="pt">5–9</div><div class="sheet body"><h3 class="display"><span>{t.later}</span></h3><p>{t.later_d}</p></div></li>
       <li class="stop"><div class="pt">10</div><div class="sheet body"><h3 class="display"><a href={href(lang, selPath('cv'))}>{t.p10}</a><small>3 {t.lessons}</small></h3><p>{t.p10_d}</p>
         <div class="links">{SEL.map(id => <a class="chip" href={href(lang, selPath(id))} data-lesson={`10/${id}`}>{sn[`n_${id}` as keyof typeof sn]}</a>)}</div></div></li>
     </ol>

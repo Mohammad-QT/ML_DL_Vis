@@ -68,3 +68,13 @@ The notebooks say it is a teaching example, not medical advice.
 
 `public/samples/customers.csv` and `public/samples/mpg.csv` are copies of the files above. The "try a sample" links
 on the Compare page serve them. Keep the copies in sync if you change the originals.
+
+## `clustering_points.csv`
+
+| | |
+|---|---|
+| Used by | `notebooks/4-clustering/*.ipynb` |
+| Rows | 30 synthetic points, 10 drawn around each of three centres |
+| Columns | `x`, `y` (coordinates on the same scale; no group labels) |
+| Source | Original to ML Visual. Generated in JavaScript with a Park–Miller generator (seed 2026) and Box–Muller normal draws (standard deviation 0.045) around `(0.21, 0.29)`, `(0.75, 0.28)`, and `(0.51, 0.74)`. Rounded to five decimals and shuffled with the same generator. |
+| License | CC0 1.0 (public domain dedication) |

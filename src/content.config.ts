@@ -2,7 +2,7 @@ import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
 import { MODEL_NAMES, REG_NAMES, REG_PRESETS } from './engine';
-import { PREP, REGRESSION, SELECTION } from './lessons';
+import { CLUSTERING, PREP, REGRESSION, SELECTION } from './lessons';
 
 const model = z.enum(MODEL_NAMES as [string, ...string[]]);
 const preset = z.enum(['blobs', 'moons', 'circles', 'xor']);
@@ -130,4 +130,22 @@ const selection = defineCollection({
   }),
 });
 
-export const collections = { lessons, prep, regression, selection };
+const clustering = defineCollection({
+  loader: glob({ pattern: '**/*.mdx', base: './src/content/clustering' }),
+  schema: z.object({
+    id: z.enum(CLUSTERING),
+    short: z.string(),
+    title: z.string(),
+    lede: z.string(),
+    figure: z.object({ caption: z.string() }),
+    steps_h: z.string(),
+    steps: z.array(z.string()).min(3).max(4),
+    caution: z.object({ h: z.string(), p: z.string() }),
+    play: z.object({ p: z.string(), p_touch: z.string().optional() }),
+    ui: z.record(z.string(), z.string()),
+    quiz: quiz.length(2),
+    code: z.string(),
+  }),
+});
+
+export const collections = { lessons, prep, regression, clustering, selection };
