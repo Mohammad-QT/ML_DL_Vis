@@ -1,0 +1,51 @@
+﻿---
+id: hierarchical
+short: Hierarchical clustering
+title: Hierarchical clustering
+lede: Start with each point on its own. Merge groups one pair at a time and read the history as a tree.
+figure: { caption: 'These colours show the groups at one height in the merge tree.' }
+steps_h: How Ward clustering works
+steps:
+  - Start with one group for each point.
+  - Use Ward linkage. Merge the pair that adds the least to the total squared spread around the group centres.
+  - Draw the merge as a join in the tree. A higher join means a more costly merge.
+  - Cut the tree at one height. Each vertical branch you cross is one cluster.
+caution:
+  h: The height is a choice
+  p: 'A low cut keeps small groups separate. A high cut combines them. Look for a tall gap between joins, where moving the cut a little leaves the same groups.'
+play:
+  p: 'Drag the horizontal cut line up or down. Count the vertical lines it crosses and compare with the cluster count below the board. Click the board to add a point and rebuild the tree.'
+  p_touch: 'Drag the horizontal cut line up or down. Count the vertical lines it crosses and compare with the cluster count below the board. Tap the board to add a point and rebuild the tree.'
+ui:
+  reset: Reset points
+  figure_board: Points coloured by cluster at the cut shown in the merge tree.
+  board: 'Cluster board. Use arrow keys to move the cursor and Enter to add a point.'
+  chart: Merge tree (dendrogram)
+  chart_note: One cluster for every vertical line the cut crosses. At a join, count the merged branch.
+  cut: Cut height
+  count: 'Clusters: {n}'
+  limit: 120 points max. Reset points to start again.
+quiz:
+  - q: The cut crosses three vertical lines. How many clusters do you have?
+    a: [One, Three, Six]
+    correct: 1
+    right: Yes. Each vertical branch at the cut represents one cluster.
+    wrong: Count one cluster for each vertical line the cut crosses, not for each point under it.
+  - q: What happens when the cut moves up past a single join?
+    a: [A cluster splits into two, Nothing changes, Two clusters become one]
+    correct: 2
+    right: Yes. The higher cut includes that merge.
+    wrong: A higher cut includes more merges, so two branches become one cluster.
+code: |
+  import pandas as pd
+  from sklearn.cluster import AgglomerativeClustering
+
+  url = "https://raw.githubusercontent.com/Mohammad-QT/ML_DL_Vis/main/datasets/clustering_points.csv"
+  X = pd.read_csv(url)[["x", "y"]]
+  model = AgglomerativeClustering(n_clusters=3, linkage="ward")
+  groups = model.fit_predict(X)
+  print(groups)
+---
+K-Means asks for K first. **Agglomerative** clustering builds the full merge tree first, then lets you decide how many groups to keep. The tree is called a <mark>dendrogram</mark>. Each tip at the bottom is one point, and each horizontal join records a merge.
+
+Ward linkage favours compact groups. At each step, it measures how much the merge would increase the sum of squared distances from points to their own group centres. It picks the cheapest merge, not necessarily the two centres that are closest to each other.

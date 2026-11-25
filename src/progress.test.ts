@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { countDone, empty, getRun, lessonState, load, openStep, parse, passQuiz, PROGRESS_KEY, reset, resume, save, setRun } from './progress';
-import { KEYS, LESSONS, PARTS, nextLesson } from './course';
+import { KEYS, LESSONS, PARTS, nextLesson, previousLesson } from './course';
+import { paint } from './progressui';
 
 class MemStore {
   m = new Map<string, string>();
@@ -60,6 +61,24 @@ describe('parse', () => {
 
 describe('counts and resume', () => {
   const part3 = PARTS.find(p => p.id === '3')!.lessons.map(l => l.key);
+  it('updates progress counters without replacing the hierarchical demos', () => {
+    const counter = { dataset: { count: '', keys: '4/kmeans,4/hierarchical', tpl: '{d} of {n}' }, textContent: '' };
+    const demos = [
+      { dataset: { cluster: 'hierarchical', count: 'Clusters: {n}', figure: '' }, textContent: 'Static figure' },
+      { dataset: { cluster: 'hierarchical', count: 'Clusters: {n}' }, textContent: 'Play controls' },
+    ];
+    const page = {
+      querySelectorAll(selector: string) {
+        const attributes = Array.from(selector.matchAll(/\[data-([\w-]+)\]/g), match => match[1]);
+        return [counter, ...demos].filter(el => attributes.every(attr => Object.hasOwn(el.dataset, attr)));
+      },
+    } as unknown as ParentNode;
+
+    paint(passQuiz(empty(), '4/kmeans'), page);
+
+    expect(counter.textContent).toBe('1 of 2');
+    expect(demos.map(demo => demo.textContent)).toEqual(['Static figure', 'Play controls']);
+  });
   it('counts done lessons in a part', () => {
     let p = passQuiz(empty(), '3/knn');
     p = openStep(p, '3/svm', 0);
@@ -119,15 +138,21 @@ describe('storage', () => {
 });
 
 describe('course', () => {
-  it('has 21 lessons with unique keys and a notebook each', () => {
-    expect(LESSONS).toHaveLength(21);
-    expect(new Set(KEYS).size).toBe(21);
+  it('has 23 lessons with unique keys and a notebook each', () => {
+    expect(LESSONS).toHaveLength(23);
+    expect(new Set(KEYS).size).toBe(23);
     for (const l of LESSONS) expect(l.notebook).toMatch(/^notebooks\/.+\.ipynb$/);
   });
   it('runs part by part, with no next lesson after the last', () => {
-    expect(PARTS.map(p => p.id)).toEqual(['0', '1', '2', '3', '10']);
+    expect(PARTS.map(p => p.id)).toEqual(['0', '1', '2', '3', '4', '10']);
     expect(nextLesson('0/start')?.key).toBe('1/missing');
     expect(nextLesson('2/forest')?.key).toBe('3/logistic');
+    expect(nextLesson('3/forest')?.key).toBe('4/kmeans');
+    expect(nextLesson('4/kmeans')?.key).toBe('4/hierarchical');
+    expect(nextLesson('4/hierarchical')?.key).toBe('10/cv');
+    expect(previousLesson('4/kmeans')?.key).toBe('3/forest');
+    expect(previousLesson('4/hierarchical')?.key).toBe('4/kmeans');
+    expect(previousLesson('10/cv')?.key).toBe('4/hierarchical');
     expect(nextLesson('10/boost')).toBeUndefined();
   });
 });

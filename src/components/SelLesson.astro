@@ -1,5 +1,5 @@
 ---
-// Lesson template for Part 0 and Part 1: same tabs and look as Lesson.astro, but the Play tab is a board (Part 0) or a small interactive.
+// Lesson template for clustering and model selection, with a custom Play interactive.
 import type { CollectionEntry } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import CourseNav from './CourseNav.astro';
@@ -9,22 +9,23 @@ import CodeOptions from './CodeOptions.astro';
 import NextLesson from './NextLesson.astro';
 import Board from './Board.astro';
 import SelDemo from './SelDemo.astro';
-import { href, common, lesson, sel as selText, type Lang } from '../i18n/ui';
-import { SELECTION, lessonPath, selPath } from '../lessons';
+import ClusterDemo from './ClusterDemo.astro';
+import { href, common, lesson, cluster as clusterText, sel as selText, type Lang } from '../i18n/ui';
+import { PARTS, lessonName, previousLesson } from '../course';
 
-interface Props { lang: Lang; entry: CollectionEntry<'selection'> }
+interface Props { lang: Lang; entry: CollectionEntry<'selection'> | CollectionEntry<'clustering'> }
 const { lang, entry } = Astro.props;
 const d = entry.data;
 const c = common[lang];
 const t = lesson[lang];
-const pt = selText[lang];
+const clustering = entry.collection === 'clustering';
+const pt = clustering ? clusterText[lang] : selText[lang];
 const fill = (s: string, vars: Record<string, string | number>) => s.replace(/\{(\w+)\}/g, (_, k) => String(vars[k]));
-const name = (id: string) => pt[`n_${id}` as keyof typeof pt];
-const n = SELECTION.indexOf(d.id) + 1;
-const prev = SELECTION[n - 2];
+const partId = clustering ? '4' : '10';
+const key = `${partId}/${d.id}`;
+const n = PARTS.find(part => part.id === partId)!.lessons.findIndex(item => item.key === key) + 1;
+const prev = previousLesson(key);
 const steps = [t.s1, t.s2, t.s3, t.s4];
-const key = `10/${d.id}`;
-const partId = '10' as const;
 const hl = (code: string) => code.replace(/&/g, '&amp;').replace(/</g, '&lt;')
   .replace(/\b(from|import)\b|\b\d+(?:\.\d+)?\b/g, (m, kw) => `<span class="${kw ? 'k' : 'n'}">${m}</span>`);
 const play = d.play;
@@ -41,7 +42,9 @@ const play = d.play;
       <p class="lede">{d.lede}</p>
     </div>
     <figure class="sheet fp">
-      <Board lang={lang} model={d.figure.model as never} variant="figure" preset={d.figure.preset} seed={d.figure.seed} cell={4} dot={3.6} tint={0.24} />
+      {entry.collection === 'clustering'
+        ? <ClusterDemo demo={entry.data.id} ui={entry.data.ui} figure />
+        : <Board lang={lang} model={entry.data.figure.model as never} variant="figure" preset={entry.data.figure.preset} seed={entry.data.figure.seed} cell={4} dot={3.6} tint={0.24} />}
       <figcaption><b>{d.figure.caption}</b></figcaption>
     </figure>
   </section>
@@ -62,9 +65,7 @@ const play = d.play;
     <ol class="how" style={`--cols:${d.steps.length}`}>{d.steps.map(s => <li set:html={s} />)}</ol>
     <div class="note read"><h3 class="display" style="margin-top:0" set:html={d.caution.h} /><p set:html={d.caution.p} /></div>
     <div class="navrow">
-      {prev
-        ? <a class="btn ghost" href={href(lang, selPath(prev))}><span class="arr">←</span> <span>{fill(t.prev, { m: name(prev) })}</span></a>
-        : <a class="btn ghost" href={href(lang, lessonPath('forest'))}><span class="arr">←</span> <span>{fill(t.prev, { m: c.m_forest })}</span></a>}
+      {prev && <a class="btn ghost" href={href(lang, prev.path)}><span class="arr">←</span> <span>{fill(t.prev, { m: lessonName(lang, prev) })}</span></a>}
       <button class="btn" data-goto="1"><span>{t.s2}</span> <span class="arr">→</span></button>
     </div>
   </section>
@@ -72,7 +73,9 @@ const play = d.play;
   <section class="sheet card" role="tabpanel">
     <h2 class="display">{t.play_h}</h2>
     <p class="muted read"><span class="on-mouse">{play.p}</span><span class="on-touch">{play.p_touch ?? play.p}</span></p>
-    <SelDemo lang={lang} demo={d.id} ui={d.ui} />
+    {entry.collection === 'clustering'
+      ? <ClusterDemo demo={entry.data.id} ui={entry.data.ui} />
+      : <SelDemo lang={lang} demo={entry.data.id} ui={entry.data.ui} />}
     <div class="navrow"><button class="btn ghost" data-goto="0"><span class="arr">←</span> <span>{t.s1}</span></button><button class="btn" data-goto="2"><span>{t.s3}</span> <span class="arr">→</span></button></div>
   </section>
 
