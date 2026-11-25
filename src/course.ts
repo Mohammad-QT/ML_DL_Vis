@@ -1,10 +1,10 @@
 // The whole course as one ordered list: the single source of truth for the sidebar, the progress counts,
 // "next lesson" and "continue where you left off". Built from the per-part lists in `lessons.ts`.
-import { CLASSIFICATION, CLUSTERING, PREP, REGRESSION, SELECTION, clusterPath, lessonPath, prepPath, regPath, selPath } from './lessons';
-import { cluster, common, prep, sel, type Lang } from './i18n/ui';
+import { CLASSIFICATION, CLUSTERING, DIMRED, PREP, REGRESSION, SELECTION, clusterPath, dimredPath, lessonPath, prepPath, regPath, selPath } from './lessons';
+import { cluster, common, dimred, prep, sel, type Lang } from './i18n/ui';
 import { home } from './i18n/pages';
 
-export type PartId = '0' | '1' | '2' | '3' | '4' | '10';
+export type PartId = '0' | '1' | '2' | '3' | '4' | '9' | '10';
 
 export interface CourseLesson {
   /** Progress key, unique across parts: `<part>/<id>`, e.g. `3/tree` vs `2/tree`. */
@@ -28,6 +28,7 @@ export const PARTS: CoursePart[] = [
   { id: '2', lessons: REGRESSION.map(id => mk('2', id, regPath(id), `2-regression/${id}`)) },
   { id: '3', lessons: CLASSIFICATION.map(id => mk('3', id, lessonPath(id), `3-classification/${id}`)) },
   { id: '4', lessons: CLUSTERING.map(id => mk('4', id, clusterPath(id), `4-clustering/${id}`)) },
+  { id: '9', lessons: DIMRED.map(id => mk('9', id, dimredPath(id), `9-dimred/${id.replace('-', '_')}`)) },
   { id: '10', lessons: SELECTION.map(id => mk('10', id, selPath(id), `10-selection/${id}`)) },
 ];
 
@@ -47,6 +48,7 @@ export const githubUrl = (path: string) => `https://github.com/${REPO}/tree/main
 export function lessonName(lang: Lang, l: CourseLesson): string {
   if (l.part === '0' || l.part === '1') return prep[lang][`n_${l.id}` as keyof (typeof prep)['en']];
   if (l.part === '4') return cluster[lang][`n_${l.id}` as keyof (typeof cluster)['en']];
+  if (l.part === '9') return dimred[lang][`n_${l.id}` as keyof (typeof dimred)['en']];
   if (l.part === '10') return sel[lang][`n_${l.id}` as keyof (typeof sel)['en']];
   return common[lang][`m_${l.id}` as keyof (typeof common)['en']];
 }

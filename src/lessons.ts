@@ -27,6 +27,10 @@ export const CLUSTERING = ['kmeans', 'hierarchical'] as const;
 export type ClusterId = (typeof CLUSTERING)[number];
 export const clusterPath = (id: ClusterId) => `learn/4-clustering/${id}/`;
 
+export const DIMRED = ['pca', 'lda', 'kernel-pca'] as const;
+export type DimredId = (typeof DIMRED)[number];
+export const dimredPath = (id: DimredId) => `learn/9-dimred/${id}/`;
+
 /** The 3 model-selection lessons (Part 10), in course order. They live under `learn/10-selection/`. */
 export const SELECTION = ['cv', 'grid', 'boost'] as const;
 export type SelId = (typeof SELECTION)[number];
