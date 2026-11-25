@@ -1,5 +1,8 @@
+import { standardizedPca as pca } from './dimred';
 import { rng, type Rng } from './random';
 import type { Label, Sample } from './types';
+
+export { pca };
 
 /** A bad file. `code` picks the message; `params` fill its {placeholders}. */
 export class CsvError extends Error {
@@ -79,37 +82,6 @@ export const MAX_ROWS = 1000;
 /** Guess the task from the target column. */
 export function detectTask(info: ColumnInfo): 'cls' | 'reg' {
   return info.numeric && info.unique > 10 ? 'reg' : 'cls';
-}
-
-const mean = (a: number[]) => a.reduce((s, v) => s + v, 0) / (a.length || 1);
-
-/** Standardise columns, then top-k principal components by power iteration with deflation. Signs are fixed so results repeat. */
-export function pca(rows: number[][], k = 2): { scores: number[][]; explained: number[] } {
-  const n = rows.length, d = rows[0]?.length ?? 0;
-  const mu = Array.from({ length: d }, (_, j) => mean(rows.map(r => r[j])));
-  const sd = mu.map((m, j) => Math.sqrt(mean(rows.map(r => (r[j] - m) ** 2))) || 1);
-  const Z = rows.map(r => r.map((v, j) => (v - mu[j]) / sd[j]));
-  const C = Array.from({ length: d }, (_, a) => Array.from({ length: d }, (_, b) => Z.reduce((s, r) => s + r[a] * r[b], 0) / Math.max(1, n)));
-  const total = C.reduce((s, r, i) => s + r[i], 0) || 1;
-  const vecs: number[][] = [], vals: number[] = [];
-  for (let c = 0; c < Math.min(k, d); c++) {
-    let v = Array.from({ length: d }, (_, j) => 1 + ((j + c * 3) % 5) * 0.1);
-    let lambda = 0;
-    for (let it = 0; it < 200; it++) {
-      const w = C.map(r => r.reduce((s, x, j) => s + x * v[j], 0));
-      const norm = Math.hypot(...w);
-      if (norm < 1e-12) { lambda = 0; break; }
-      const nv = w.map(x => x / norm);
-      const diff = Math.hypot(...nv.map((x, j) => x - v[j]));
-      v = nv; lambda = norm;
-      if (diff < 1e-10) break;
-    }
-    const big = v.reduce((m, x) => (Math.abs(x) > Math.abs(m) ? x : m), 0);
-    if (big < 0) v = v.map(x => -x);
-    vecs.push(v); vals.push(lambda);
-    for (let a = 0; a < d; a++) for (let b = 0; b < d; b++) C[a][b] -= lambda * v[a] * v[b];
-  }
-  return { scores: Z.map(r => vecs.map(v => r.reduce((s, x, j) => s + x * v[j], 0))), explained: vals.map(l => l / total) };
 }
 
 /** Rescale to [0.06, 0.94]. With 100+ values the 1st and 99th percentiles set the range, so one outlier doesn't squash the rest. */

@@ -82,10 +82,11 @@ You can also upload your own CSV on the Compare page. The file stays in your bro
 | **1 · Prepare the data** | Missing values · Text categories · Train/test split · Feature scaling |
 | **2 · Regression** | Simple linear · Multiple linear · Polynomial · SVR · Decision tree · Random forest |
 | **3 · Classification** | Logistic regression · K-NN · SVM · Kernel SVM · Naive Bayes · Decision tree · Random forest |
+| **4 · Clustering** | K-Means · Hierarchical clustering |
+| **9 · Dimensionality reduction** | PCA · LDA · Kernel PCA |
 | **10 · Pick the best model** | k-fold cross-validation · Grid search · Gradient boosting (XGBoost) |
 
-Parts 4 to 9 (clustering, association rules, reinforcement learning, NLP, deep learning and dimensionality
-reduction) come later.
+Parts 5 to 8 (association rules, reinforcement learning, NLP and deep learning) come later.
 
 ## How a lesson works
 
@@ -100,7 +101,7 @@ reduction) come later.
 
 Every lesson has a notebook in [`notebooks/`](notebooks/). Three ways to use it:
 
-- **Colab.** Press "Open in Colab" on the lesson's Code tab. Each notebook loads its data from [`datasets/`](datasets/) by link, so you upload nothing.
+- **Colab.** Press "Open in Colab" on the lesson's Code tab. Notebooks load data by link from [`datasets/`](datasets/) or use data from scikit-learn, so you upload nothing.
 - **Download.** Save the `.ipynb` file from the lesson page or from this repository.
 - **VS Code or Jupyter.** Open the downloaded file. You need Python with `pandas`, `scikit-learn` and `matplotlib`, plus `xgboost` for the boosting lesson.
 
@@ -138,8 +139,8 @@ npm install
 npm run build && npm run preview   # http://localhost:4321/ML_DL_Vis/
 ```
 
-Notebooks still read their data from GitHub. To run them with no internet at all, download
-[`datasets/`](datasets/) too and point the notebook at the local file.
+For notebooks that read data from GitHub, download [`datasets/`](datasets/) too and point the notebook at the local file.
+The Part 9 notebooks get their data from scikit-learn.
 
 ## Copyright
 

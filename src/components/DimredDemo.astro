@@ -1,0 +1,117 @@
+﻿---
+import type { DimredId } from '../lessons';
+import type { Lang } from '../i18n/ui';
+
+interface Props { demo: DimredId; ui: Record<string, string>; lang: Lang; figure?: boolean }
+const { demo, ui, lang, figure = false } = Astro.props;
+const pca = demo === 'pca';
+const lda = demo === 'lda';
+const kernel = demo === 'kernel-pca';
+const presets = pca ? ['stretched', 'round', 'blobs'] : lda ? ['lda_wins', 'pca_wins', 'overlap'] : ['circles', 'moons', 'xor'];
+---
+<div class:list={['dimred-demo', { figure }]} data-dimred={demo} data-dimred-lang={lang} data-dimred-figure={figure ? '' : undefined}>
+  {!figure && <div class="controls">
+    <div class="chips">
+      {presets.map((preset, index) => <button type="button" class:list={['chip', { on: index === 0 }]}
+        data-dimred-preset={preset} aria-pressed={index === 0 ? 'true' : 'false'} draggable={pca ? 'true' : undefined}>{ui[preset]}</button>)}
+      <button type="button" class="chip" data-dimred-reset>{ui.reset}</button>
+    </div>
+    {!pca && <div class="chips">
+      <button type="button" class="chip on" data-dimred-class="0" aria-pressed="true"><span class="swatch a"></span>{ui.class_a}</button>
+      <button type="button" class="chip" data-dimred-class="1" aria-pressed="false"><span class="swatch b"></span>{ui.class_b}</button>
+    </div>}
+    {pca && <div class="settings">
+      <label>{ui.rotate} <input type="range" min="-180" max="180" value="0" step="any" dir="ltr" data-dimred-angle />
+        <output data-dimred-angle-value dir="auto">0°</output>
+      </label>
+      <button type="button" class="chip" data-dimred-snap>{ui.snap}</button>
+    </div>}
+    {kernel && <div class="settings">
+      <label>{ui.gamma} <input type="range" min="0" max="2.4" value="1.4" step="0.05" dir="ltr" data-dimred-gamma />
+        <output data-dimred-gamma-value dir="auto"></output>
+      </label>
+    </div>}
+  </div>}
+  <div class:list={['plots', { pair: kernel }]}>
+    <div class="plot" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
+      {kernel && <p class="plot-title"><bdi>{ui.original}</bdi></p>}
+      <canvas class="board" role="img" aria-label={figure ? (kernel ? ui.original : undefined) : ui.board}
+        aria-hidden={figure && !kernel ? 'true' : undefined} data-dimred-input></canvas>
+      {kernel && !figure && <p data-dimred-original-score data-dimred-template={ui.original_accuracy} aria-live="polite"></p>}
+    </div>
+    {kernel && <div class="plot" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
+      <p class="plot-title"><bdi>{ui.projected}</bdi></p>
+      <div class="coordinates">
+        <canvas class="board" role="img" aria-label={ui.projected} data-dimred-output></canvas>
+        <span class="kpc-y" aria-hidden="true"><bdi>{ui.kpc2}</bdi></span>
+        <span class="kpc-x" aria-hidden="true"><bdi>{ui.kpc1}</bdi></span>
+      </div>
+      {!figure && <p data-dimred-projected-score data-dimred-template={ui.projected_accuracy} aria-live="polite"></p>}
+    </div>}
+  </div>
+  {pca && !figure && <>
+    <div class="legend muted">
+      <span class="axis solid"><bdi>{ui.pc1}</bdi></span>
+      <span class="axis dashed">{ui.candidate}</span>
+    </div>
+    <p data-dimred-variance data-dimred-template={ui.variance_kept} aria-live="polite"></p>
+    <div class="summary">
+      <b>{ui.variance_explained}</b>
+      <div class="variance-bar" aria-hidden="true">
+        <span data-dimred-pc1-bar></span><span data-dimred-pc2-bar></span>
+      </div>
+      <div class="legend">
+        <span><bdi>{ui.pc1}</bdi> <bdi data-dimred-pc1-value></bdi></span>
+        <span><bdi>{ui.pc2}</bdi> <bdi data-dimred-pc2-value></bdi></span>
+      </div>
+    </div>
+  </>}
+  {lda && <div class="strips">
+    {[['pca', ui.pca_axis], ['lda', ui.lda_axis]].map(([id, label]) => <div class="summary">
+      <b class:list={['axis', id === 'pca' ? 'dashed' : 'solid']}><bdi>{label}</bdi></b>
+      <svg viewBox="0 0 300 28" role="img" aria-label={label} data-dimred-strip={id}></svg>
+      {!figure && <p data-dimred-separation={id} data-dimred-template={ui.separation} data-dimred-empty={ui.no_separation} aria-live="polite"></p>}
+    </div>)}
+  </div>}
+  {!figure && <p class="muted" data-dimred-status data-dimred-limit={ui.limit} role="status"></p>}
+</div>
+
+<style>
+  .controls { display: grid; gap: 10px; margin-bottom: 12px; }
+  .chips, .settings, .legend { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+  .settings label { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+  .settings input { width: 106px; }
+  .settings output { min-width: 3ch; font: 600 13px var(--mono); }
+  .plots { max-width: 430px; }
+  .plots.pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; max-width: none; direction: ltr; }
+  .plot { min-width: 0; }
+  .plot-title { font-weight: 700; }
+  .coordinates { position: relative; }
+  .kpc-x, .kpc-y { position: absolute; color: var(--ink); background: var(--sheet); font: 600 11px var(--mono); pointer-events: none; }
+  .kpc-x { right: 5%; bottom: 4%; }
+  .kpc-y { left: 5%; top: 4%; }
+  canvas { aspect-ratio: 1; border: 1.5px solid var(--rule); max-width: 100%; }
+  .figure canvas, [data-dimred-output] { cursor: default; }
+  .figure .plots { margin: 0; }
+  .figure .plots.pair { gap: 8px; }
+  .figure .plot-title { font-size: 13px; }
+  .strips, .summary, .plots + .legend { margin-top: 10px; }
+  .strips { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .summary { background: var(--paper); border: 1.5px solid var(--rule); padding: 8px 10px; border-radius: 12px; min-width: 0; }
+  .summary svg { display: block; width: 100%; }
+  .axis::before { content: ''; display: inline-block; width: 18px; margin-inline-end: 6px; vertical-align: middle; }
+  .axis.solid::before { border-top: 2px solid var(--ink); }
+  .axis.dashed::before { border-top: 2px dashed var(--ok); }
+  .variance-bar { display: flex; border-radius: 5px; height: 8px; margin-block: 5px; background: var(--rule); overflow: hidden; }
+  [data-dimred-pc1-bar] { background: var(--a); }
+  [data-dimred-pc2-bar] { background: var(--b); }
+  [data-dimred-status]:empty { display: none; }
+  @media (max-width: 650px) {
+    .dimred-demo:not(.figure) .plots.pair, .dimred-demo:not(.figure) .strips { grid-template-columns: minmax(0, 1fr); }
+  }
+</style>
+
+<script>
+  import { mountDimred } from '../dimred/demos';
+  document.querySelectorAll<HTMLElement>('[data-dimred]').forEach(mountDimred);
+</script>

@@ -1,0 +1,66 @@
+---
+id: lda
+short: "LDA"
+title: "Linear discriminant analysis (LDA)"
+lede: "Sometimes the biggest spread tells you little about the classes. LDA makes new axes that pull class centres apart and keep each class close together."
+figure:
+  caption: "The dashed PCA axis follows the spread of all points. The solid LDA axis separates the two classes."
+steps_h: "How LDA works"
+steps:
+  - "Use the labels to find the average point for each class."
+  - "Measure how far apart the class centres are and how spread out each class is."
+  - "Choose a direction with a large gap between centres compared with the spread within each class."
+  - "Give each point a coordinate on that axis. With more classes, you can keep more axes."
+caution:
+  h: "Check separation on new points"
+  p: "The strips score the best single cut on the points you used to find the axes. Use held-out data to check how well a classifier will do on new points."
+play:
+  p: "Switch between the presets and compare the strips. The score is the share of points that the best single cut classifies correctly. Pick a class, then click the board to add a point."
+  p_touch: "Switch between the presets and compare the strips. The score is the share of points that the best single cut classifies correctly. Pick a class, then tap the board to add a point."
+ui:
+  board: "LDA board. Use arrow keys to move the cursor and Enter to add a point."
+  limit: "300 points max. Reset points to start again."
+  reset: "Reset points"
+  pca_wins: "PCA wins"
+  lda_wins: "LDA wins"
+  overlap: "Overlap"
+  class_a: "Class A"
+  class_b: "Class B"
+  pca_axis: "PCA axis (dashed)"
+  lda_axis: "LDA axis (solid)"
+  separation: "Separation: {n}"
+  no_separation: "Add points from both classes to measure separation."
+quiz:
+  - q: "Why can LDA keep an axis with little overall variance?"
+    a: ["It uses the class labels to find separation","It always picks the longest axis","It ignores the original features"]
+    correct: 0
+    right: "A small spread can still include a gap between the classes."
+    wrong: "LDA looks at the class centres and the spread within each class."
+  - q: "What can happen if you swap some labels but leave the points where they are?"
+    a: ["Both axes must rotate","The LDA axis can change while the PCA axis stays the same","Only the PCA axis can change"]
+    correct: 1
+    right: "LDA uses labels. PCA only uses the positions of the points."
+    wrong: "Ask which method can see the labels you changed."
+code: |
+  from sklearn.datasets import load_wine
+  from sklearn.discriminant_analysis import LinearDiscriminantAnalysis
+  from sklearn.linear_model import LogisticRegression
+  from sklearn.model_selection import train_test_split
+  from sklearn.pipeline import Pipeline
+  from sklearn.preprocessing import StandardScaler
+
+  X, y = load_wine(return_X_y=True)
+  X_train, X_test, y_train, y_test = train_test_split(
+      X, y, test_size=0.25, stratify=y, random_state=42
+  )
+  model = Pipeline([
+      ("scale", StandardScaler()),
+      ("reduce", LinearDiscriminantAnalysis(n_components=2)),
+      ("classify", LogisticRegression(max_iter=1000)),
+  ])
+  model.fit(X_train, y_train)
+  print(model.score(X_test, y_test))
+---
+Picture two long rows of points, one for each class. The rows run left to right, but one sits above the other. PCA chooses the left-to-right axis because that is where the points have the most spread. Both classes land in much the same places along that axis.
+
+Linear discriminant analysis uses <mark>class labels</mark>. It can choose the up-and-down axis because the rows land far apart, even if the whole cloud is short in that direction. In the notebook, three wine classes let us keep two axes. Logistic regression learns which class to predict from those two coordinates.

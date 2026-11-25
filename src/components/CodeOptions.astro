@@ -24,7 +24,7 @@ const pip = `pip install pandas scikit-learn matplotlib${l.key === '10/boost' ? 
       <li><span set:html={t.local_2} /><pre>{pip}</pre></li>
       <li set:html={t.local_3} />
     </ol>
-    <p class="net" set:html={fill(t.local_net, { u: githubUrl('datasets') })} />
+    <p class="net" set:html={l.part === '9' ? t.local_builtin : fill(t.local_net, { u: githubUrl('datasets') })} />
   </details>
 </div>
 

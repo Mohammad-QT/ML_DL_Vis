@@ -1,0 +1,69 @@
+---
+id: kernel-pca
+short: "Kernel PCA"
+title: "Kernel PCA"
+lede: "A straight line cannot separate two rings that share a centre. Kernel PCA can redraw the points so that a straight line works."
+figure:
+  caption: "The same points appear twice. On the KPC1 and KPC2 axes, a straight boundary can separate the rings."
+steps_h: "How Kernel PCA works"
+steps:
+  - "Compare each pair of points. The RBF kernel gives nearby points high similarity and distant points low similarity."
+  - "Use gamma to set how quickly similarity falls with distance."
+  - "Find the directions with the most spread in the feature space described by those similarities. Keep two new coordinates."
+  - "Fit logistic regression on the new coordinates. Compare it with the same classifier on the original coordinates."
+caution:
+  h: "Try different gamma values"
+  p: "If gamma is too low, most points look similar. If it is too high, most pairs look unrelated. Check the accuracy on held-out data before you pick a setting for real use."
+play:
+  p: "Try Circles and drag gamma. Compare the two logistic regression training scores. Pick a class and click the original board to add a point to both views."
+  p_touch: "Try Circles and drag gamma. Compare the two logistic regression training scores. Pick a class and tap the original board to add a point to both views."
+ui:
+  board: "Original feature board. Use arrow keys to move the cursor and Enter to add a point."
+  limit: "300 points max. Reset points to start again."
+  reset: "Reset points"
+  circles: "Circles"
+  moons: "Moons"
+  xor: "XOR-like"
+  class_a: "Class A"
+  class_b: "Class B"
+  gamma: "Gamma"
+  original: "Original coordinates"
+  projected: "Kernel PCA coordinates"
+  original_accuracy: "Logistic regression on the original points · train accuracy {n}"
+  projected_accuracy: "Logistic regression on the new coordinates · train accuracy {n}"
+  kpc1: "KPC1"
+  kpc2: "KPC2"
+quiz:
+  - q: "What does raising gamma do to an RBF similarity?"
+    a: ["Similarity falls faster as distance grows","Distant points become more similar","Gamma supplies class labels"]
+    correct: 0
+    right: "A larger gamma limits high similarity to closer pairs."
+    wrong: "Watch how quickly two points stop looking similar as their distance increases."
+  - q: "Which part learns from the class labels?"
+    a: ["The RBF kernel","Kernel PCA","Logistic regression"]
+    correct: 2
+    right: "Logistic regression learns which class goes where. Kernel PCA uses only the feature values."
+    wrong: "The method that draws the decision boundary uses labels. The projection uses similarities between points."
+code: |
+  from sklearn.datasets import make_circles
+  from sklearn.decomposition import KernelPCA
+  from sklearn.linear_model import LogisticRegression
+  from sklearn.model_selection import train_test_split
+  from sklearn.pipeline import Pipeline
+  from sklearn.preprocessing import StandardScaler
+
+  X, y = make_circles(n_samples=400, factor=0.3, noise=0.03, random_state=42)
+  X_train, X_test, y_train, y_test = train_test_split(
+      X, y, test_size=0.25, stratify=y, random_state=42
+  )
+  model = Pipeline([
+      ("scale", StandardScaler()),
+      ("reduce", KernelPCA(n_components=2, kernel="rbf", gamma=2)),
+      ("classify", LogisticRegression(max_iter=1000)),
+  ])
+  model.fit(X_train, y_train)
+  print(model.score(X_test, y_test))
+---
+A <mark>kernel</mark> lets us compare points as though we had described them with many extra features. The radial basis function (RBF) kernel uses distance for the comparison. Kernel PCA uses these similarities to make a new view of the same points, without asking for their class labels.
+
+On the original plot, a straight boundary cuts across both rings. On the new plot, you can sometimes separate them with a line. The classifier in both plots is logistic regression. Its input coordinates are what change.

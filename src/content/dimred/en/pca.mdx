@@ -1,0 +1,67 @@
+---
+id: pca
+short: "PCA"
+title: "Principal component analysis (PCA)"
+lede: "A dataset can have more features than we can draw. PCA makes new axes that keep as much of the spread as possible."
+figure:
+  caption: "The solid line is PC1. The thin lines show where the points land when you project them onto it."
+steps_h: "How PCA works"
+steps:
+  - "Find the average point. The new axes pass through it."
+  - "Find the direction along which the points spread out the most. Call it the first principal component, or PC1."
+  - "Find the next direction at a right angle to PC1. Call it PC2."
+  - "Keep the coordinates along the axes you chose. Use those coordinates to draw the data or train a classifier."
+caution:
+  h: "Check the feature scales"
+  p: "A feature measured in large units can dominate the spread. Scale columns first when their units differ. The board uses the same scale on both axes."
+play:
+  p: "Click the board to add a point. Drag the slider to turn the dashed axis and watch how much variance it keeps. Try the round cloud, then the stretched cloud, and snap to PC1."
+  p_touch: "Tap the board to add a point. Drag the slider to turn the dashed axis and watch how much variance it keeps. Try the round cloud, then the stretched cloud, and snap to PC1."
+ui:
+  board: "PCA board. Use arrow keys to move the cursor and Enter to add a point."
+  limit: "300 points max. Reset points to start again."
+  reset: "Reset points"
+  stretched: "Stretched cloud"
+  round: "Round cloud"
+  blobs: "Two blobs"
+  rotate: "Rotate axis"
+  snap: "Snap to PC1"
+  variance_kept: "Variance kept: {n}"
+  variance_explained: "Variance explained"
+  candidate: "Candidate axis"
+  pc1: "PC1"
+  pc2: "PC2"
+quiz:
+  - q: "What does PCA look for when it chooses PC1?"
+    a: ["The direction with the most spread","The direction with the fewest points","The direction that best separates known labels"]
+    correct: 0
+    right: "PC1 keeps as much variance as any single straight axis can."
+    wrong: "Look at the spread of the projections. PCA does not use class labels."
+  - q: "If PC1 explains 85% of the variance, how much remains for PC2 on this two-feature board?"
+    a: ["5%","15%","85%"]
+    correct: 1
+    right: "The two components account for all the variance, so 100% minus 85% leaves 15%."
+    wrong: "Subtract the share of PC1 from 100%."
+code: |
+  from sklearn.datasets import load_wine
+  from sklearn.decomposition import PCA
+  from sklearn.linear_model import LogisticRegression
+  from sklearn.model_selection import train_test_split
+  from sklearn.pipeline import Pipeline
+  from sklearn.preprocessing import StandardScaler
+
+  X, y = load_wine(return_X_y=True)
+  X_train, X_test, y_train, y_test = train_test_split(
+      X, y, test_size=0.25, stratify=y, random_state=42
+  )
+  model = Pipeline([
+      ("scale", StandardScaler()),
+      ("reduce", PCA(n_components=2)),
+      ("classify", LogisticRegression(max_iter=1000)),
+  ])
+  model.fit(X_train, y_train)
+  print(model.score(X_test, y_test))
+---
+Imagine a wine described by thirteen measurements, including alcohol and colour intensity. A flat plot has room for two axes. PCA makes new features by mixing the original measurements. Each point gets a new coordinate for each axis you keep.
+
+On the board, imagine dropping every point straight onto a line, along a path at right angles to it. The ticks mark the resulting <mark>projections</mark>. The first principal component follows the direction that spreads those ticks out the most. <mark>Variance explained</mark> tells you how much of the original spread the new coordinates keep. In the notebook, logistic regression learns from just two of those coordinates.
