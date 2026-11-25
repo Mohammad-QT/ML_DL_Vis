@@ -18,6 +18,7 @@ const sn = sel[lang];
 const SEL = SELECTION;
 const clustering = PARTS.find(part => part.id === '4')!.lessons;
 const rules = PARTS.find(part => part.id === '5')!.lessons;
+const bandit = PARTS.find(part => part.id === '6')!.lessons;
 const dimred = PARTS.find(part => part.id === '9')!.lessons;
 const PART1: PrepId[] = ['missing', 'categories', 'split', 'scaling'];
 const m = (n: string) => t[`m_${n}` as keyof typeof t];
@@ -133,7 +134,24 @@ const REG: Array<[keyof typeof t, string]> = [
           </a>
         ))}</div>
       </div></li>
-      <li class="stop later"><div class="pt">6–8</div><div class="sheet body"><h3 class="display"><span>{t.later}</span></h3><p>{t.later_d}</p></div></li>
+      <li class="stop"><div class="pt">6</div><div class="sheet body"><h3 class="display"><span>{t.p6}</span><small>{bandit.length} {t.lessons}</small></h3><p>{t.p6_d}</p>
+        <div class="minis">{bandit.map(item => (
+          <a class="mini" href={href(lang, item.path)} data-lesson={item.key}>
+            <svg viewBox="0 0 80 48" preserveAspectRatio="none" aria-hidden="true" fill="none" stroke-width="1.5">
+              <path d="M5 40H75" stroke="var(--rule)" />
+              {item.id === 'ucb' ? <>
+                <path d="M20 33V22m-4 0h8M40 25V12m-4 0h8M60 34V16m-4 0h8" stroke="var(--a)" />
+                <g fill="var(--ink)"><circle cx="20" cy="33" r="2" /><circle cx="40" cy="25" r="2" /><circle cx="60" cy="34" r="2" /></g>
+              </> : <>
+                <path d="M5 40C14 39 16 19 23 19S31 39 42 40" stroke="var(--b)" />
+                <path d="M33 40C48 40 50 10 56 10S63 40 75 40" stroke="var(--a)" />
+                <circle cx="58" cy="12" r="2" fill="var(--ink)" />
+              </>}
+            </svg><span><bdi>{lessonName(lang, item)}</bdi></span>
+          </a>
+        ))}</div>
+      </div></li>
+      <li class="stop later"><div class="pt">7–8</div><div class="sheet body"><h3 class="display"><span>{t.later}</span></h3><p>{t.later_d}</p></div></li>
       <li class="stop"><div class="pt">9</div><div class="sheet body"><h3 class="display"><span>{t.p9}</span><small>{dimred.length} {t.lessons}</small></h3><p>{t.p9_d}</p>
         <div class="minis">{dimred.map(item => (
           <a class="mini" href={href(lang, item.path)} data-lesson={item.key}>

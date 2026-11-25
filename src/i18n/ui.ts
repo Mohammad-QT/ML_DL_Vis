@@ -219,12 +219,25 @@ export const dimred = {
   },
 } as const;
 
+export const rl = {
+  en: {
+    part: 'Reinforcement learning', kicker: 'Part 6 · Reinforcement learning · lesson {n} of 2',
+    n_ucb: 'Upper confidence bound', n_thompson: 'Thompson sampling',
+    code_p: 'Replay 10,000 rounds from the example CSV. Open the notebook to compare policies and plot the results.',
+  },
+  ar: {
+    part: 'التعلّم المعزّز', kicker: 'الجزء 6 · التعلّم المعزّز · الدرس {n} من 2',
+    n_ucb: 'الحد الأعلى للثقة', n_thompson: 'أخذ العينات بطريقة تومبسون',
+    code_p: 'أعِد تشغيل 10,000 جولة من ملف البيانات. افتح الدفتر لمقارنة السياسات ورسم النتائج.',
+  },
+} as const;
+
 /** Course navigation, progress, code options and the offline app. */
 export const nav = {
   en: {
     course: 'Course', toc: 'Course contents', close: 'Close the course menu',
     part: 'Part {n}', count: '{d} of {n}', overall: '{d} of {n} lessons done', bar: '{p} · {d} of {n} done',
-    later: 'Parts 6–8', later_d: 'Coming later',
+    later: 'Parts 7–8', later_d: 'Coming later',
     here: 'You are here', st_none: 'Not started', st_started: 'In progress', st_done: 'Done',
     saved: 'Progress is saved in this browser only.',
     reset: 'Reset progress', reset_q: 'Erase all your progress on this device?', reset_yes: 'Yes, erase it', cancel: 'Cancel',
@@ -233,7 +246,7 @@ export const nav = {
     step: 'Step {n} of 4',
     next_h: 'Next lesson', next_part: 'Part {n} · {p}',
     end_h: 'You reached the end of the course for now',
-    end_p: 'Parts 6–8 come later. Go back to the route to revisit any lesson.', end_cta: 'Back to the route',
+    end_p: 'Parts 7–8 come later. Go back to the route to revisit any lesson.', end_cta: 'Back to the route',
     cont: 'Continue where you left off', cont_part: 'Part {n} · {p}',
     collapse: 'Collapse the course menu', expand: 'Expand the course menu',
     show_all: 'Show all parts', focus: 'Show only my part', cont_tag: 'Continue here',
@@ -252,7 +265,7 @@ export const nav = {
   ar: {
     course: 'الدورة', toc: 'محتويات الدورة', close: 'أغلق قائمة الدورة',
     part: 'الجزء {n}', count: '{d} من {n}', overall: 'أنهيت {d} من {n} درسًا', bar: '{p} · أنهيت {d} من {n}',
-    later: 'الأجزاء 6–8', later_d: 'لاحقًا',
+    later: 'الأجزاء 7–8', later_d: 'لاحقًا',
     here: 'أنت هنا', st_none: 'لم تبدأ', st_started: 'قيد التعلّم', st_done: 'مكتمل',
     saved: 'يُحفظ تقدّمك في هذا المتصفح فقط.',
     reset: 'إعادة ضبط التقدّم', reset_q: 'هل تريد مسح كل تقدّمك على هذا الجهاز؟', reset_yes: 'نعم، امسحه', cancel: 'إلغاء',
@@ -261,7 +274,7 @@ export const nav = {
     step: 'الخطوة {n} من 4',
     next_h: 'الدرس التالي', next_part: 'الجزء {n} · {p}',
     end_h: 'وصلت إلى نهاية الدورة حاليًا',
-    end_p: 'الأجزاء 6–8 تأتي لاحقًا. عد إلى المسار لتراجع أي درس.', end_cta: 'العودة إلى المسار',
+    end_p: 'الأجزاء 7–8 تأتي لاحقًا. عد إلى المسار لتراجع أي درس.', end_cta: 'العودة إلى المسار',
     cont: 'تابع من حيث توقفت', cont_part: 'الجزء {n} · {p}',
     collapse: 'صغّر قائمة الدورة', expand: 'وسّع قائمة الدورة',
     show_all: 'أظهر كل الأجزاء', focus: 'أظهر جزئي فقط', cont_tag: 'تابع من هنا',
