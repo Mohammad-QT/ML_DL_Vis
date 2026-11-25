@@ -1,27 +1,13 @@
 // @vitest-environment jsdom
-import { execFileSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
-import { join, resolve, sep } from 'node:path';
-import { afterAll, afterEach, beforeAll, expect, it } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { afterEach, expect, inject, it } from 'vitest';
 import { empty } from '../progress';
 import { paint } from '../progressui';
 import { mountRules } from './demos';
 import { RULES, rulesPath } from './lessons';
 
-let out: string;
-beforeAll(() => {
-  mkdirSync('.astro', { recursive: true });
-  out = mkdtempSync(resolve('.astro/rules-test-'));
-  execFileSync(process.execPath, ['node_modules/astro/bin/astro.mjs', 'build', '--outDir', out], {
-    timeout: 90_000,
-    stdio: 'pipe',
-    windowsHide: true,
-  });
-}, 95_000);
-
-afterAll(() => {
-  if (out?.startsWith(resolve('.astro') + sep)) rmSync(out, { recursive: true, force: true });
-});
+const out = inject('siteDir');
 
 afterEach(() => { document.body.replaceChildren(); });
 

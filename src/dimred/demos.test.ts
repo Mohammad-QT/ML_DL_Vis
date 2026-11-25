@@ -1,28 +1,13 @@
 // @vitest-environment jsdom
-import { execFileSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
-import { join, resolve } from 'node:path';
-import { afterAll, afterEach, beforeAll, expect, it, vi } from 'vitest';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { afterEach, expect, inject, it, vi } from 'vitest';
 import { DIMRED, dimredPath } from '../lessons';
 import { empty } from '../progress';
 import { paint } from '../progressui';
 import { mountDimred } from './demos';
 
-let out: string;
-beforeAll(() => {
-  // Build the actual routes so this also catches regressions in the Astro template.
-  mkdirSync('.astro', { recursive: true });
-  out = mkdtempSync(resolve('.astro/dimred-test-'));
-  execFileSync(process.execPath, ['node_modules/astro/bin/astro.mjs', 'build', '--outDir', out], {
-    timeout: 60_000,
-    stdio: 'pipe',
-    windowsHide: true,
-  });
-}, 65_000);
-
-afterAll(() => {
-  if (out) rmSync(out, { recursive: true, force: true });
-});
+const out = inject('siteDir');
 
 afterEach(() => {
   vi.restoreAllMocks();

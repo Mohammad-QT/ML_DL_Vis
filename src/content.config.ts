@@ -6,6 +6,7 @@ import { CLUSTERING, DIMRED, PREP, REGRESSION, SELECTION } from './lessons';
 import { RULES } from './rules/lessons';
 
 import { RL } from './rl/lessons';
+import { NLP } from './lessons';
 
 const model = z.enum(MODEL_NAMES as [string, ...string[]]);
 const preset = z.enum(['blobs', 'moons', 'circles', 'xor']);
@@ -167,4 +168,9 @@ const bandit = defineCollection({
   schema: customBoardLesson.extend({ id: z.enum(RL) }),
 });
 
-export const collections = { lessons, prep, regression, clustering, rules, bandit, selection, dimred };
+const nlp = defineCollection({
+  loader: glob({ pattern: '**/*.mdx', base: './src/content/nlp' }),
+  schema: customBoardLesson.extend({ id: z.enum(NLP) }),
+});
+
+export const collections = { lessons, prep, regression, clustering, rules, bandit, nlp, selection, dimred };

@@ -145,7 +145,7 @@ describe('course', () => {
   it('runs part by part, with no next lesson after the last', () => {
     const parts = PARTS.map(part => Number(part.id));
     expect(parts).toEqual([...new Set(parts)].sort((left, right) => left - right));
-    expect(parts).toEqual(expect.arrayContaining([0, 1, 2, 3, 4, 5, 6, 9, 10]));
+    expect(parts).toEqual(expect.arrayContaining([0, 1, 2, 3, 4, 5, 6, 7, 9, 10]));
     expect(nextLesson('0/start')?.key).toBe('1/missing');
     expect(nextLesson('2/forest')?.key).toBe('3/logistic');
     expect(nextLesson('3/forest')?.key).toBe('4/kmeans');
@@ -154,7 +154,9 @@ describe('course', () => {
     expect(nextLesson('5/apriori')?.key).toBe('5/eclat');
     expect(nextLesson('5/eclat')?.key).toBe('6/ucb');
     expect(nextLesson('6/ucb')?.key).toBe('6/thompson');
-    expect(nextLesson('6/thompson')?.key).toBe('9/pca');
+    expect(nextLesson('6/thompson')?.key).toBe('7/bag-of-words');
+    expect(nextLesson('7/bag-of-words')?.key).toBe('7/sentiment');
+    expect(nextLesson('7/sentiment')?.key).toBe('9/pca');
     expect(nextLesson('9/pca')?.key).toBe('9/lda');
     expect(nextLesson('9/lda')?.key).toBe('9/kernel-pca');
     expect(nextLesson('9/kernel-pca')?.key).toBe('10/cv');
@@ -164,7 +166,8 @@ describe('course', () => {
     expect(previousLesson('5/eclat')?.key).toBe('5/apriori');
     expect(previousLesson('6/ucb')?.key).toBe('5/eclat');
     expect(previousLesson('6/thompson')?.key).toBe('6/ucb');
-    expect(previousLesson('9/pca')?.key).toBe('6/thompson');
+    expect(previousLesson('7/bag-of-words')?.key).toBe('6/thompson');
+    expect(previousLesson('9/pca')?.key).toBe('7/sentiment');
     expect(previousLesson('10/cv')?.key).toBe('9/kernel-pca');
     expect(nextLesson('10/boost')).toBeUndefined();
   });

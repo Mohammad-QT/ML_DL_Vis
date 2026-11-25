@@ -14,10 +14,11 @@ import DimredDemo from './DimredDemo.astro';
 import RulesDemo from './RulesDemo.astro';
 import RulesFigure from './RulesFigure.astro';
 import BanditDemo from './BanditDemo.astro';
-import { href, common, lesson, cluster as clusterText, dimred as dimredText, rules as rulesText, rl as rlText, sel as selText, type Lang } from '../i18n/ui';
+import NlpDemo from './NlpDemo.astro';
+import { href, common, lesson, cluster as clusterText, dimred as dimredText, rules as rulesText, rl as rlText, nlp as nlpText, sel as selText, type Lang } from '../i18n/ui';
 import { PARTS, lessonName, previousLesson } from '../course';
 
-interface Props { lang: Lang; entry: CollectionEntry<'selection'> | CollectionEntry<'clustering'> | CollectionEntry<'dimred'> | CollectionEntry<'rules'> | CollectionEntry<'bandit'> }
+interface Props { lang: Lang; entry: CollectionEntry<'selection'> | CollectionEntry<'clustering'> | CollectionEntry<'dimred'> | CollectionEntry<'rules'> | CollectionEntry<'bandit'> | CollectionEntry<'nlp'> }
 const { lang, entry } = Astro.props;
 const d = entry.data;
 const c = common[lang];
@@ -26,9 +27,10 @@ const clustering = entry.collection === 'clustering';
 const dimred = entry.collection === 'dimred';
 const rules = entry.collection === 'rules';
 const bandit = entry.collection === 'bandit';
-const pt = clustering ? clusterText[lang] : rules ? rulesText[lang] : bandit ? rlText[lang] : dimred ? dimredText[lang] : selText[lang];
+const nlp = entry.collection === 'nlp';
+const pt = clustering ? clusterText[lang] : rules ? rulesText[lang] : bandit ? rlText[lang] : nlp ? nlpText[lang] : dimred ? dimredText[lang] : selText[lang];
 const fill = (s: string, vars: Record<string, string | number>) => s.replace(/\{(\w+)\}/g, (_, k) => String(vars[k]));
-const partId = clustering ? '4' : rules ? '5' : bandit ? '6' : dimred ? '9' : '10';
+const partId = clustering ? '4' : rules ? '5' : bandit ? '6' : nlp ? '7' : dimred ? '9' : '10';
 const key = `${partId}/${d.id}`;
 const n = PARTS.find(part => part.id === partId)!.lessons.findIndex(item => item.key === key) + 1;
 const prev = previousLesson(key);
@@ -57,7 +59,9 @@ const play = d.play;
           ? <DimredDemo lang={lang} demo={entry.data.id} ui={entry.data.ui} figure />
         : entry.collection === 'rules'
           ? <RulesFigure eclat={entry.data.id === 'eclat'} />
-          : <Board lang={lang} model={entry.data.figure.model as never} variant="figure" preset={entry.data.figure.preset} seed={entry.data.figure.seed} cell={4} dot={3.6} tint={0.24} />}
+          : entry.collection === 'nlp'
+            ? <NlpDemo lang={lang} demo={entry.data.id} ui={entry.data.ui} figure />
+            : <Board lang={lang} model={entry.data.figure.model as never} variant="figure" preset={entry.data.figure.preset} seed={entry.data.figure.seed} cell={4} dot={3.6} tint={0.24} />}
       <figcaption><b>{d.figure.caption}</b></figcaption>
     </figure>
   </section>
@@ -94,7 +98,9 @@ const play = d.play;
         ? <DimredDemo lang={lang} demo={entry.data.id} ui={entry.data.ui} />
       : entry.collection === 'rules'
         ? <RulesDemo lang={lang} demo={entry.data.id} />
-        : <SelDemo lang={lang} demo={entry.data.id} ui={entry.data.ui} />}
+        : entry.collection === 'nlp'
+          ? <NlpDemo lang={lang} demo={entry.data.id} ui={entry.data.ui} />
+          : <SelDemo lang={lang} demo={entry.data.id} ui={entry.data.ui} />}
     <div class="navrow"><button class="btn ghost" data-goto="0"><span class="arr">←</span> <span>{t.s1}</span></button><button class="btn" data-goto="2"><span>{t.s3}</span> <span class="arr">→</span></button></div>
   </section>
 
