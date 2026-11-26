@@ -63,7 +63,10 @@ export class Board {
   }
 
   setModel(m: Model, animate = false): void {
-    if (animate && this.W && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    // Only fade a board that is on screen. Off screen, `refresh` defers the work until it scrolls back into view.
+    if (animate && this.W && this.visible && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      // A resize or theme change clears the colours; read them again before drawing.
+      if (!this.colors) this.readColors();
       this.prev.width = this.field.width;
       this.prev.height = this.field.height;
       this.prev.getContext('2d')!.drawImage(this.field, 0, 0);

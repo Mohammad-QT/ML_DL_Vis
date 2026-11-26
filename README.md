@@ -27,7 +27,14 @@ ML Visual is a free course in machine learning for beginners, in English and Ara
 The models train in your browser and redraw their decision line the moment you add a point or move a setting.
 There is nothing to install. When you want the code, each lesson opens its own notebook in Google Colab.
 
-**On this page:** [Features](#-features) · [Inside the course](#inside-the-course) · [How a lesson works](#how-a-lesson-works) · [Run the code](#run-the-code) · [Run the site locally](#run-the-site-locally) · [Use it offline](#use-it-offline) · [Tech](#tech) · [Copyright](#copyright)
+**On this page:** [What's new](#whats-new) · [Features](#-features) · [Inside the course](#inside-the-course) · [How a lesson works](#how-a-lesson-works) · [Run the code](#run-the-code) · [Run the site locally](#run-the-site-locally) · [Use it offline](#use-it-offline) · [Tech](#tech) · [Copyright](#copyright)
+
+## What's new
+
+- **26 November 2026: Part 8, Deep learning.** Train a neural network live and choose its activation function (ReLU, tanh, sigmoid or Leaky ReLU), then draw a digit and watch a convolutional network read it. Every part of the course, 0 to 10, is now live.
+- **25 November 2026:** Parts 4, 5, 6, 7 and 9, plus five new lessons: gradient descent, Ridge and Lasso, DBSCAN, Q-learning, and precision, recall and the ROC curve.
+
+The full history is in [CHANGELOG.md](CHANGELOG.md).
 
 ## ✦ Features
 
@@ -97,7 +104,7 @@ You can also upload your own CSV on the Compare page. The file stays in your bro
 | 1 | **Learn** | Read the idea in plain words, how the algorithm decides, and the one mistake to avoid |
 | 2 | **Play** | Add points, pick a dataset, move a setting, and watch the train and test scores |
 | 3 | **Check** | Answer a short quiz, predict the line, and try to beat the score |
-| 4 | **Code** | Read the scikit-learn code and open the full notebook in Colab |
+| 4 | **Code** | Read the Python code and open the full notebook in Colab |
 
 ## Run the code
 
@@ -120,10 +127,6 @@ npm test         # model and lesson tests
 npm run build    # static site in dist/
 ```
 
-## Use it offline
-
-Offline use is being documented. This section will be filled in soon.
-
 ## Tech
 
 [Astro](https://astro.build) and TypeScript, with the models written from scratch in [`src/engine/`](src/engine/) and covered by Vitest tests. The draw-a-digit CNN is trained offline by [`scripts/train_cnn.py`](scripts/train_cnn.py); the browser runs its exported weights with plain TypeScript, so there is no machine learning library on the site. It is a static site; pushing to `main` deploys it to GitHub Pages.
@@ -142,7 +145,7 @@ npm run build && npm run preview   # http://localhost:4321/ML_DL_Vis/
 ```
 
 For notebooks that read data from GitHub, download [`datasets/`](datasets/) too and point the notebook at the local file.
-The Part 9 notebooks get their data from scikit-learn.
+The Part 9 notebooks get their data from scikit-learn. The CNN notebook downloads the MNIST digits (about 11 MB) the first time it runs.
 
 ## Copyright
 
