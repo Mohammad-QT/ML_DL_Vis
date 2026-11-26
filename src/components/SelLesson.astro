@@ -70,7 +70,7 @@ const play = d.play;
         : entry.collection === 'nlp'
           ? <NlpDemo lang={lang} demo={entry.data.id} ui={entry.data.ui} figure />
           : <Board lang={lang} model={entry.data.figure.model as never} variant="figure" preset={entry.data.figure.preset} seed={entry.data.figure.seed} cell={4} dot={3.6} tint={0.24} />}
-    <figcaption><b>{d.figure.caption}</b></figcaption>
+    <figcaption slot="caption"><b>{d.figure.caption}</b></figcaption>
   </LessonHero>
 
   <div class="tabs" role="tablist">

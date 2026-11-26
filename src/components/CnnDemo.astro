@@ -86,9 +86,19 @@ const fill = (s: string, n: number | string) => s.replace(/\{\w\}/, String(n));
   .big { width: 150px; aspect-ratio: 1; image-rendering: pixelated; border: 1.5px solid var(--rule); }
   .arr { font-size: 22px; color: var(--muted); }
   [data-cnn-status]:empty { display: none; }
-  .figure .top { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 10px; }
-  .figure .input { width: 56px; }
-  .figure .bar { grid-template-columns: 1.2em minmax(0, 1fr) 3.4em; font-size: 11px; }
+  .figure .top {
+    --prediction-height: 16px;
+    --prediction-gap: 4px;
+    --plot-gap: 10px;
+    gap: var(--plot-gap);
+    max-inline-size: calc(2 * (100cqh - var(--prediction-height) - var(--prediction-gap)) + var(--plot-gap));
+    margin-inline: auto;
+  }
+  .figure .result { gap: var(--prediction-gap); }
+  .figure .input { inline-size: 100%; }
+  .figure .bars { min-block-size: var(--prediction-height); }
+  .figure .bar { grid-template-columns: 1.2em minmax(0, 1fr) 3.4em; font-size: 11px; line-height: var(--prediction-height); }
+  .figure .bar:not(.best) { display: none; }
   .figure .track { height: 7px; }
   @media (max-width: 700px) {
     .cnn-demo:not(.figure) .top { grid-template-columns: minmax(0, 1fr); }

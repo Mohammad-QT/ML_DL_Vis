@@ -73,7 +73,10 @@ const json = (data: unknown) => JSON.stringify(data).replace(/</g, '\\u003c');
   .nlp-demo { display: grid; gap: 12px; grid-template-columns: minmax(0, 1fr); }
   .review-label { display: grid; gap: 5px; font-weight: 700; }
   textarea { width: 100%; resize: vertical; padding: 10px; background: var(--paper); color: var(--ink); border: 1px solid var(--rule); border-radius: 10px; font: 16px var(--body); }
-  .examples, .settings, .nlp-hero-chips { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .examples, .settings { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .nlp-figure table { block-size: 100cqh; }
+  .nlp-hero-chips { display: flex; flex-wrap: wrap; gap: 8px; align-content: center; align-items: center; justify-content: center;
+    min-block-size: 100cqh; padding: 8px; border: 1px solid var(--rule); border-radius: 12px; background: var(--paper); }
   .examples button { min-height: 44px; padding: 6px 10px; }
   .settings { padding: 8px 10px; border-radius: 10px; background: var(--paper); }
   .settings label { min-height: 44px; display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
@@ -88,6 +91,7 @@ const json = (data: unknown) => JSON.stringify(data).replace(/</g, '\\u003c');
     display: inline-block; max-width: 100%; padding: 3px 7px; border-radius: 6px; border: 1px solid var(--rule);
     font: 500 13px/1.45 var(--mono); white-space: pre-wrap; background: var(--sheet);
   }
+  .nlp-hero-chips span { padding: 8px; font-size: 15px; }
   .nlp-demo :global([data-nlp-direction="liked"]), .nlp-hero-chips [data-nlp-direction="liked"] { --nlp-tone: var(--ok); }
   .nlp-demo :global([data-nlp-direction="disliked"]), .nlp-hero-chips [data-nlp-direction="disliked"] { --nlp-tone: var(--bad); }
   .nlp-demo :global([data-nlp-direction]), .nlp-hero-chips [data-nlp-direction] {

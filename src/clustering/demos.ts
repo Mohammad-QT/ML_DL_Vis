@@ -30,11 +30,16 @@ function drawElbow(svg: SVGSVGElement, scores: number[], k: number) {
 }
 
 const treeTop = 12, treeBottom = 195, initialCut = .42;
+const cutHeight = (tree: WardNode, position: number) => {
+  const max = (tree.height || 1) * 1.1;
+  const min = -max * .025;
+  return min + (max - min) * position;
+};
 
 function drawDendrogram(svg: SVGSVGElement, tree: WardNode, position: number) {
   const max = (tree.height || 1) * 1.1;
   const min = -max * .025;
-  const height = min + (max - min) * position;
+  const height = cutHeight(tree, position);
   const y = (value: number) => treeBottom - (value - min) / (max - min) * (treeBottom - treeTop);
   const { labels, count } = cutWard(tree, height);
   const parts: SVGElement[] = [];
@@ -73,7 +78,8 @@ export function mountCluster(root: HTMLElement) {
     if (means) {
       board.show(points, [], runKMeans(points, initKMeans(points, 3, 42)));
     } else {
-      const { labels } = drawDendrogram(get<SVGSVGElement>('[data-tree]'), ward(points)!, initialCut);
+      const tree = ward(points)!;
+      const { labels } = cutWard(tree, cutHeight(tree, initialCut));
       board.show(points, labels);
     }
     return;

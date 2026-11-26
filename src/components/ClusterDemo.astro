@@ -17,19 +17,19 @@ const means = demo === 'kmeans';
   </div>}
   <div class="plots">
     <canvas class="board" aria-label={figure && !means ? ui.figure_board : ui.board} role={figure ? 'img' : undefined}></canvas>
-    {(!figure || !means) && <div class="plot">
+    {!figure && <div class="plot">
       <b>{ui.chart}</b>
       {means
         ? <svg viewBox="0 0 300 210" role="img" aria-label={ui.chart} data-elbow></svg>
-        : <svg viewBox="0 0 300 210" role={figure ? 'img' : undefined} aria-label={ui.chart} data-tree>
+        : <svg viewBox="0 0 300 210" aria-label={ui.chart} data-tree>
             <g data-branches></g>
-            <g data-cut role={figure ? undefined : 'slider'} tabindex={figure ? undefined : 0} aria-label={figure ? undefined : ui.cut} aria-orientation={figure ? undefined : 'vertical'} aria-valuemin={figure ? undefined : 0} aria-valuemax={figure ? undefined : 100}>
-              {!figure && <line class="cut-hit" x1="12" x2="288"></line>}
+            <g data-cut role="slider" tabindex={0} aria-label={ui.cut} aria-orientation="vertical" aria-valuemin={0} aria-valuemax={100}>
+              <line class="cut-hit" x1="12" x2="288"></line>
               <line class="cut-ink" x1="12" x2="288"></line>
-              {!figure && <circle class="cut-knob" cx="288" r="5"></circle>}
+              <circle class="cut-knob" cx="288" r="5"></circle>
             </g>
           </svg>}
-      {!figure && <small class="muted" data-plot-detail>{ui.chart_note}</small>}
+      <small class="muted" data-plot-detail>{ui.chart_note}</small>
     </div>}
   </div>
   {!figure && <p class="muted state" data-state role="status"></p>}
@@ -39,10 +39,10 @@ const means = demo === 'kmeans';
   .cluster-demo { --cluster-amber: #986016; --cluster-violet: #7646a4; --cluster-cyan: #007389; --cluster-rose: #a1422b; --cluster-olive: #656c1e; }
   :global(:root[data-theme="dark"]) .cluster-demo { --cluster-amber: #e9ab59; --cluster-violet: #cb9beb; --cluster-cyan: #65c7dc; --cluster-rose: #ff987f; --cluster-olive: #c1ca70; }
   .plots { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 14px; margin-top: 12px; align-items: start; }
-  .figure .plots { margin: 0; }
-  .figure[data-cluster="kmeans"] .plots { display: block; }
+  .figure { --hero-plot-ratio: 1.65; }
+  .figure .plots { display: block; margin: 0; }
   canvas { border: 1.5px solid var(--rule); aspect-ratio: 1; }
-  .figure canvas { cursor: default; aspect-ratio: 1.65; }
+  .figure canvas { cursor: default; aspect-ratio: var(--hero-plot-ratio); }
   .controls { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
   .controls label { display: flex; align-items: center; gap: 6px; }
   .controls .btn { padding: 6px 12px; font-size: 14px; }

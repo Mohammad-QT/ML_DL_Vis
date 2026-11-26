@@ -13,10 +13,12 @@ const number = new Intl.NumberFormat(lang);
       <div class="arm" data-bandit-arm>
         <b>{ui.ad} {number.format(index + 1)}</b>
         <div data-bandit-plot></div>
-        {!figure && <button class="btn ghost pick" data-bandit-pick hidden aria-label={`${ui.pick} ${number.format(index + 1)}`}>{ui.pickShort}</button>}
-        <span data-bandit-tally></span>
-        <span data-bandit-value></span>
-        <strong data-bandit-rate></strong>
+        {!figure && <>
+          <button class="btn ghost pick" data-bandit-pick hidden aria-label={`${ui.pick} ${number.format(index + 1)}`}>{ui.pickShort}</button>
+          <span data-bandit-tally></span>
+          <span data-bandit-value></span>
+          <strong data-bandit-rate></strong>
+        </>}
       </div>
     ))}
   </div>

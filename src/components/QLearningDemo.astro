@@ -62,6 +62,7 @@ const number = new Intl.NumberFormat(lang, { maximumFractionDigits: 2 });
 <style>
   .q-world { min-inline-size: 0; }
   .q-grid { display: grid; grid-template-columns: repeat(var(--columns), minmax(0, 1fr)); gap: 3px; max-inline-size: 360px; margin-inline: auto; }
+  .q-world:not([data-q-world]) .q-grid { inline-size: min(100%, 100cqh); }
   .q-cell { position: relative; display: flex; align-items: center; justify-content: center; gap: 2px; min-inline-size: 0; aspect-ratio: 1; border: 1.5px solid var(--rule); border-radius: 6px; padding: 0; color: var(--ink); background: color-mix(in srgb, var(--q-color, var(--ok)) var(--q-tint, 0%), var(--paper)); font: 600 clamp(.8rem, 3vw, 1.2rem) var(--mono); }
   button.q-cell { cursor: pointer; touch-action: manipulation; }
   button.q-cell:disabled { cursor: default; opacity: 1; }

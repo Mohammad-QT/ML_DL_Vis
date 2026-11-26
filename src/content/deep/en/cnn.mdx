@@ -4,7 +4,7 @@ short: "CNN"
 title: "Convolutional neural networks (draw a digit)"
 lede: "Images are grids of pixels where neighbors matter. A convolutional network slides small filters across the grid to spot strokes, shapes and whole digits."
 figure:
-  caption: "An example drawn digit, the 28 × 28 image the network actually sees, and its top prediction."
+  caption: "Drawn digit, 28 × 28 input, and top guess."
 steps_h: "How a CNN reads a digit"
 steps:
   - "Slide 8 small 3 × 3 filters across the 28 × 28 image, reusing the same weights at every position. ReLU keeps only the positive responses, creating 8 feature maps."

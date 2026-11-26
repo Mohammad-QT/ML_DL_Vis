@@ -203,9 +203,10 @@ export function mountDimred(root: HTMLElement) {
       const axes = [{ direction: linear.directions[0], dashed: true }];
       if (fisher.directions.length) axes.push({ direction: fisher.directions[0], dashed: false });
       board.showAxes(linear.mean, axes);
+      if (figure) return;
       for (const [id, scores] of [['pca', linear.scores], ['lda', fisher.directions.length ? fisher.scores : []]] as const) {
         drawStrip(get<SVGSVGElement>(`strip="${id}"`), store.points, scores);
-        if (!figure) report(get(`separation="${id}"`), scores.length ? thresholdAccuracy(scores, store.points) : null);
+        report(get(`separation="${id}"`), scores.length ? thresholdAccuracy(scores, store.points) : null);
       }
     });
   } else {

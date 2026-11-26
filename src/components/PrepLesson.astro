@@ -40,7 +40,7 @@ const play = d.play;
 
   <LessonHero kicker={part0 ? pt.kicker0 : fill(pt.kicker1, { n: i })} title={d.title} lede={d.lede}>
     <Board lang={lang} model={d.figure.model as never} variant="figure" preset={d.figure.preset} seed={d.figure.seed} cell={4} dot={3.6} tint={0.24} />
-    <figcaption><b>{d.figure.caption}</b></figcaption>
+    <figcaption slot="caption"><b>{d.figure.caption}</b></figcaption>
   </LessonHero>
 
   <div class="tabs" role="tablist">
