@@ -158,3 +158,55 @@ Problem: key actions look like secondary chips. Examples: CNN **Example**/**Clea
 
 Rules for every agent: read `CLAUDE.md` and this file first; never open `course_material/`; only edit the files of your
 own task; run `npm test` and `npm run build` before finishing; do not commit (Claude reviews and commits).
+
+## Phase 2: which lessons get a scene (owner approved, 26 Nov 2026)
+
+Owner feedback on the pilot: "super good". Two changes:
+
+1. **Pointing at a step plays that step instead of freezing it** (done in `player.ts`: `before(i)` then `frame(i)` every
+   2.6s, plus `loop`).
+2. **Animate where it teaches, not everywhere.** The rule: animate when the algorithm is a *process over time* that the
+   Play board only shows as an end result. Tier 3 lessons get no scene for now.
+
+How-to for authors: `docs/scenes-guide.md`.
+
+### Tier 1 — animate (process lessons)
+
+| Lesson (file) | Scene id | What the steps show |
+|---|---|---|
+| K-Means (`clustering/kmeans`) | `kmeans` | Centres dropped → points take the nearest centre's colour (lines to centres) → centres slide to their points' mean (trail) → repeat until still ("Round n" ticks; loop runs rounds) |
+| Hierarchical (`clustering/hierarchical`) | `hierarchical` | Every point its own cluster → closest pair merges (link drawn, dendrogram bar grows beside) → merging continues up the tree → cut line across the dendrogram picks the clusters |
+| DBSCAN (`clustering/dbscan`) | `dbscan` | ε-circle around a point counts neighbours → core points light up → clusters grow by chaining core points (spread animation) → leftover points marked as noise (×) |
+| Decision tree, classification (`lessons/tree`) | `3-tree` | Board with two classes → first split line with the question → second split inside one half → regions shaded = leaves; a point drops down the tiny tree to its leaf |
+| Random forest, classification (`lessons/forest`) | `3-forest` | Bootstrap: points sampled with repeats into 3 mini boards → each grows a different tree boundary → boundaries overlaid → majority vote gives a smooth boundary |
+| SVM (`lessons/svm`) | `svm` | Many possible separating lines → the widest street (margin) → support vectors ringed on the edges → a new point classified by side |
+| Kernel SVM (`lessons/ksvm`) | `ksvm` | Rings that no line separates → points lifted by a bump (height = distance from centre, isometric) → a flat plane cuts them → back on the board the cut is a circle |
+| Gradient descent (`regression/gradient-descent`) | `gradient-descent` | Loss curve (bowl) with a ball → slope arrow at the ball → step downhill by rate × slope → repeated steps shrink near the bottom (loop), line on a mini board fits better each step |
+| XGBoost / boosting (`selection/boost`) | `boost` | First weak model (flat step) and its residual bars → next tree fits the residuals → added together the fit improves → repeat, residual bars shrink |
+| k-fold CV (`selection/cv`) | `cv` | Data split into 5 folds (bar) → fold 1 is test, rest train, score shown → the test fold rotates through all 5 (loop) → scores averaged, mean ± spread |
+| Grid search (`selection/grid`) | `grid` | C × gamma grid → each cell runs CV and fills with its score colour (loop fills cells) → best cell ringed → final model retrained with it |
+| PCA (`dimred/pca`) | `pca` | Cloud of points → a candidate axis rotates, projected ticks spread changes (loop) → stops at max spread = PC1 → PC2 at right angles, points re-drawn in PC coordinates |
+| Q-learning (`bandit/q-learning`) | `q-learning` | Grid world, agent at start → agent explores (random steps) → reaching the goal updates the last cell's value → values spread backwards over episodes (cells brighten), then the greedy arrow path |
+| Apriori (`rules/apriori`) | `apriori` | Baskets → count single items, prune the rare ones (struck out) → build pairs only from survivors, count, prune → rule with support/confidence/lift shown |
+| UCB (`bandit/ucb`) | `ucb` | 3 ads with bars (average) and confidence whiskers → pick the highest top-of-whisker → its whisker shrinks after a click/no-click → over rounds the best ad gets most picks (loop) |
+| Thompson sampling (`bandit/thompson`) | `thompson` | 3 bell-shaped beliefs → draw one sample from each (dots) → play the highest sample; that belief narrows after the result → over rounds beliefs separate (loop) |
+
+### Tier 2 — short and simple (one clear movement each)
+
+`logistic` (straight score → squashed by the S-curve → threshold 0.5 colours the side), `nb` (bell curve per class per
+feature → multiply → larger product wins), `2-polynomial` (degree 1 → 2 → 3 bends the line), `svr` (tube around the line;
+points outside pull it), `regularization` (weight bars shrink as λ grows; Lasso hits zero), `metrics` (threshold slides,
+confusion counts change, a dot walks the ROC curve), `lda`, `kernel-pca`, `eclat` (ID lists intersect),
+`bag-of-words` (sentence → words → count row), `scaling` (axis squash changes which neighbour is nearest), `split`
+(cards shuffle into train / test piles), `categories` (a text column becomes one-hot columns), `missing` (blank cells
+fill with the mean/median), `2-tree` and `2-forest` (regression versions: steps, averaging).
+
+### Tier 3 — no scene for now
+
+`linear`, `multiple`, `start`, `sentiment`: their Play board already says it all. They keep today's Learn view.
+
+### Agents
+
+Trial first: **Gemini 4 Hydrogen (high)** writes the K-Means scene. If its quality matches the pilot scenes, Hydrogen
+does the rest; otherwise Gemini 4 Neon does. Tier 1 is split across parallel agents by part, each in its own worktree,
+merged and browser-checked by Claude; tier 2 follows after the owner sees tier 1.
