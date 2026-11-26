@@ -92,14 +92,14 @@ export function mountBandit(root: HTMLElement) {
       const score = last?.scores[index];
       const selected = last?.chosen === index;
       column.classList.toggle('picked', selected);
-      column.querySelector('[data-bandit-tally]')!.textContent = fill(ui.tally, format.format(current.wins), format.format(current.plays));
-      column.querySelector('[data-bandit-value]')!.textContent = manual ? '' : demo === 'ucb'
-        ? previous.plays && score !== undefined ? fill(ui.bound, format.format(score)) : ui.unplayed
-        : score === undefined ? '' : fill(ui.sample, percent.format(score));
-      column.querySelector('[data-bandit-rate]')!.textContent = revealed ? percent.format(rates[index]) : '';
       armPlots[index].toggleAttribute('hidden', manual);
       if (!manual) drawArm(armPlots[index], demo, previous, score, ceiling);
       if (!figure) {
+        column.querySelector('[data-bandit-tally]')!.textContent = fill(ui.tally, format.format(current.wins), format.format(current.plays));
+        column.querySelector('[data-bandit-value]')!.textContent = manual ? '' : demo === 'ucb'
+          ? previous.plays && score !== undefined ? fill(ui.bound, format.format(score)) : ui.unplayed
+          : score === undefined ? '' : fill(ui.sample, percent.format(score));
+        column.querySelector('[data-bandit-rate]')!.textContent = revealed ? percent.format(rates[index]) : '';
         const button = column.querySelector('button')!;
         button.hidden = !manual;
         button.disabled = rounds >= 30;

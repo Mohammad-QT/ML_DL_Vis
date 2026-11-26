@@ -53,6 +53,7 @@ const { lang, ui, figure = false } = Astro.props;
   .plot p { margin: 0 0 4px; }
   canvas, svg { display: block; width: 100%; max-width: 100%; }
   canvas { aspect-ratio: 10 / 7; height: auto; cursor: default; }
+  .figure { --hero-plot-ratio: 10 / 7; }
   .contour { position: relative; direction: ltr; }
   .contour, .summary svg { background: var(--sheet); border: 1.5px solid var(--rule); border-radius: 14px; }
   .intercept, .slope { position: absolute; background: var(--sheet); color: var(--muted); font-size: .8rem; }

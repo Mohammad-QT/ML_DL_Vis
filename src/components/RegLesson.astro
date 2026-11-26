@@ -47,7 +47,7 @@ const hl = (code: string) => code.replace(/&/g, '&amp;').replace(/</g, '&lt;')
 
   <LessonHero kicker={fill(t.r_kicker, { n, total: REGRESSION.length })} title={d.title} lede={d.lede}>
     {ExtraDemo ? <ExtraDemo lang={lang} ui={d.ui} figure /> : <RegBoard lang={lang} model={model} variant="figure" preset={d.figure.preset as never} seed={d.figure.seed} />}
-    <figcaption><span>{t.fp_cap}</span> <b>{d.figure.caption ?? shape}</b></figcaption>
+    <figcaption slot="caption"><span>{t.fp_cap}</span> <b>{d.figure.caption ?? shape}</b></figcaption>
   </LessonHero>
 
   <div class="tabs" role="tablist">

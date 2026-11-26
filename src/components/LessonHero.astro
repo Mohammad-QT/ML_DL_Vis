@@ -8,7 +8,10 @@ const { kicker, title, lede } = Astro.props;
     <h1 class="display" set:html={title} />
     <p class="lede">{lede}</p>
   </div>
-  <figure class="sheet fp"><slot /></figure>
+  <figure class="sheet fp">
+    <div class="fp-visual"><slot /></div>
+    <slot name="caption" />
+  </figure>
 </section>
 
 <style>
@@ -16,7 +19,10 @@ const { kicker, title, lede } = Astro.props;
   .kicker { font: 600 13px var(--mono); color: var(--muted); }
   h1 { font-size: 68px; line-height: .98; margin: 12px 0 14px; overflow-wrap: anywhere; }
   .lede { font-size: 20px; color: var(--muted); max-width: 30em; }
-  .fp { padding: 12px; transform: rotate(1.2deg); }
+  .fp { display: grid; grid-template-rows: minmax(0, 1fr) auto; block-size: 252px; padding: 12px; transform: rotate(1.2deg); }
+  .fp-visual { display: grid; grid-template-columns: minmax(0, 1fr); align-items: center; container-type: size; }
+  .fp-visual :global(.board), .fp-visual > :global(svg) { max-block-size: 100cqh; margin-inline: auto; }
+  .fp-visual :global(.figure .board) { inline-size: min(100%, calc(100cqh * var(--hero-plot-ratio, 1))); }
   :global(html[dir="rtl"]) .fp { transform: rotate(-1.2deg); }
   .fp > :global(figcaption) { font: 500 13px var(--mono); color: var(--muted); padding: 10px 4px 2px; }
   .fp > :global(figcaption b) { color: var(--ink); font-family: var(--body); font-size: 15px; }

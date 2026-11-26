@@ -1,9 +1,11 @@
+# AI Visual
+
 <div align="center">
 
 <a href="https://mohammad-qt.github.io/ML_DL_Vis/">
   <picture>
     <source media="(prefers-color-scheme: light)" srcset="docs/banner-light.png">
-    <img src="docs/banner-dark.png" alt="ML Visual: every algorithm draws a different line" width="100%">
+    <img src="docs/banner-dark.png" alt="AI Visual: every algorithm draws a different line" width="100%">
   </picture>
 </a>
 
@@ -23,7 +25,7 @@
   <img src="docs/img/hero.gif" alt="The same points redrawn by K-NN, logistic regression, SVM, kernel SVM, Naive Bayes, a decision tree and a random forest" width="460">
 </p>
 
-ML Visual is a free course in machine learning for beginners, in English and Arabic. Every lesson has a live board.
+AI Visual is a free course in machine learning and deep learning for beginners, in English and Arabic. Every lesson has a live board.
 The models train in your browser and redraw their decision line the moment you add a point or move a setting.
 There is nothing to install. When you want the code, each lesson opens its own notebook in Google Colab.
 
@@ -127,6 +129,8 @@ npm run dev      # http://localhost:4321/ML_DL_Vis/
 npm test         # model and lesson tests
 npm run build    # static site in dist/
 ```
+
+Run `node scripts/og.mjs` to regenerate the social preview at [`public/og.png`](public/og.png).
 
 ## Tech
 

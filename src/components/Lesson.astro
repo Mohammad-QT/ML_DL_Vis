@@ -41,7 +41,7 @@ const hl = (code: string) => code.replace(/&/g, '&amp;').replace(/</g, '&lt;')
 
   <LessonHero kicker={fill(t.kicker, { n })} title={d.title} lede={d.lede}>
     <Board lang={lang} model={d.model as never} variant="figure" preset={d.figure.preset} seed={d.figure.seed} cell={d.figure.cell} dot={d.figure.dot} tint={d.figure.tint} />
-    <figcaption><span>{t.fp_cap}</span> <b>{shape}</b></figcaption>
+    <figcaption slot="caption"><span>{t.fp_cap}</span> <b>{shape}</b></figcaption>
   </LessonHero>
 
   <div class="tabs" role="tablist">

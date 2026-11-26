@@ -1,7 +1,7 @@
 {
-  "name": "ML Visual",
-  "short_name": "ML Visual",
-  "description": "Learn machine learning by watching real models fit your data live. Works offline once installed.",
+  "name": "AI Visual",
+  "short_name": "AI Visual",
+  "description": "Learn machine learning and deep learning with AI Visual. Watch models fit your data live. Works offline once installed.",
   "id": "./",
   "start_url": "./",
   "scope": "./",

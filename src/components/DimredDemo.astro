@@ -66,11 +66,11 @@ const presets = pca ? ['stretched', 'round', 'blobs'] : lda ? ['lda_wins', 'pca_
       </div>
     </div>
   </>}
-  {lda && <div class="strips">
+  {lda && !figure && <div class="strips">
     {[['pca', ui.pca_axis], ['lda', ui.lda_axis]].map(([id, label]) => <div class="summary">
       <b class:list={['axis', id === 'pca' ? 'dashed' : 'solid']}><bdi>{label}</bdi></b>
       <svg viewBox="0 0 300 28" role="img" aria-label={label} data-dimred-strip={id}></svg>
-      {!figure && <p data-dimred-separation={id} data-dimred-template={ui.separation} data-dimred-empty={ui.no_separation} aria-live="polite"></p>}
+      <p data-dimred-separation={id} data-dimred-template={ui.separation} data-dimred-empty={ui.no_separation} aria-live="polite"></p>
     </div>)}
   </div>}
   {!figure && <p class="muted" data-dimred-status data-dimred-limit={ui.limit} role="status"></p>}
@@ -92,8 +92,8 @@ const presets = pca ? ['stretched', 'round', 'blobs'] : lda ? ['lda_wins', 'pca_
   .kpc-y { left: 5%; top: 4%; }
   canvas { aspect-ratio: 1; border: 1.5px solid var(--rule); max-width: 100%; }
   .figure canvas, [data-dimred-output] { cursor: default; }
-  .figure .plots { margin: 0; }
-  .figure .plots.pair { gap: 8px; }
+  .figure .plots { max-width: none; }
+  .figure .plots.pair { gap: 8px; max-width: calc(2 * (100cqh - 22px) + 8px); margin-inline: auto; }
   .figure .plot-title { font-size: 13px; }
   .strips, .summary, .plots + .legend { margin-top: 10px; }
   .strips { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
