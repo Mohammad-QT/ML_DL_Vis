@@ -9,6 +9,18 @@ steps:
   - Grow a decision tree on that sample, looking at a random few features at each split.
   - Repeat to grow many trees. The setting you choose is the number of trees.
   - Every tree votes. The majority wins.
+quick:
+  steps:
+    - "Draw a random sample with repeats for each tree"
+    - "Grow a different decision tree on each sample"
+    - "Repeat to combine many trees on the same board"
+    - "Let every tree vote and take the majority"
+  caution: "More trees boost accuracy, but you can no longer read one flowchart."
+  scene: 3-forest
+  words:
+    sample: "Bootstrap"
+    trees: "3 trees"
+    majority: "Majority"
 caution:
   h: Accurate, but hard to explain
   p: 'One tree reads like a flowchart. A forest of hundreds <mark>cannot be read</mark>. You get strong accuracy, but you lose the easy explanation. More trees help less and less after a point, while training takes longer.'
