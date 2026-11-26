@@ -35,7 +35,7 @@ const l = learn[lang];
             <span class="arr" aria-hidden="true">←</span>
           </button>
           <div class="learn-caption-body" aria-live="polite" aria-atomic="true">
-            <span class="learn-counter" data-learn-status dir="ltr" aria-label={fill(l.step, { n: 1, total: quick.steps.length })}>1 / {quick.steps.length}</span>
+            <span class="learn-counter"><span data-learn-status dir="ltr" aria-label={fill(l.step, { n: 1, total: quick.steps.length })}>1 / {quick.steps.length}</span></span>
             <span class="learn-caption-text">
               {quick.steps.map((step, i) => (
                 <span class="learn-step-copy" data-learn-step={i} hidden={i !== 0}><mark set:html={step} /></span>
@@ -135,7 +135,9 @@ const l = learn[lang];
   .learn-caption { display: flex; align-items: center; gap: 12px; padding: 10px 12px; border: 1.5px solid var(--rule); border-radius: 14px; background: var(--paper); }
   .learn-nav { min-width: 44px; min-height: 44px; padding: 8px 14px; justify-content: center; flex: none; box-shadow: 0 3px 0 var(--lift); }
   .learn-caption-body { flex: 1; min-width: 0; text-align: center; font: 600 18px/1.45 var(--body); color: var(--ink); overflow-wrap: anywhere; }
-  .learn-counter { display: inline-block; font: 600 14px var(--mono); color: var(--muted); margin-inline-end: 8px; white-space: nowrap; }
+  .learn-counter { display: inline-block; unicode-bidi: isolate; font: 600 14px var(--mono); color: var(--muted); margin-inline-end: 8px; white-space: nowrap; }
+  .learn-counter [data-learn-status] { direction: ltr; unicode-bidi: isolate; }
+  .learn-caption-text { unicode-bidi: isolate; }
   .learn-caption-text mark { padding-inline: .14em; background-size: 100% 100%; transition-delay: 0s; }
   .learn-controls { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px; color: var(--muted); font-size: 13px; }
   .learn-dots { display: flex; align-items: center; gap: 2px; }
