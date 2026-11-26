@@ -65,7 +65,7 @@ function split(root: HTMLElement, ui: UI) {
   root.innerHTML = `<div class="dsplit"><svg class="plot" viewBox="0 0 400 300" role="img" aria-label="${ui.alt}"></svg><div class="dside">
     <label class="box"><span class="label">${ui.share} · <b data-pct></b></span><input type="range" min="10" max="50" step="5" value="25" data-share></label>
     <div class="box dstats"><div class="stat"><small>${ui.train}</small><b data-ntrain></b></div><div class="stat"><small>${ui.test}</small><b data-ntest></b></div></div>
-    <div class="box"><span class="label"><code>random_state</code></span><input class="num" type="number" min="0" max="9999" step="1" data-seed><button class="chip" data-shuffle>${ui.shuffle}</button></div>
+    <div class="box"><span class="label"><code>random_state</code></span><input class="num" type="number" min="0" max="9999" step="1" data-seed><button class="chip act" data-shuffle>${ui.shuffle}</button></div>
     <p class="legend"><span class="swatch a"></span><span class="swatch b"></span>${ui.legend} <span class="swatch ring"></span>${ui.legend_test}</p></div></div>`;
   const q = <T extends HTMLElement>(s: string) => root.querySelector<T>(s)!;
   const svg = q<HTMLElement>('svg.plot') as unknown as SVGSVGElement;

@@ -10,9 +10,9 @@ const { lang, ui, figure = false } = Astro.props;
       <output data-gd-rate-value></output>
     </label>
     <div class="chips">
-      <button type="button" class="chip" data-gd-step>{ui.step}</button>
-      <button type="button" class="chip" data-gd-run>{ui.run}</button>
-      <button type="button" class="chip" data-gd-reset>{ui.reset}</button>
+    <button type="button" class="btn" data-demo-primary data-gd-run>{ui.run}</button>
+    <button type="button" class="chip act" data-gd-step>{ui.step}</button>
+    <button type="button" class="chip act" data-gd-reset>{ui.reset}</button>
     </div>
   </div>}
   <div class:list={['plots', { pair: !figure }]}>

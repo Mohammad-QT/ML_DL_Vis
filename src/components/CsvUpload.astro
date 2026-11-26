@@ -8,7 +8,7 @@ const samples = [['customers.csv', t.c_s_customers], ['mpg.csv', t.c_s_mpg]];
 ---
 <div class="csv" id="csv" data-csv hidden>
   <div class="csv-row">
-    <label class="btn ghost csv-pick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H6v18h12V7zM14 3v4h4M12 17v-6m0 0-3 3m3-3 3 3"/></svg>{t.c_upload}<input type="file" accept=".csv,text/csv,text/plain,.tsv,.txt" hidden></label>
+    <label class="btn csv-pick"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H6v18h12V7zM14 3v4h4M12 17v-6m0 0-3 3m3-3 3 3"/></svg>{t.c_upload}<input type="file" accept=".csv,text/csv,text/plain,.tsv,.txt" class="vh"></label>
     <span class="csv-try">{t.c_try}{" "}
       {samples.map(([f, label], i) => <Fragment>{i > 0 && ' · '}<a href={`${import.meta.env.BASE_URL.replace(/\/?$/, '/')}samples/${f}`} download={f} data-sample={f}>{label}</a></Fragment>)}
     </span>
@@ -42,7 +42,7 @@ const samples = [['customers.csv', t.c_s_customers], ['mpg.csv', t.c_s_mpg]];
   .csv-file { font-size: 14px; margin-bottom: 8px; }
   .csv-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
   .csv-grid label { display: block; }
-  .csv-grid select { width: 100%; appearance: none; border: 1.5px solid var(--rule); background: var(--paper); color: var(--ink); font: 500 14px var(--mono); padding: 8px 34px 8px 12px; border-radius: 10px; cursor: pointer; margin-top: 4px;
+  .csv-grid select { width: 100%; appearance: none; border: 1.5px solid var(--muted); background: var(--paper); color: var(--ink); font: 500 14px var(--mono); padding: 8px 34px 8px 12px; border-radius: 10px; cursor: pointer; margin-top: 4px;
     background-image: linear-gradient(45deg, transparent 50%, var(--muted) 50%), linear-gradient(135deg, var(--muted) 50%, transparent 50%); background-position: calc(100% - 18px) 55%, calc(100% - 13px) 55%; background-size: 5px 5px; background-repeat: no-repeat; }
   :global(html[dir="rtl"]) .csv-grid select { padding: 8px 12px 8px 34px; background-position: 18px 55%, 13px 55%; }
   .csv-grid select:disabled { opacity: .45; cursor: not-allowed; }

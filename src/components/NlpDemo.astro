@@ -37,7 +37,7 @@ const json = (data: unknown) => JSON.stringify(data).replace(/</g, '\\u003c');
     </label>
     {!bag && <p class="muted">{ui.try}</p>}
     <div class="examples">
-      {examples.map(text => <button type="button" data-nlp-example={text} lang="en" dir="ltr">{text}</button>)}
+      {examples.map(text => <button type="button" class="chip act" data-nlp-example={text} lang="en" dir="ltr">{text}</button>)}
     </div>
     <div class="settings">
       {!bag && <>
@@ -74,8 +74,7 @@ const json = (data: unknown) => JSON.stringify(data).replace(/</g, '\\u003c');
   .review-label { display: grid; gap: 5px; font-weight: 700; }
   textarea { width: 100%; resize: vertical; padding: 10px; background: var(--paper); color: var(--ink); border: 1px solid var(--rule); border-radius: 10px; font: 16px var(--body); }
   .examples, .settings, .nlp-hero-chips { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-  .examples button { font: 600 14px var(--body); min-height: 44px; padding: 6px 10px; border: 1px solid var(--rule); border-radius: 10px; background: var(--sheet); box-shadow: 0 2px var(--lift); color: var(--ink); cursor: pointer; }
-  .examples button:hover { border-color: var(--a); }
+  .examples button { min-height: 44px; padding: 6px 10px; }
   .settings { padding: 8px 10px; border-radius: 10px; background: var(--paper); }
   .settings label { min-height: 44px; display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
   input { accent-color: var(--a); }

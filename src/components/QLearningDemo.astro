@@ -43,9 +43,9 @@ const number = new Intl.NumberFormat(lang, { maximumFractionDigits: 2 });
       ))}
     </div>
     <div class="q-actions">
-      <button type="button" class="btn" data-q-train="1">{ui.train1}</button>
-      <button type="button" class="btn ghost" data-q-train="100">{ui.train100}</button>
-      <button type="button" class="btn ghost" data-q-reset>{ui.reset}</button>
+      <button type="button" class="btn" data-demo-primary data-q-train="1">{ui.train1}</button>
+      <button type="button" class="chip act" data-q-train="100">{ui.train100}</button>
+      <button type="button" class="chip act" data-q-reset>{ui.reset}</button>
     </div>
     <p class="q-status" data-q-status role="status">{ui.ready}</p>
     <h3 class="display">{ui.chart}</h3>

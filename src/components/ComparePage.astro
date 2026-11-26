@@ -57,9 +57,9 @@ const sides = [{ key: 'a', label: t.algo_a }, { key: 'b', label: t.algo_b }];
       <div class="miniseg">
         <button class="on" data-cls="0" aria-pressed="true"><span class="swatch a"></span><span>{t.cls_a}</span></button><button data-cls="1" aria-pressed="false"><span class="swatch b"></span><span>{t.cls_b}</span></button></div></div>
     <div class="acts">
-      <button class="act" id="resplit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 3h5v5M4 20 21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg>{t.resplit}</button>
-      <button class="act" data-role="undo" disabled><Fragment set:html={ICON.undo} />{t.undo}</button>
-      <button class="act bad" id="clear"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>{t.clear}</button>
+      <button class="chip act" id="resplit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 3h5v5M4 20 21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg>{t.resplit}</button>
+      <button class="chip act" data-role="undo" disabled><Fragment set:html={ICON.undo} />{t.undo}</button>
+      <button class="chip act" id="clear"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/></svg>{t.clear}</button>
     </div>
     <!-- 4. Quiet helper text by the boards. -->
     <p class="legend"><span class="swatch ring"></span><span>{t.legend_test}</span></p>
@@ -107,7 +107,7 @@ const sides = [{ key: 'a', label: t.algo_a }, { key: 'b', label: t.algo_b }];
       ))}
     </div>
     <div class="dk-row">
-      <button type="button" class="dbtn grow scoreboard" data-sheet-open="verdict-sheet" aria-expanded="false" aria-controls="verdict-sheet" aria-label={t.sb_open}><span id="sb" aria-live="polite">–</span></button>
+      <button type="button" class="dbtn btn hl grow scoreboard" data-sheet-open="verdict-sheet" aria-expanded="false" aria-controls="verdict-sheet" aria-label={t.sb_open}><span id="sb" aria-live="polite">–</span></button>
       <button type="button" class="dbtn flip" data-task="cls" data-role="flip" data-label={t.flip}><span class="swatch a"></span></button>
       <button type="button" class="dbtn" data-role="undo" disabled aria-label={t.undo} title={t.undo}><Fragment set:html={ICON.undo} /></button>
       <button type="button" class="dbtn" data-sheet-open="cmp-data" aria-expanded="false" aria-controls="cmp-data"><span>{t.data_more}</span><Fragment set:html={ICON.down} /></button>
@@ -158,12 +158,7 @@ const sides = [{ key: 'a', label: t.algo_a }, { key: 'b', label: t.algo_b }];
   .miniseg { display: flex; border: 1.5px solid var(--rule); border-radius: 10px; background: var(--sheet); padding: 2px; gap: 2px; }
   .miniseg button { border: 0; background: none; color: var(--ink); font: 600 14px var(--body); padding: 3px 10px; border-radius: 7px; cursor: pointer; }
   .miniseg button.on { background: var(--ink); color: var(--sheet); }
-  .acts { display: flex; gap: 4px; }
-  .act { display: inline-flex; align-items: center; gap: 6px; border: 1.5px solid transparent; background: none; color: var(--muted); font: 600 14px var(--body); padding: 4px 9px; border-radius: 9px; cursor: pointer; transition: color .12s, border-color .12s, background-color .12s; }
-  .act svg, .act :global(svg) { width: 16px; height: 16px; flex: none; }
-  .act:hover { color: var(--ink); border-color: var(--rule); background: var(--sheet); }
-  .act.bad { color: color-mix(in srgb, var(--bad) 65%, var(--muted)); }
-  .act.bad:hover { color: var(--bad); border-color: color-mix(in srgb, var(--bad) 45%, var(--rule)); }
+  .acts { display: flex; flex-wrap: wrap; gap: 6px; }
   /* 4. the legend is helper text, not a control */
   .legend { font-size: 13.5px; color: var(--muted); margin-inline-start: auto; }
   .duel { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 14px; align-items: start; }
@@ -203,7 +198,7 @@ const sides = [{ key: 'a', label: t.algo_a }, { key: 'b', label: t.algo_b }];
     .taskseg { width: 100%; } .taskseg button { flex: 1; padding: 7px 12px 8px; }
     .data { padding: 12px 14px; }
     .csv-tab { margin-inline-start: 0; }
-    .edit { gap: 6px 12px; margin-inline: 2px; } .acts { margin-inline-start: -9px; }
+    .edit { gap: 6px 12px; margin-inline: 2px; }
   }
   /* view: side by side or overlay (both lines on one board) */
   .viewpick { display: flex; align-items: center; gap: 8px; }
@@ -262,7 +257,7 @@ const sides = [{ key: 'a', label: t.algo_a }, { key: 'b', label: t.algo_b }];
     .scoreboard :global(#sb) { display: flex; flex-direction: column; align-items: flex-start; line-height: 1.2; overflow: hidden; white-space: nowrap; }
     .scoreboard :global(#sb .sc) { display: flex; gap: 9px; direction: ltr; unicode-bidi: isolate; }
     .scoreboard :global(#sb .sc b) { margin-inline-end: 3px; }
-    .scoreboard :global(#sb b) { color: var(--muted); }
+    .scoreboard :global(#sb b) { color: inherit; }
     .scoreboard :global(#sb .w) { font: 700 12.5px var(--body); }
     :global(.vscores table) { width: 100%; border-collapse: collapse; font-size: 15px; margin-bottom: 12px; }
     :global(.vscores th), :global(.vscores td) { padding: 8px 4px; text-align: start; border-bottom: 1.5px solid var(--rule); }

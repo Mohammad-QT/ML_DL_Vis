@@ -77,6 +77,7 @@ export function mountCnn(root: HTMLElement) {
   const input = get<HTMLCanvasElement>('input');
   const bars = [...root.querySelectorAll<HTMLElement>('[data-cnn-bar]')];
   const status = figure ? null : get('status');
+  const exampleButton = figure ? null : get('example');
   const maps = [...root.querySelectorAll<HTMLButtonElement>('[data-cnn-map]')];
   let colors: Colors | null = null;
   let model: Cnn | null = null;
@@ -114,6 +115,14 @@ export function mountCnn(root: HTMLElement) {
     colors ??= readColors();
     paintPad(pad, strokes, colors);
     image = rasterize(strokes);
+    if (exampleButton) {
+      const empty = strokes.length === 0;
+      exampleButton.classList.toggle('btn', empty);
+      exampleButton.classList.toggle('hl', empty);
+      exampleButton.classList.toggle('chip', !empty);
+      exampleButton.classList.toggle('act', !empty);
+      if (!empty) exampleButton.removeAttribute('data-demo-pulse');
+    }
     result = model && image ? infer(model, image) : null;
     paintGrid(input, image ?? new Float32Array(SIZE * SIZE), SIZE, colors);
     const probs = result?.probs;
@@ -159,7 +168,7 @@ export function mountCnn(root: HTMLElement) {
     pad.addEventListener('pointerup', end);
     pad.addEventListener('pointercancel', end);
     get('clear').addEventListener('click', () => { strokes = []; schedule(); });
-    get('example').addEventListener('click', () => {
+    exampleButton!.addEventListener('click', () => {
       strokes = EXAMPLES[example].map(s => s.map(p => ({ ...p })));
       example = (example + 1) % EXAMPLES.length;
       schedule();
