@@ -7,6 +7,7 @@ import CourseNav from './CourseNav.astro';
 import PartProgress from './PartProgress.astro';
 import StepOf from './StepOf.astro';
 import LearnStep from './LearnStep.astro';
+import PlayIntro from './PlayIntro.astro';
 import LessonHero from './LessonHero.astro';
 import CodeOptions from './CodeOptions.astro';
 import NextLesson from './NextLesson.astro';
@@ -63,7 +64,7 @@ const hl = (code: string) => code.replace(/&/g, '&amp;').replace(/</g, '&lt;')
 
   <section class="sheet card" role="tabpanel">
     <h2 class="display">{t.play_h}</h2>
-    <p class="muted read"><span class="on-mouse">{play.p}</span><span class="on-touch">{play.p_touch ?? play.p}</span></p>
+    <PlayIntro {lang} {play} />
     {ExtraDemo ? <ExtraDemo lang={lang} ui={d.ui} /> : multiple
       ? <MultiLinear ui={d.ui} />
       : <RegBoard lang={lang} model={model} preset={play.preset as never} seed={play.seed}

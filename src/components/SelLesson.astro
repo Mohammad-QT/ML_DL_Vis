@@ -6,6 +6,7 @@ import CourseNav from './CourseNav.astro';
 import PartProgress from './PartProgress.astro';
 import StepOf from './StepOf.astro';
 import LearnStep from './LearnStep.astro';
+import PlayIntro from './PlayIntro.astro';
 import LessonHero from './LessonHero.astro';
 import CodeOptions from './CodeOptions.astro';
 import NextLesson from './NextLesson.astro';
@@ -86,7 +87,7 @@ const play = d.play;
 
   <section class="sheet card" role="tabpanel">
     <h2 class="display">{t.play_h}</h2>
-    <p class="muted read"><span class="on-mouse">{play.p}</span><span class="on-touch">{play.p_touch ?? play.p}</span></p>
+    <PlayIntro {lang} {play} />
     {entry.collection === 'clustering'
       ? entry.data.id === 'dbscan' ? <DbscanDemo lang={lang} ui={entry.data.ui} /> : <ClusterDemo demo={entry.data.id} ui={entry.data.ui} />
       : entry.collection === 'bandit'

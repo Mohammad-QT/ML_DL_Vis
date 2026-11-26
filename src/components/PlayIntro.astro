@@ -1,0 +1,30 @@
+---
+import { lesson, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+  play: { p: string; p_touch?: string; short?: string; short_touch?: string };
+}
+
+const { lang, play } = Astro.props;
+---
+
+{play.short ? (
+  <>
+    <p class="muted read play-short"><span class="on-mouse">{play.short}</span><span class="on-touch">{play.short_touch ?? play.short}</span></p>
+    <details class="read play-help">
+      <summary>{lesson[lang].play_help}</summary>
+      <p class="muted read"><span class="on-mouse">{play.p}</span><span class="on-touch">{play.p_touch ?? play.p}</span></p>
+    </details>
+  </>
+) : (
+  <p class="muted read"><span class="on-mouse">{play.p}</span><span class="on-touch">{play.p_touch ?? play.p}</span></p>
+)}
+
+<style>
+  .read { max-width: 640px; }
+  .play-short, .play-help { overflow-wrap: anywhere; }
+  .play-help summary { width: fit-content; color: var(--muted); font-size: 14px; cursor: pointer; }
+  .play-help summary:hover { color: var(--ink); }
+  .play-help p { margin-block-start: 4px; }
+</style>
