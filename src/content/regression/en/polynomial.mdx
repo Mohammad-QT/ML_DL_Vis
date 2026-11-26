@@ -10,6 +10,19 @@ steps:
   - Fit an ordinary linear regression on x and those new columns.
   - 'Degree 1 is the straight line, degree 2 a single bend, degree 3 an S-shape, and so on.'
   - 'More degree means more bends, which fits the training points better but may start chasing noise.'
+quick:
+  steps:
+    - "Build powers of x like <b>x²</b> and <b>x³</b> up to your degree"
+    - "Fit linear regression on x and those new power columns"
+    - "Degree 1 is straight; 2 bends once; 3 makes an S"
+    - "Too many bends hug every point and chase the noise"
+  caution: "High-degree curves swing wildly between and beyond points; watch test R²."
+  scene: polynomial
+  words:
+    powers: "x, x², x³"
+    deg1: "Degree 1"
+    deg3: "Degree 3"
+    deg8: "Degree 9"
 caution:
   h: High degrees swing wildly
   p: 'A high-degree curve can pass close to every training point and then <mark>swing off</mark> between and beyond them. Raise the degree only while the <mark>test</mark> R² keeps rising.'
