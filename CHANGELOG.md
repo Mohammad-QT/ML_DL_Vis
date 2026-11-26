@@ -4,6 +4,18 @@ Every change that learners can see, newest first. Each entry links to the pull r
 
 ## 26 November 2026
 
+**A new Learn step: less reading, more watching.** ([#24](https://github.com/Mohammad-QT/ML_DL_Vis/pull/24) and the scenes PR)
+
+- **Short steps next to an animation.** The Learn step now opens in a Simple view: 3–4 short steps beside an animation
+  that plays them one by one. Point at (or tap) a step and the animation replays just that step. The full text is one
+  click away under **Detailed**, and the site remembers your choice.
+- **19 lessons have animations:** K-NN, decision tree, random forest, SVM, kernel SVM, K-Means, hierarchical
+  clustering, DBSCAN, Apriori, gradient descent, XGBoost, k-fold cross-validation, grid search, PCA, Q-learning, UCB,
+  Thompson sampling, neural networks and CNN. More are coming.
+- **More room for the board.** After the Learn step, the big header shrinks to the title, which helps most on phones.
+- **Easier-to-spot buttons.** Next-step buttons are larger and highlighted, buttons that *do* something look different
+  from buttons that *choose* something, and each demo's main action pulses once when you first see it.
+
 **Part 8: Deep learning.** The course now covers every part, 0 to 10. ([#22](https://github.com/Mohammad-QT/ML_DL_Vis/pull/22))
 
 - **Neural networks (MLP).** Train a network on the board and watch the boundary bend while the epochs tick. Choose
