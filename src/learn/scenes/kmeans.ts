@@ -79,6 +79,24 @@ export default function kmeansScene() {
   let centres: { group: SVGGElement; ring: SVGCircleElement }[] = [];
   let status: SVGTextElement;
 
+  function setDelay(el: Element, ms: number) {
+    (el as SVGElement).style.setProperty('--delay', `${ms}ms`);
+  }
+
+  function resetDelays() {
+    dots.forEach(d => setDelay(d, 0));
+    edges.forEach(e => setDelay(e, 0));
+    trails.forEach(tr => {
+      setDelay(tr.line, 0);
+      setDelay(tr.mark, 0);
+    });
+    centres.forEach(({ group, ring }) => {
+      setDelay(group, 0);
+      setDelay(ring, 0);
+    });
+    setDelay(status, 0);
+  }
+
   function setTrails(visibleThroughStep: number, opacity: string) {
     for (const trail of trails) {
       const show = trail.step <= visibleThroughStep;
@@ -95,7 +113,8 @@ export default function kmeansScene() {
     });
   }
 
-  function showAssign(roundIndex: number, text: string, edgeOpacity = '0.45') {
+  function showAssign(roundIndex: number, text: string, edgeOpacity = '0.45', staged = false) {
+    resetDelays();
     const state = states[roundIndex];
     for (let i = 0; i < points.length; i++) {
       const c = state.assign[i];
@@ -108,14 +127,20 @@ export default function kmeansScene() {
       edges[i].setAttribute('stroke', colors[c]);
       edges[i].setAttribute('stroke-dashoffset', '0');
       edges[i].setAttribute('opacity', edgeOpacity);
+      if (staged) {
+        setDelay(edges[i], i * 20);
+        setDelay(dots[i], 550);
+      }
     }
     setTrails(roundIndex - 1, '0.55');
     setCentres(state.centres, '0');
     status.textContent = text;
     status.setAttribute('opacity', '1');
+    if (staged) setDelay(status, 850);
   }
 
-  function showMove(roundIndex: number, text: string) {
+  function showMove(roundIndex: number, text: string, staged = false) {
+    resetDelays();
     const prev = states[roundIndex];
     const next = states[roundIndex + 1];
     for (let i = 0; i < points.length; i++) {
@@ -126,11 +151,24 @@ export default function kmeansScene() {
     }
     setTrails(roundIndex, '0.6');
     setCentres(next.centres, '1');
+    if (staged) {
+      trails.forEach(tr => {
+        if (tr.step <= roundIndex) {
+          setDelay(tr.line, 250);
+          setDelay(tr.mark, 250);
+        }
+      });
+      centres.forEach(({ group, ring }) => {
+        setDelay(group, 350);
+        setDelay(ring, 350);
+      });
+    }
     status.textContent = text;
     status.setAttribute('opacity', '1');
   }
 
-  function showDrop(yOffset: number, opacity: string) {
+  function showDrop(yOffset: number, opacity: string, staged = false) {
+    resetDelays();
     for (let i = 0; i < points.length; i++) {
       dots[i].setAttribute('fill', 'var(--muted)');
       dots[i].setAttribute('opacity', '1');
@@ -139,15 +177,16 @@ export default function kmeansScene() {
     }
     setTrails(-1, '0');
     setCentres(states[0].centres, '0', yOffset, opacity);
+    if (staged) centres.forEach(({ group }, c) => setDelay(group, c * 180));
     status.textContent = '';
     status.setAttribute('opacity', '0');
   }
 
-  function applyFrame(i: number, api: SceneApi) {
-    if (i === 0) showDrop(0, '1');
-    else if (i === 1) showAssign(0, api.t('round').replace('{n}', '1'));
-    else if (i === 2) showMove(0, api.t('round').replace('{n}', '1'));
-    else showAssign(states.length - 1, api.t('done'), '0.4');
+  function applyFrame(i: number, api: SceneApi, staged = true) {
+    if (i === 0) showDrop(0, '1', staged);
+    else if (i === 1) showAssign(0, api.t('round').replace('{n}', '1'), '0.45', staged);
+    else if (i === 2) showMove(0, api.t('round').replace('{n}', '1'), staged);
+    else showAssign(states.length - 1, api.t('done'), '0.4', false);
   }
 
   return defineScene({
@@ -205,7 +244,7 @@ export default function kmeansScene() {
       }, cloudLayer));
 
       centres = initCentres.map((_, c) => {
-        const group = el('g', { class: 'scene-tween' }, centresLayer);
+        const group = el('g', { class: 'scene-tween scene-slow' }, centresLayer);
         const ring = el('circle', {
           cx: 0, cy: 0, r: 13, fill: 'none', stroke: 'var(--hl)', 'stroke-width': 2.5, opacity: 0, class: 'scene-tween',
         }, group);
@@ -231,7 +270,7 @@ export default function kmeansScene() {
 
       const timers: number[] = [];
       const moveRounds = states.length - 2;
-      const phaseMs = Math.min(520, Math.floor(2100 / (moveRounds * 2)));
+      const phaseMs = Math.min(480, Math.floor(2000 / (moveRounds * 2)));
       let elapsed = 0;
 
       for (let r = 1; r <= moveRounds; r++) {
@@ -242,7 +281,7 @@ export default function kmeansScene() {
         timers.push(browser.setTimeout(() => showMove(r, roundLabel), elapsed));
         elapsed += phaseMs;
       }
-      timers.push(browser.setTimeout(() => applyFrame(3, api), elapsed));
+      timers.push(browser.setTimeout(() => applyFrame(3, api, false), elapsed));
 
       return () => timers.forEach(id => browser.clearTimeout(id));
     },

@@ -23,6 +23,7 @@ export const learn = {
   en: {
     mode: 'Learn view', simple: 'Simple', detailed: 'Detailed',
     animation: 'Step animation', pause: 'Pause', play: 'Play animation', step: 'Step {n} of {total}',
+    prevStep: 'Previous step', nextStep: 'Next step', goToStep: 'Go to step {n}', stepControls: 'Step controls',
     neighbours: 'K = 5', query: 'New point', classA: 'Class A', classB: 'Class B', votes: 'Votes',
     input: 'Input', output: 'Output', label: 'Label', loss: 'Loss', error: 'Error',
     weightedSum: 'Weighted sum + bias', activation: 'Activation', weights: 'Update weights', boundary: 'Boundary',
@@ -32,6 +33,7 @@ export const learn = {
   ar: {
     mode: 'طريقة العرض', simple: 'مبسّط', detailed: 'مفصّل',
     animation: 'رسم متحرّك للخطوات', pause: 'إيقاف مؤقت', play: 'تشغيل الرسم', step: 'الخطوة {n} من {total}',
+    prevStep: 'الخطوة السابقة', nextStep: 'الخطوة التالية', goToStep: 'انتقل إلى الخطوة {n}', stepControls: 'التحكّم بالخطوات',
     neighbours: 'K = 5', query: 'نقطة جديدة', classA: 'الفئة أ', classB: 'الفئة ب', votes: 'الأصوات',
     input: 'المدخل', output: 'المخرج', label: 'الفئة الفعلية', loss: 'الخسارة', error: 'الخطأ',
     weightedSum: 'مجموع موزون + انحياز', activation: 'تفعيل', weights: 'تحديث الأوزان', boundary: 'الحدّ الفاصل',

@@ -82,7 +82,24 @@ export default function dbscanScene() {
   let legendBorder: SVGGElement;
   let legendNoise: SVGGElement;
 
-  function focusEps(centerIndex: number, showRing: boolean, api: SceneApi) {
+  const delay = (el: Element, ms: number) => (el as SVGElement).style.setProperty('--delay', `${ms}ms`);
+
+  function resetDelays() {
+    delay(epsRing, 0);
+    nodes.forEach(n => {
+      delay(n.dot, 0);
+      delay(n.halo, 0);
+      delay(n.cross, 0);
+    });
+    coreEdges.forEach(e => delay(e.el, 0));
+    borderEdges.forEach(e => delay(e, 0));
+    delay(legendCore, 0);
+    delay(legendBorder, 0);
+    delay(legendNoise, 0);
+  }
+
+  function focusEps(centerIndex: number, showRing: boolean, api: SceneApi, staged = false) {
+    resetDelays();
     const c = points[centerIndex];
     epsRing.style.transform = `translate(${c.x}px, ${c.y}px) scale(${showRing ? 1 : 0.2})`;
     epsRing.setAttribute('opacity', showRing ? '1' : '0');
@@ -97,6 +114,10 @@ export default function dbscanScene() {
       node.dot.setAttribute('opacity', showRing && !inRadius ? '0.65' : '1');
       node.halo.setAttribute('opacity', showRing && inRadius ? '1' : '0');
       node.cross.setAttribute('opacity', '0');
+      if (staged) {
+        delay(node.dot, 450);
+        delay(node.halo, 450);
+      }
     });
 
     coreEdges.forEach(e => {
@@ -116,6 +137,7 @@ export default function dbscanScene() {
   }
 
   function showCore(api: SceneApi) {
+    resetDelays();
     epsRing.setAttribute('opacity', '0');
     nodes.forEach((node, idx) => {
       const isCore = result.types[idx] === 'core';
@@ -125,6 +147,10 @@ export default function dbscanScene() {
       node.dot.setAttribute('opacity', isCore ? '1' : '0.35');
       node.halo.setAttribute('opacity', isCore ? '1' : '0');
       node.cross.setAttribute('opacity', '0');
+      if (isCore) {
+        delay(node.dot, 350);
+        delay(node.halo, 450);
+      }
     });
     coreEdges.forEach(e => {
       e.el.setAttribute('stroke-dashoffset', '1');
@@ -138,11 +164,13 @@ export default function dbscanScene() {
     statusLabel.textContent = api.t('core');
     statusNum.textContent = String(coreIndices.length);
     legendCore.setAttribute('opacity', '1');
+    delay(legendCore, 700);
     legendBorder.setAttribute('opacity', '0.45');
     legendNoise.setAttribute('opacity', '0.45');
   }
 
   function showChainsThrough(maxVisibleWave: number, api: SceneApi) {
+    resetDelays();
     epsRing.setAttribute('opacity', '0');
     nodes.forEach((node, idx) => {
       const isCore = result.types[idx] === 'core';
@@ -172,6 +200,7 @@ export default function dbscanScene() {
   }
 
   function showBorderAndNoise(api: SceneApi) {
+    resetDelays();
     epsRing.setAttribute('opacity', '0');
     nodes.forEach((node, idx) => {
       const kind = result.types[idx];
@@ -190,10 +219,14 @@ export default function dbscanScene() {
         node.dot.setAttribute('opacity', '1');
         node.halo.setAttribute('opacity', '0.9');
         node.cross.setAttribute('opacity', '0');
+        delay(node.dot, 450);
+        delay(node.halo, 450);
       } else {
         node.dot.setAttribute('opacity', '0');
         node.halo.setAttribute('opacity', '0');
         node.cross.setAttribute('opacity', '1');
+        delay(node.dot, 900);
+        delay(node.cross, 900);
       }
     });
     coreEdges.forEach(e => {
@@ -209,11 +242,13 @@ export default function dbscanScene() {
     statusNum.textContent = String(result.noise);
     legendCore.setAttribute('opacity', '1');
     legendBorder.setAttribute('opacity', '1');
+    delay(legendBorder, 450);
     legendNoise.setAttribute('opacity', '1');
+    delay(legendNoise, 900);
   }
 
   function applyFrame(i: number, api: SceneApi) {
-    if (i === 0) focusEps(1, true, api);
+    if (i === 0) focusEps(1, true, api, true);
     else if (i === 1) showCore(api);
     else if (i === 2) showChainsThrough(maxWave, api);
     else showBorderAndNoise(api);
@@ -326,9 +361,9 @@ export default function dbscanScene() {
       if (i === 0) {
         const timers: number[] = [];
         const noiseSample = noiseIndices[0];
-        focusEps(1, true, api);
-        timers.push(browser.setTimeout(() => focusEps(noiseSample, true, api), 1150));
-        timers.push(browser.setTimeout(() => focusEps(1, true, api), 2200));
+        focusEps(1, true, api, true);
+        timers.push(browser.setTimeout(() => focusEps(noiseSample, true, api, false), 1100));
+        timers.push(browser.setTimeout(() => focusEps(1, true, api, false), 2150));
         return () => timers.forEach(id => browser.clearTimeout(id));
       }
 

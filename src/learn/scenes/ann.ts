@@ -94,9 +94,10 @@ export default function annScene() {
       }
       const axis = el('g', { transform: 'translate(329 255)' }, board);
       line(api, axis, -39, 0, 39, 0, { stroke: 'var(--muted)', 'stroke-dasharray': '3 4', transform: `rotate(${beforeAngle})` });
-      boundary = line(api, axis, -39, 0, 39, 0, { stroke: 'var(--ink)', 'stroke-width': 2, class: 'scene-tween' });
+      boundary = line(api, axis, -39, 0, 39, 0, { stroke: 'var(--ink)', 'stroke-width': 2, class: 'scene-tween scene-slow' });
     },
     frame(i, api) {
+      const delay = (el: Element, ms: number) => (el as SVGElement).style.setProperty('--delay', `${ms}ms`);
       const { t } = api;
       heading.textContent = [
         `${t('weightedSum')} → ${t('activation')}`,
@@ -110,19 +111,24 @@ export default function annScene() {
         edge.line.setAttribute('stroke', i === 2 ? 'var(--bad)' : weight < 0 ? 'var(--b)' : 'var(--a)');
         edge.line.setAttribute('stroke-width', String(1.5 + .5 * strength));
         edge.line.setAttribute('opacity', String(.42 + .58 * strength));
+        delay(edge.line, i === 2 ? (1 - edge.layer) * 350 : 0);
         edge.pulse.setAttribute('fill', i === 2 ? 'var(--bad)' : 'var(--a)');
         edge.pulse.setAttribute('opacity', i === 0 || i === 2 ? '1' : '0');
       }
       compare.setAttribute('opacity', i === 1 ? '1' : '0');
+      delay(compare, 0);
       lossBar.setAttribute('transform', i === 1 ? 'scale(1 1)' : 'scale(0 1)');
+      delay(lossBar, i === 1 ? 450 : 0);
       board.setAttribute('opacity', i === 3 ? '1' : '0');
+      delay(board, i === 3 ? 350 : 0);
       boundary.setAttribute('transform', `rotate(${i === 3 ? afterAngle : beforeAngle})`);
+      delay(boundary, i === 3 ? 750 : 0);
     },
     loop(i) {
       if (i !== 0 && i !== 2) return () => {};
       const sign = i === 0 ? 1 : -1;
       const animations: Animation[] = [];
-      const travel = 550, start = 130, layerTime = 850;
+      const travel = 600, start = 150, layerTime = 900;
       for (const { pulse, dx, dy, layer } of edges) {
         const delay = start + (i === 0 ? layer : 1 - layer) * layerTime;
         const shift = (fraction: number) => `translate(${sign * fraction * dx}px, ${sign * fraction * dy}px)`;

@@ -29,7 +29,27 @@ export default function cvScene() {
   const foldX = (f: number) => BAR_X + f * (FOLD_W + FOLD_GAP);
   const pct = (v: number) => `${Math.round(v * 100)}%`;
 
+  const delay = (el: Element, ms: number) => (el as SVGElement).style.setProperty('--delay', `${ms}ms`);
+
+  function resetDelays() {
+    folds.forEach(f => {
+      delay(f.group, 0);
+      delay(f.box, 0);
+      delay(f.ring, 0);
+      delay(f.num, 0);
+    });
+    bars.forEach(b => {
+      delay(b.fill, 0);
+      delay(b.text, 0);
+      delay(b.track, 0);
+    });
+    delay(legend, 0);
+    delay(summary, 0);
+    delay(status, 0);
+  }
+
   function showFolds(opts: { testFold: number; scoredThrough: number; bunched: boolean; neutral: boolean }) {
+    resetDelays();
     for (let f = 0; f < K; f++) {
       const isTest = f === opts.testFold;
       const offset = opts.bunched ? (2 - f) * 6 : 0;
@@ -59,16 +79,22 @@ export default function cvScene() {
   function applyFrame(i: number, api: SceneApi) {
     if (i === 0) {
       showFolds({ testFold: -1, scoredThrough: -1, bunched: false, neutral: true });
+      folds.forEach((f, idx) => delay(f.group, idx * 90));
       legend.setAttribute('opacity', '0');
       summary.setAttribute('opacity', '0');
       status.textContent = api.t('data');
       status.setAttribute('opacity', '1');
+      delay(status, 450);
     } else if (i === 1) {
       showFolds({ testFold: 0, scoredThrough: 0, bunched: false, neutral: false });
+      delay(bars[0].track, 350);
+      delay(bars[0].fill, 600);
+      delay(bars[0].text, 600);
       legend.setAttribute('opacity', '1');
       summary.setAttribute('opacity', '0');
       status.textContent = api.t('fold').replace('{n}', '1');
       status.setAttribute('opacity', '1');
+      delay(status, 450);
     } else if (i === 2) {
       showFolds({ testFold: K - 1, scoredThrough: K - 1, bunched: false, neutral: false });
       legend.setAttribute('opacity', '1');
@@ -79,8 +105,10 @@ export default function cvScene() {
       showFolds({ testFold: -1, scoredThrough: K - 1, bunched: false, neutral: true });
       legend.setAttribute('opacity', '0');
       summary.setAttribute('opacity', '1');
+      delay(summary, 550);
       status.textContent = api.t('mean');
       status.setAttribute('opacity', '1');
+      delay(status, 550);
     }
   }
 
@@ -171,7 +199,7 @@ export default function cvScene() {
       const browser = api.svg.ownerDocument.defaultView;
       if (i !== 2 || api.reduced || !browser) return () => {};
       const timers: number[] = [];
-      const phaseMs = 500;
+      const phaseMs = 480;
       for (let f = 0; f < K; f++) {
         const fold = f;
         const run = () => {

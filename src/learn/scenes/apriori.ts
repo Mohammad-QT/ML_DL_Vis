@@ -55,6 +55,30 @@ export default function aprioriScene() {
   let pairRows: BarRow[] = [];
   let metricBars: SVGRectElement[] = [];
 
+  const delay = (el: Element, ms: number) => (el as SVGElement).style.setProperty('--delay', `${ms}ms`);
+
+  function resetDelays() {
+    basketRows.forEach(row => {
+      delay(row.card, 0);
+      row.pills.forEach(p => {
+        delay(p.rect, 0);
+        delay(p.text, 0);
+      });
+    });
+    delay(scanFrame, 0);
+    delay(minHeader, 0);
+    delay(step0Group, 0);
+    delay(step1Group, 0);
+    delay(step2Group, 0);
+    delay(step3Group, 0);
+    singleRows.forEach(r => { delay(r.bar, 0); delay(r.strike, 0); });
+    chipHighlights.forEach(r => delay(r, 0));
+    candidateCards.forEach(c => delay(c, 0));
+    cardHighlights.forEach(r => delay(r, 0));
+    pairRows.forEach(r => { delay(r.bar, 0); delay(r.strike, 0); });
+    metricBars.forEach(b => delay(b, 0));
+  }
+
   function highlightPair(pairIdx: number | null) {
     chipHighlights.forEach(ring => ring.setAttribute('opacity', '0'));
     cardHighlights.forEach(ring => ring.setAttribute('opacity', '0'));
@@ -123,6 +147,7 @@ export default function aprioriScene() {
   }
 
   function applyFrame(i: number, _api: SceneApi) {
+    resetDelays();
     step0Group.setAttribute('opacity', i === 0 ? '1' : '0');
     step1Group.setAttribute('opacity', i === 1 ? '1' : '0');
     step2Group.setAttribute('opacity', i === 2 ? '1' : '0');
@@ -146,7 +171,11 @@ export default function aprioriScene() {
       showPairs(baskets.length - 1, true);
     } else {
       setBasketState([true, true, false, false], [false, false, false, true], 'var(--a)');
-      metricBars.forEach(bar => bar.setAttribute('transform', 'scale(1 1)'));
+      delay(step3Group, 150);
+      metricBars.forEach((bar, idx) => {
+        bar.setAttribute('transform', 'scale(1 1)');
+        delay(bar, 450 + idx * 300);
+      });
     }
   }
 
@@ -381,9 +410,10 @@ export default function aprioriScene() {
 
       if (i === 0 || i === 2) {
         const timers: number[] = [];
-        const stepMs = 480;
+        const stepMs = 460;
         for (let b = 0; b < baskets.length; b++) {
           const run = () => {
+            resetDelays();
             scanFrame.setAttribute('y', String(46 + b * 54));
             scanFrame.setAttribute('opacity', '1');
             if (i === 0) showSingles(b, b === baskets.length - 1);
@@ -392,19 +422,22 @@ export default function aprioriScene() {
           if (b === 0) run();
           else timers.push(browser.setTimeout(run, b * stepMs));
         }
-        timers.push(browser.setTimeout(() => applyFrame(i, api), baskets.length * stepMs + 150));
+        timers.push(browser.setTimeout(() => applyFrame(i, api), baskets.length * stepMs + 60));
         return () => timers.forEach(id => browser.clearTimeout(id));
       }
 
       if (i === 1) {
         const timers: number[] = [];
-        const pairMs = 620;
+        const pairMs = 580;
         for (let p = 0; p < pairList.length; p++) {
-          const run = () => highlightPair(p);
+          const run = () => {
+            resetDelays();
+            highlightPair(p);
+          };
           if (p === 0) run();
           else timers.push(browser.setTimeout(run, p * pairMs));
         }
-        timers.push(browser.setTimeout(() => applyFrame(1, api), pairList.length * pairMs + 150));
+        timers.push(browser.setTimeout(() => applyFrame(1, api), pairList.length * pairMs + 60));
         return () => timers.forEach(id => browser.clearTimeout(id));
       }
 

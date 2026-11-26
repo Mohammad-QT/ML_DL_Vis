@@ -93,7 +93,24 @@ export default function hierarchicalScene() {
   let cutLegendText: SVGTextElement;
   let countNum: SVGTextElement;
 
-  function showTreeThrough(mergeIndex: number, clusterCount: number, highlightMerge: number) {
+  const delay = (el: Element, ms: number) => (el as SVGElement).style.setProperty('--delay', `${ms}ms`);
+
+  function resetDelays() {
+    dots.forEach(d => delay(d, 0));
+    dotRings.forEach(r => delay(r, 0));
+    leafDots.forEach(l => delay(l, 0));
+    merges.forEach(m => {
+      delay(m.join, 0);
+      delay(m.link, 0);
+    });
+    delay(cutLine, 0);
+    cutMarks.forEach(m => delay(m, 0));
+    delay(cutLegend, 0);
+    delay(cutLegendText, 0);
+  }
+
+  function showTreeThrough(mergeIndex: number, clusterCount: number, highlightMerge: number, staged = false) {
+    resetDelays();
     merges.forEach((merge, idx) => {
       const visible = idx <= mergeIndex;
       const active = idx === highlightMerge;
@@ -105,6 +122,11 @@ export default function hierarchicalScene() {
       merge.link.setAttribute('stroke-dashoffset', visible ? '0' : '1');
       merge.link.setAttribute('opacity', visible ? (idx <= 2 ? '0.65' : '0.4') : '0');
       merge.link.setAttribute('stroke', active ? 'var(--a)' : 'var(--muted)');
+
+      if (staged && visible) {
+        delay(merge.link, 200);
+        delay(merge.join, 600);
+      }
     });
 
     const mergedLeaves = new Set<number>();
@@ -117,6 +139,10 @@ export default function hierarchicalScene() {
       dot.setAttribute('opacity', highlightMerge >= 0 && !inHighlight ? '0.65' : '1');
       dot.setAttribute('transform', 'scale(1)');
       dotRings[id].setAttribute('opacity', inHighlight ? '1' : mergeIndex < 0 ? '0.45' : '0');
+      if (staged && mergeIndex < 0) {
+        delay(dot, id * 80);
+        delay(dotRings[id], 450);
+      }
     });
 
     leafDots.forEach((leaf, id) => {
@@ -125,6 +151,7 @@ export default function hierarchicalScene() {
       leaf.setAttribute('fill', inHighlight ? 'var(--a)' : inAny ? 'var(--ink)' : 'var(--muted)');
       leaf.setAttribute('opacity', '1');
       leaf.setAttribute('transform', 'scale(1)');
+      if (staged && mergeIndex < 0) delay(leaf, id * 80);
     });
 
     cutLine.setAttribute('stroke-dashoffset', '1');
@@ -136,6 +163,7 @@ export default function hierarchicalScene() {
   }
 
   function showCut() {
+    resetDelays();
     merges.forEach(merge => {
       const belowCut = merge.nodeBelowCut;
       const cluster = belowCut ? cutResult.labels[merge.leafIds[0]] : -1;
@@ -143,10 +171,12 @@ export default function hierarchicalScene() {
       merge.join.setAttribute('opacity', belowCut ? '1' : '0.28');
       merge.join.setAttribute('stroke', belowCut ? colors[cluster] : 'var(--muted)');
       merge.join.setAttribute('stroke-width', belowCut ? '2.25' : '1.75');
+      delay(merge.join, 850);
 
       merge.link.setAttribute('stroke-dashoffset', belowCut ? '0' : '1');
       merge.link.setAttribute('opacity', belowCut ? '0.55' : '0');
       if (belowCut) merge.link.setAttribute('stroke', colors[cluster]);
+      delay(merge.link, 850);
     });
 
     dots.forEach((dot, id) => {
@@ -155,26 +185,33 @@ export default function hierarchicalScene() {
       dot.setAttribute('opacity', '1');
       dot.setAttribute('transform', 'scale(1)');
       dotRings[id].setAttribute('opacity', '0');
+      delay(dot, 850);
     });
 
     leafDots.forEach((leaf, id) => {
       leaf.setAttribute('fill', colors[cutResult.labels[id]]);
       leaf.setAttribute('opacity', '1');
       leaf.setAttribute('transform', 'scale(1)');
+      delay(leaf, 850);
     });
 
     cutLine.setAttribute('stroke-dashoffset', '0');
     cutLine.setAttribute('opacity', '1');
-    cutMarks.forEach(mark => mark.setAttribute('opacity', '1'));
+    cutMarks.forEach((mark, idx) => {
+      mark.setAttribute('opacity', '1');
+      delay(mark, 550 + idx * 120);
+    });
     cutLegend.setAttribute('opacity', '1');
+    delay(cutLegend, 200);
     cutLegendText.setAttribute('opacity', '1');
+    delay(cutLegendText, 200);
     countNum.textContent = String(cutResult.count);
   }
 
   function applyFrame(i: number, _api: SceneApi) {
-    if (i === 0) showTreeThrough(-1, samples.length, -1);
-    else if (i === 1) showTreeThrough(0, samples.length - 1, 0);
-    else if (i === 2) showTreeThrough(merges.length - 1, 1, -1);
+    if (i === 0) showTreeThrough(-1, samples.length, -1, true);
+    else if (i === 1) showTreeThrough(0, samples.length - 1, 0, true);
+    else if (i === 2) showTreeThrough(merges.length - 1, 1, -1, false);
     else showCut();
   }
 
@@ -318,7 +355,7 @@ export default function hierarchicalScene() {
 
       if (i === 2) {
         const timers: number[] = [];
-        const stepMs = 460;
+        const stepMs = 440;
         showTreeThrough(0, samples.length - 1, 0);
         for (let m = 1; m < merges.length; m++) {
           timers.push(browser.setTimeout(() => {
@@ -334,7 +371,7 @@ export default function hierarchicalScene() {
         cutMarks.forEach((mark, idx) => {
           const anim = mark.animate?.(
             [{ transform: 'scale(1)' }, { transform: 'scale(1.35)' }, { transform: 'scale(1)' }],
-            { duration: 900, delay: idx * 140, fill: 'both' },
+            { duration: 900, delay: 850 + idx * 140, fill: 'both' },
           );
           if (anim) animations.push(anim);
         });

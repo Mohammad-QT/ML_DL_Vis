@@ -61,17 +61,23 @@ export default function knnScene() {
       label(api, votes, 348, 270, String(k - countA), { class: 'scene-value', 'font-weight': 700 });
     },
     frame(i) {
-      for (const { dot, edge, c, near } of points) {
+      const delay = (el: Element, ms: number) => (el as SVGElement).style.setProperty('--delay', `${ms}ms`);
+      for (const [idx, { dot, edge, c, near }] of points.entries()) {
         dot.setAttribute('opacity', i >= 2 && !near ? '0.22' : '1');
+        delay(dot, 0);
         edge.setAttribute('stroke-dashoffset', i === 0 || (i >= 2 && !near) ? '1' : '0');
         edge.setAttribute('stroke', i >= 2 ? colors[c] : 'var(--muted)');
+        delay(edge, i === 1 ? idx * 35 : i === 2 && near ? 500 : 0);
       }
       query.setAttribute('fill', i === 3 ? colors[winner] : 'var(--muted)');
+      delay(query, i === 3 ? 700 : 0);
       queryLabel.setAttribute('opacity', i === 0 ? '1' : '0');
+      delay(queryLabel, i === 0 ? 450 : 0);
       votes.setAttribute('opacity', i === 3 ? '1' : '0');
+      delay(votes, i === 3 ? 200 : 0);
     },
     loop(i) {
-      const animation = i === 0 ? query.animate?.([{ opacity: 0 }, { opacity: 1 }], { duration: 350 }) : undefined;
+      const animation = i === 0 ? query.animate?.([{ opacity: 0 }, { opacity: 1 }], { duration: 700 }) : undefined;
       return () => animation?.cancel();
     },
   });

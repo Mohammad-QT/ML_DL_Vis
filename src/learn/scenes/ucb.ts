@@ -56,7 +56,23 @@ export default function ucbScene() {
   let legendMean: SVGGElement;
   let legendBonus: SVGGElement;
 
+  const delay = (el: Element, ms: number) => (el as SVGElement).style.setProperty('--delay', `${ms}ms`);
+
+  function resetDelays() {
+    bars.forEach(b => delay(b, 0));
+    whiskers.forEach(w => delay(w, 0));
+    caps.forEach(c => delay(c, 0));
+    rings.forEach(r => delay(r, 0));
+    pulses.forEach(p => delay(p, 0));
+    outcomes.forEach(o => delay(o, 0));
+    counts.forEach(c => delay(c, 0));
+    delay(shownTag, 0);
+    delay(legendMean, 0);
+    delay(legendBonus, 0);
+  }
+
   function renderSnapshot(snap: RoundSnapshot, opts: { showBars: boolean; showWhiskers: boolean; highlight: number }, api: SceneApi) {
+    resetDelays();
     const scores = snap.plays.map((n, a) => {
       const mean = snap.wins[a] / n;
       const bonus = Math.sqrt((2 * Math.log(snap.round)) / n);
@@ -116,21 +132,27 @@ export default function ucbScene() {
       legendBonus.setAttribute('opacity', '0');
     } else if (i === 1) {
       renderSnapshot(history[0], { showBars: true, showWhiskers: false, highlight: -1 }, api);
+      bars.forEach((b, a) => delay(b, a * 220));
       outcomes.forEach(o => o.setAttribute('opacity', '0'));
       pulses.forEach(p => p.setAttribute('opacity', '0'));
       shownTag.setAttribute('opacity', '0');
       counts.forEach(c => c.setAttribute('opacity', '1'));
       legendMean.setAttribute('opacity', '1');
+      delay(legendMean, 450);
       legendBonus.setAttribute('opacity', '0');
     } else if (i === 2) {
       const snap = history[0];
       renderSnapshot(snap, { showBars: true, showWhiskers: true, highlight: highestTop(snap) }, api);
+      whiskers.forEach((w, a) => delay(w, 150 + a * 180));
+      caps.forEach(c => delay(c, 650));
+      rings.forEach(r => delay(r, 950));
       outcomes.forEach(o => o.setAttribute('opacity', '0'));
       pulses.forEach(p => p.setAttribute('opacity', '0'));
       shownTag.setAttribute('opacity', '0');
       counts.forEach(c => c.setAttribute('opacity', '1'));
       legendMean.setAttribute('opacity', '1');
       legendBonus.setAttribute('opacity', '1');
+      delay(legendBonus, 650);
     } else {
       const last = history[history.length - 1];
       renderSnapshot(last, { showBars: true, showWhiskers: true, highlight: highestTop(last) }, api);
@@ -285,8 +307,8 @@ export default function ucbScene() {
           }
         };
 
-        const adStepMs = 760;
-        const revealDelay = 320;
+        const adStepMs = 680;
+        const revealDelay = 280;
         for (let a = 0; a < 3; a++) {
           const start = a * adStepMs;
           if (a === 0) showTrial(0, false);
@@ -305,7 +327,7 @@ export default function ucbScene() {
 
       const timers: number[] = [];
       const steps = history.slice(1);
-      const stepMs = Math.min(85, Math.floor(2200 / steps.length));
+      const stepMs = Math.min(75, Math.floor(2000 / steps.length));
       steps.forEach((snap, idx) => {
         const draw = () => {
           renderSnapshot(snap, { showBars: true, showWhiskers: true, highlight: highestTop(snap) }, api);

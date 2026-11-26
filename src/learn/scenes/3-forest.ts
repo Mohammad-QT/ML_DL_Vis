@@ -66,38 +66,65 @@ export default function forestScene() {
   let treeVotes: number[] = [0, 0, 0];
   let majorityClass = 0;
 
+  const delay = (el: Element, ms: number) => (el as SVGElement).style.setProperty('--delay', `${ms}ms`);
+
   function applyFrame(i: number, api: SceneApi) {
     const { t } = api;
     heading.textContent = i === 0 ? t('sample') : i <= 2 ? t('trees') : t('majority');
 
-    mainDots.forEach(d => d.setAttribute('opacity', i === 1 ? '0.42' : i === 3 ? '0.68' : '1'));
-    arrows.forEach(a => {
+    mainDots.forEach(d => {
+      d.setAttribute('opacity', i === 1 ? '0.42' : i === 3 ? '0.68' : '1');
+      delay(d, 0);
+    });
+    arrows.forEach((a, idx) => {
       a.setAttribute('stroke-dashoffset', i === 0 ? '0' : '1');
       a.setAttribute('opacity', i === 0 ? '0.85' : '0.2');
+      delay(a, i === 0 ? idx * 150 : 0);
     });
 
-    miniDotGroups.forEach(g => g.setAttribute('opacity', '1'));
-    miniSplitGroups.forEach(g => g.setAttribute('opacity', i >= 1 ? '1' : '0'));
-    miniRings.forEach(r => r.setAttribute('opacity', '0'));
+    miniDotGroups.forEach((g, idx) => {
+      g.setAttribute('opacity', '1');
+      delay(g, i === 0 ? 500 + idx * 150 : 0);
+    });
+    miniSplitGroups.forEach((g, idx) => {
+      g.setAttribute('opacity', i >= 1 ? '1' : '0');
+      delay(g, i === 1 ? 200 + idx * 350 : 0);
+    });
+    miniRings.forEach(r => {
+      r.setAttribute('opacity', '0');
+      delay(r, 0);
+    });
 
-    overlaySplits.forEach(segs => segs.forEach(lineEl => {
+    overlaySplits.forEach((segs, tIdx) => segs.forEach(lineEl => {
       lineEl.setAttribute('stroke-dashoffset', i >= 2 ? '0' : '1');
       lineEl.setAttribute('opacity', i === 2 ? '0.72' : i === 3 ? '0.2' : '0');
+      delay(lineEl, i === 2 ? tIdx * 400 : 0);
     }));
 
-    ensembleRegions.forEach(r => r.setAttribute('opacity', i === 3 ? '0.16' : '0'));
+    ensembleRegions.forEach(r => {
+      r.setAttribute('opacity', i === 3 ? '0.16' : '0');
+      delay(r, i === 3 ? 200 : 0);
+    });
     ensembleContours.forEach(p => {
       p.setAttribute('stroke-dashoffset', i === 3 ? '0' : '1');
       p.setAttribute('opacity', i === 3 ? '1' : '0');
+      delay(p, i === 3 ? 350 : 0);
     });
 
     const showVote = i === 3;
     queryRing.setAttribute('opacity', showVote ? '1' : '0');
+    delay(queryRing, showVote ? 750 : 0);
     queryDot.setAttribute('opacity', showVote ? '1' : '0');
     queryDot.setAttribute('fill', majorityClass === 1 ? 'var(--b)' : 'var(--a)');
+    delay(queryDot, showVote ? 750 : 0);
     voteBar.setAttribute('opacity', showVote ? '1' : '0');
-    voteRings.forEach(r => r.setAttribute('opacity', '0'));
+    delay(voteBar, showVote ? 950 : 0);
+    voteRings.forEach(r => {
+      r.setAttribute('opacity', '0');
+      delay(r, 0);
+    });
     voteMajRing.setAttribute('opacity', showVote ? '1' : '0');
+    delay(voteMajRing, showVote ? 1200 : 0);
   }
 
   return defineScene({

@@ -111,6 +111,23 @@ export default function boostScene() {
   let bottomLabel: SVGTextElement;
   let status: SVGTextElement;
 
+  const delay = (el: Element, ms: number) => (el as SVGElement).style.setProperty('--delay', `${ms}ms`);
+
+  function resetDelays() {
+    segments.forEach(s => delay(s, 0));
+    joins.forEach(j => delay(j, 0));
+    residBars.forEach(b => delay(b, 0));
+    [fullCard, scaledCard].forEach(c => {
+      delay(c.group, 0);
+      delay(c.left, 0);
+      delay(c.right, 0);
+      delay(c.split, 0);
+    });
+    delay(scaleBadge, 0);
+    delay(bottomLabel, 0);
+    delay(status, 0);
+  }
+
   function setModelCurve(preds: number[]) {
     const ys = preds.map(mapY);
     for (let i = 0; i < ys.length; i++) {
@@ -187,6 +204,7 @@ export default function boostScene() {
   }
 
   function applyFrame(i: number, api: SceneApi) {
+    resetDelays();
     if (i === 0) {
       setModelCurve(rounds[0].preds);
       setResiduals(rounds[0].preds, false);
@@ -198,16 +216,29 @@ export default function boostScene() {
       setModelCurve(rounds[0].preds);
       setResiduals(rounds[0].preds, true);
       setStumpComparison(rounds[1].stump, 'full');
+      delay(fullCard.group, 450);
+      delay(fullCard.left, 750);
+      delay(fullCard.right, 750);
       bottomLabel.textContent = api.t('tree');
       bottomLabel.setAttribute('opacity', '1');
+      delay(bottomLabel, 450);
       status.textContent = api.t('errors');
       status.setAttribute('opacity', '1');
+      delay(status, 450);
     } else if (i === 2) {
       setModelCurve(rounds[1].preds);
       setResiduals(rounds[1].preds, true);
       setStumpComparison(rounds[1].stump, 'scaled');
+      delay(scaleBadge, 450);
+      delay(scaledCard.group, 650);
+      delay(scaledCard.left, 850);
+      delay(scaledCard.right, 850);
+      segments.forEach(s => delay(s, 1000));
+      joins.forEach(j => delay(j, 1000));
+      residBars.forEach(b => delay(b, 1000));
       bottomLabel.textContent = api.t('scaledTree');
       bottomLabel.setAttribute('opacity', '1');
+      delay(bottomLabel, 650);
       status.textContent = api.t('round').replace('{n}', '1');
       status.setAttribute('opacity', '1');
     } else {
@@ -227,8 +258,8 @@ export default function boostScene() {
     setup(api) {
       const { el, svg, t } = api;
 
-      function createStumpCard(baseX: number, stroke: string, strokeWidth: number): StumpCard {
-        const group = el('g', { opacity: 0, class: 'scene-tween' }, svg);
+      function createStumpCard(baseX: number, stroke: string, strokeWidth: number, slow = false): StumpCard {
+        const group = el('g', { opacity: 0, class: slow ? 'scene-tween scene-slow' : 'scene-tween' }, svg);
         el('rect', {
           x: baseX, y: TY, width: CW, height: TH, rx: 8, fill: 'var(--sheet)', stroke, 'stroke-width': strokeWidth,
         }, group);
@@ -295,7 +326,7 @@ export default function boostScene() {
         'text-anchor': 'middle', 'font-size': 13, fill: 'var(--muted)', opacity: 0, class: 'scene-tween',
       });
 
-      fullCard = createStumpCard(FULL_CENTER_X, 'var(--rule)', 1.5);
+      fullCard = createStumpCard(FULL_CENTER_X, 'var(--rule)', 1.5, true);
 
       scaleBadge = el('g', { opacity: 0, class: 'scene-tween' }, svg);
       label(api, scaleBadge, 200, 230, `× ${LR}`, {
@@ -332,6 +363,7 @@ export default function boostScene() {
         const idx = r;
         const text = idx === ROUNDS ? api.t('done') : api.t('round').replace('{n}', String(idx));
         const run = () => {
+          resetDelays();
           setModelCurve(rounds[idx].preds);
           setResiduals(rounds[idx].preds, true);
           setStumpComparison(rounds[idx].stump, 'scaled');

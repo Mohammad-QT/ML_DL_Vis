@@ -36,6 +36,23 @@ export default function pcaScene() {
   let pc1Tag: SVGTextElement;
   let pc2Tag: SVGTextElement;
 
+  const delay = (el: Element, ms: number) => (el as SVGElement).style.setProperty('--delay', `${ms}ms`);
+
+  function resetDelays() {
+    delay(rotGroup, 0);
+    delay(meanGroup, 0);
+    delay(meanRing, 0);
+    delay(candAxis, 0);
+    delay(pc2Axis, 0);
+    delay(rightAngle, 0);
+    projLines.forEach(l => delay(l, 0));
+    projTicks.forEach(t => delay(t, 0));
+    delay(spreadLabel, 0);
+    delay(statusLabel, 0);
+    delay(pc1Tag, 0);
+    delay(pc2Tag, 0);
+  }
+
   function varianceAt(theta: number): number {
     const ux = Math.cos(theta);
     const uy = Math.sin(theta);
@@ -72,6 +89,7 @@ export default function pcaScene() {
 
   function applyFrame(i: number, api: SceneApi) {
     const { t } = api;
+    resetDelays();
     const deg = (pc1Angle * 180) / Math.PI;
     const ux = Math.cos(pc1Angle);
     const uy = Math.sin(pc1Angle);
@@ -79,8 +97,10 @@ export default function pcaScene() {
     const vy = ux;
 
     rotGroup.style.transform = i === 3 ? `rotate(${-deg}deg)` : 'rotate(0deg)';
+    delay(rotGroup, i === 3 ? 250 : 0);
     meanGroup.setAttribute('opacity', '1');
     meanRing.setAttribute('opacity', i === 0 ? '1' : '0');
+    delay(meanRing, i === 0 ? 350 : 0);
 
     setAxis(pc1Angle, api);
     const showPc1 = i >= 1;
@@ -92,18 +112,27 @@ export default function pcaScene() {
     for (let k = 0; k < centered.length; k++) {
       projLines[k].setAttribute('opacity', projOpacity);
       projTicks[k].setAttribute('opacity', tickOpacity);
+      if (i === 1) {
+        delay(projLines[k], 450);
+        delay(projTicks[k], 450);
+      }
     }
 
     const showPc2 = i >= 2;
     pc2Axis.setAttribute('opacity', showPc2 ? '1' : '0');
     pc2Axis.setAttribute('stroke-dashoffset', showPc2 ? '0' : '1');
+    delay(pc2Axis, i === 2 ? 200 : 0);
     rightAngle.setAttribute('opacity', showPc2 ? (i === 3 ? '0.65' : '1') : '0');
+    delay(rightAngle, i === 2 ? 700 : 0);
 
     spreadLabel.setAttribute('opacity', i === 1 ? '1' : '0');
+    delay(spreadLabel, i === 1 ? 600 : 0);
     statusLabel.textContent = i === 0 ? t('mean') : '';
     statusLabel.setAttribute('opacity', i === 0 ? '1' : '0');
+    delay(statusLabel, i === 0 ? 500 : 0);
 
     pc1Tag.setAttribute('opacity', showPc1 ? '1' : '0');
+    delay(pc1Tag, i === 1 ? 300 : i === 3 ? 250 : 0);
     if (i === 3) {
       pc1Tag.setAttribute('x', String(mx + 132));
       pc1Tag.setAttribute('y', String(my - 10));
@@ -115,6 +144,7 @@ export default function pcaScene() {
     }
 
     pc2Tag.setAttribute('opacity', showPc2 ? '1' : '0');
+    delay(pc2Tag, i === 2 ? 850 : i === 3 ? 250 : 0);
     if (i === 3) {
       pc2Tag.setAttribute('x', String(mx + 12));
       pc2Tag.setAttribute('y', String(my - 76));
@@ -162,7 +192,7 @@ export default function pcaScene() {
       });
 
       const anchor = el('g', { transform: `translate(${mx} ${my})` }, svg);
-      rotGroup = el('g', { class: 'scene-tween' }, anchor);
+      rotGroup = el('g', { class: 'scene-tween scene-slow' }, anchor);
       rotGroup.style.transformOrigin = '0px 0px';
 
       const projLayer = el('g', {}, rotGroup);
@@ -215,10 +245,10 @@ export default function pcaScene() {
       }, meanGroup);
 
       pc1Tag = label(api, svg, 0, 0, t('pc1'), {
-        fill: 'var(--a)', 'font-size': 14, 'font-weight': 700, opacity: 0, class: 'scene-tween',
+        fill: 'var(--a)', 'font-size': 14, 'font-weight': 700, opacity: 0, class: 'scene-tween scene-slow',
       });
       pc2Tag = label(api, svg, 0, 0, t('pc2'), {
-        fill: 'var(--b)', 'font-size': 14, 'font-weight': 700, opacity: 0, class: 'scene-tween',
+        fill: 'var(--b)', 'font-size': 14, 'font-weight': 700, opacity: 0, class: 'scene-tween scene-slow',
       });
 
       applyFrame(0, api);

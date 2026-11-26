@@ -89,35 +89,55 @@ export default function treeScene() {
     }
   }
 
+  const delay = (el: Element, ms: number) => (el as SVGElement).style.setProperty('--delay', `${ms}ms`);
+
   function applyFrame(i: number) {
     setProbe(true, 0.58, i === 0);
+    delay(probeGroup, 0);
 
     const hasSplit1 = i >= 1;
     const hasSplit2 = i >= 2;
     split1.setAttribute('stroke-dashoffset', hasSplit1 ? '0' : '1');
     split1.setAttribute('opacity', hasSplit1 ? '1' : '0');
+    delay(split1, 0);
     split1Glow.setAttribute('opacity', i === 1 ? '0.65' : '0');
+    delay(split1Glow, 0);
 
     split2.setAttribute('stroke-dashoffset', hasSplit2 ? '0' : '1');
     split2.setAttribute('opacity', hasSplit2 ? '1' : '0');
+    delay(split2, 0);
     split2Glow.setAttribute('opacity', i === 2 ? '0.65' : '0');
+    delay(split2Glow, 0);
 
     regLeft.setAttribute('opacity', hasSplit1 ? '0.15' : '0');
+    delay(regLeft, i === 1 ? 500 : 0);
     regTopRight.setAttribute('opacity', hasSplit2 ? '0.16' : '0');
+    delay(regTopRight, i === 2 ? 500 : 0);
     regBotRight.setAttribute('opacity', hasSplit2 ? '0.15' : '0');
+    delay(regBotRight, i === 2 ? 500 : 0);
     pureBadge.setAttribute('opacity', i === 1 ? '1' : '0');
+    delay(pureBadge, i === 1 ? 750 : 0);
 
     const isQuery = i === 3;
-    dots.forEach(dot => dot.setAttribute('opacity', isQuery ? '0.55' : '1'));
+    dots.forEach(dot => {
+      dot.setAttribute('opacity', isQuery ? '0.55' : '1');
+      delay(dot, 0);
+    });
     queryDot.setAttribute('opacity', isQuery ? '1' : '0');
     queryDot.setAttribute('fill', isQuery ? 'var(--b)' : 'var(--muted)');
+    delay(queryDot, isQuery ? 1000 : 0);
     queryRing.setAttribute('opacity', isQuery ? '1' : '0');
+    delay(queryRing, 0);
 
     treeGroup.setAttribute('opacity', i === 0 ? '0.28' : '1');
+    delay(treeGroup, i === 1 ? 500 : 0);
     branchRGroup.setAttribute('opacity', hasSplit2 ? '1' : '0.3');
+    delay(branchRGroup, i === 2 ? 500 : 0);
     treePathGlow.setAttribute('stroke-dashoffset', isQuery ? '0' : '1');
     treePathGlow.setAttribute('opacity', isQuery ? '1' : '0');
+    delay(treePathGlow, isQuery ? 350 : 0);
     leafRing.setAttribute('opacity', isQuery ? '1' : '0');
+    delay(leafRing, isQuery ? 1000 : 0);
     traveler.setAttribute('opacity', '0');
   }
 
@@ -266,7 +286,7 @@ export default function treeScene() {
           { transform: `translate(${TREE_NODE_R.x}px, ${TREE_NODE_R.y}px)`, opacity: 1, offset: 0.45 },
           { transform: `translate(${TREE_LEAF_RL.x}px, ${TREE_LEAF_RL.y}px)`, opacity: 1, offset: 0.85 },
           { transform: `translate(${TREE_LEAF_RL.x}px, ${TREE_LEAF_RL.y}px)`, opacity: 0 },
-        ], { duration: 1500, delay: 250, iterations: Infinity });
+        ], { duration: 1500, delay: 350, iterations: Infinity });
         return () => anim?.cancel();
       }
 
