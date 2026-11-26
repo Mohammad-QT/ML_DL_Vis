@@ -10,6 +10,20 @@ steps:
   - For every cell of the grid, run k-fold cross-validation and record the mean score.
   - Pick the cell with the best mean score.
   - Train the final model once on all the training data, using that cell's settings.
+quick:
+  steps:
+    - "Pick settings to try and make a grid of pairs"
+    - "Run <b>k-fold</b> cross-validation on every cell in the grid"
+    - "Pick the cell with the highest mean CV score"
+    - "Train the final model once on all training data"
+  caution: "Pick by cross-validation, not training score—high train score often means overfitting."
+  scene: grid
+  words:
+    c: "C"
+    gamma: "gamma"
+    cv: "CV {s}%"
+    best: "Best {s}%"
+    final: "Final model"
 caution:
   h: Do not pick the best cell by its training score
   p: 'A model can reach 100% on its training data by memorising it. Choose by the <mark>cross-validated</mark> score. A big gap between train and CV score is the sign of overfitting.'

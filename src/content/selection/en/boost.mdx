@@ -10,6 +10,21 @@ steps:
   - Measure each point's error, and fit a small tree that predicts those errors.
   - 'Add that tree to the model, but only a small step of it (the <b>learning rate</b>).'
   - Repeat for many rounds. Stop when the test score stops improving.
+quick:
+  steps:
+    - "Start with one flat guess across all points"
+    - "Measure the errors and fit a small tree to them"
+    - "Add a small fraction of that tree using the <b>learning rate</b>"
+    - "Repeat for many rounds until errors stop shrinking"
+  caution: "Too many rounds memorise noise; stop when the test score peaks."
+  scene: boost
+  words:
+    model: "Model"
+    round: "Round {n}"
+    tree: "New tree"
+    errors: "Errors"
+    lr: "× learning rate"
+    done: "Fitted"
 caution:
   h: More rounds is not always better
   p: 'The training score keeps climbing as rounds pass. The test score stops, then can slip back. That is overfitting, and <mark>early stopping</mark> means stopping near the peak.'
