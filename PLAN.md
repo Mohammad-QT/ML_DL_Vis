@@ -1,4 +1,4 @@
-# ML Visual — build plan
+# AI Visual — build plan
 
 An interactive, bilingual (English default, Arabic RTL) site that teaches the Machine Learning A-Z
 syllabus (Python only) by letting beginners watch models draw their decision lines live in the browser.

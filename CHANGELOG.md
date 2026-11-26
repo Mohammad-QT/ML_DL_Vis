@@ -1,8 +1,10 @@
-# What's new in ML Visual
+# What's new in AI Visual
 
 Every change that learners can see, newest first. Each entry links to the pull request with the full details.
 
 ## 26 November 2026
+
+The site is now called **AI Visual**, since it covers deep learning as well as machine learning.
 
 **A new Learn step: less reading, more watching.** ([#24](https://github.com/Mohammad-QT/ML_DL_Vis/pull/24) and the scenes PR)
 

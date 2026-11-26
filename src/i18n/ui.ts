@@ -44,7 +44,7 @@ export const learn = {
 
 export const common = {
   en: {
-    brand: 'ML Visual', nav_course: 'Course', nav_pick: 'Pick an algorithm', nav_compare: 'Compare',
+    brand: 'AI Visual', nav_course: 'Course', nav_pick: 'Pick an algorithm', nav_compare: 'Compare',
     m_knn: 'K-Nearest Neighbors', m_logistic: 'Logistic Regression', m_svm: 'Support Vector Machine', m_ksvm: 'Kernel SVM',
     m_nb: 'Naive Bayes', m_tree: 'Decision Tree', m_forest: 'Random Forest',
     s_knn: 'blobs that hug the data', s_logistic: 'one straight line', s_svm: 'the widest straight gap', s_ksvm: 'smooth curves and islands',
@@ -70,13 +70,13 @@ export const common = {
     hint_tap: 'Tap to add a point. Pick the class with the buttons. Touch and hold to see what the model predicts.',
     goal: 'Goal', goal_test: 'Test score of at least {t}%', win: 'Goal reached. Nice work.', win_before: 'You reached this goal before.',
     copyright: '© 2026 Mohammad Ismael Al-Qatameen. All rights reserved.',
-    site_desc: 'Learn machine learning by watching real models fit your data live. Interactive lessons, English and Arabic, with Google Colab notebooks.',
+    site_desc: 'Learn machine learning and deep learning with AI Visual. Watch models fit your data live in English and Arabic lessons with Google Colab notebooks.',
     nf_h: 'This page is not here', nf_p: 'The link may be old or mistyped. Try the home page or the course route.', nf_home: 'Go to the home page', skip: 'Skip to content',
     undo: 'Undo', full: 'Full screen', full_exit: 'Exit full screen', close: 'Close', data_more: 'Data',
     flip: 'Adding {c}. Tap to switch class.', tip_dock: 'Tap the board to add a point. The bar at the bottom holds the setting, the class and the data.',
   },
   ar: {
-    brand: 'ML Visual', nav_course: 'الدورة', nav_pick: 'اختر خوارزمية', nav_compare: 'قارن',
+    brand: 'AI Visual', nav_course: 'الدورة', nav_pick: 'اختر خوارزمية', nav_compare: 'قارن',
     m_knn: 'أقرب الجيران (K-NN)', m_logistic: 'الانحدار اللوجستي', m_svm: 'آلة المتجهات الداعمة', m_ksvm: 'SVM بالنواة',
     m_nb: 'بايز الساذج', m_tree: 'شجرة القرار', m_forest: 'الغابة العشوائية',
     s_knn: 'مناطق تلتف حول البيانات', s_logistic: 'خط مستقيم واحد', s_svm: 'أعرض فجوة مستقيمة', s_ksvm: 'منحنيات ناعمة وجزر',
@@ -102,7 +102,7 @@ export const common = {
     hint_tap: 'المس لإضافة نقطة. اختر الصنف من الأزرار. المس مطوّلًا لترى ما يتوقّعه النموذج.',
     goal: 'الهدف', goal_test: 'درجة اختبار لا تقل عن {t}%', win: 'تحقّق الهدف. أحسنت.', win_before: 'سبق أن حققت هذا الهدف.',
     copyright: '© 2026 محمد إسماعيل القطامين. جميع الحقوق محفوظة.',
-    site_desc: 'تعلّم تعلّم الآلة بمشاهدة نماذج حقيقية تتكيّف مع بياناتك مباشرة. دروس تفاعلية بالإنجليزية والعربية، مع دفاتر Google Colab.',
+    site_desc: 'تعلّم تعلّم الآلة والتعلّم العميق مع AI Visual. شاهد النماذج تتدرّب على بياناتك مباشرة في دروس بالإنجليزية والعربية، مع دفاتر Google Colab.',
     nf_h: 'هذه الصفحة غير موجودة', nf_p: 'قد يكون الرابط قديمًا أو مكتوبًا بخطأ. جرّب الصفحة الرئيسية أو مسار الدورة.', nf_home: 'اذهب إلى الصفحة الرئيسية', skip: 'تخطَّ إلى المحتوى',
     undo: 'تراجع', full: 'ملء الشاشة', full_exit: 'الخروج من ملء الشاشة', close: 'إغلاق', data_more: 'البيانات',
     flip: 'تضيف الآن: {c}. المس للتبديل بين الصنفين.', tip_dock: 'المس اللوحة لإضافة نقطة. الشريط في الأسفل فيه الإعداد والصنف والبيانات.',

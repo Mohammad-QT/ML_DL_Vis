@@ -35,13 +35,14 @@ Nothing here needs a developer: edit the file named in the table and save. Arabi
 
 Shared text on every page (top bar, footer, model names, board hints, score labels, "Open in Colab"):
 `src/i18n/ui.ts` (`common`, `lesson`, `prep`, `sel`, each with `en` and `ar`).
-Page titles and descriptions come from each lesson's `short` / `lede` fields, and from `page_title` / `lede` for Home and Compare.
-Site-wide fallback description: `site_desc` in `src/i18n/ui.ts`.
+Lesson page titles and descriptions come from `short` and `lede`. Home and Compare use `page_title` for their titles.
+Compare uses `lede` for its description. Home and pages without a custom description use `site_desc` in `src/i18n/ui.ts`.
+
+The brand is **AI Visual** in Latin letters in both languages.
 
 ## Confirm first
 
 - **Your name in Arabic**: محمد إسماعيل القطامين (footer on every page). Please confirm the spelling.
-- **Brand**: the Arabic site shows "ML Visual" in Latin letters. Keep, or add an Arabic name?
 - **Copyright wording** in both languages (`common.*.copyright`).
 
 ## Arabic passages I'm unsure about
