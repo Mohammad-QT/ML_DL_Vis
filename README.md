@@ -31,7 +31,7 @@ There is nothing to install. When you want the code, each lesson opens its own n
 
 ## What's new
 
-- **26 November 2026: a new Learn step.** Short steps next to an animation that plays each one; point at a step to replay it, or switch to Detailed for the full text. 19 lessons have animations so far, the header shrinks after Learn, and the main buttons are easier to spot.
+- **26 November 2026: a new Learn step.** Short steps next to an animation that plays each one; step with ← →, or switch to Detailed for the full text. 35 lessons have animations, with ← → buttons to step through them; the header shrinks after Learn, and the main buttons are easier to spot.
 - **26 November 2026: Part 8, Deep learning.** Train a neural network live and choose its activation function (ReLU, tanh, sigmoid or Leaky ReLU), then draw a digit and watch a convolutional network read it. Every part of the course, 0 to 10, is now live.
 - **25 November 2026:** Parts 4, 5, 6, 7 and 9, plus five new lessons: gradient descent, Ridge and Lasso, DBSCAN, Q-learning, and precision, recall and the ROC curve.
 
