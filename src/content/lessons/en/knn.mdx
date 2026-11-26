@@ -9,6 +9,14 @@ steps:
   - Measure the distance from the new point to every training point.
   - Keep the K closest and count their classes.
   - The majority wins.
+quick:
+  steps:
+    - "Pick K, the number of neighbours to ask"
+    - "Measure the distance to every training point"
+    - "Keep the K closest points"
+    - "Give the new point the majority class"
+  caution: "Scale features first so large values don’t dominate distances."
+  scene: knn
 caution:
   h: Scale your features first
   p: 'Distance mixes every feature. Salary runs into the tens of thousands while age stays under 100, so without <code>StandardScaler</code> salary would <mark>decide everything</mark>.'

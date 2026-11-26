@@ -14,8 +14,8 @@ const fill = (s: string, n: number | string) => s.replace(/\{\w\}/, String(n));
     <div class="padwrap">
       <canvas class="pad" role="img" aria-label={figure ? undefined : ui.pad} aria-hidden={figure ? 'true' : undefined} data-cnn-pad></canvas>
       {!figure && <div class="chips">
-        <button type="button" class="chip" data-cnn-clear>{ui.clear}</button>
-        <button type="button" class="chip" data-cnn-example>{ui.example}</button>
+        <button type="button" class="btn hl" data-demo-primary data-cnn-example>{ui.example}</button>
+        <button type="button" class="chip act" data-cnn-clear>{ui.clear}</button>
       </div>}
     </div>
     <div class="result">

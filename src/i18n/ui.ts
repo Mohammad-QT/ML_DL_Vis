@@ -19,6 +19,27 @@ export function parsePath(pathname: string): { lang: Lang; path: string } {
   return { lang: 'en', path: rest };
 }
 
+export const learn = {
+  en: {
+    mode: 'Learn view', simple: 'Simple', detailed: 'Detailed',
+    animation: 'Step animation', pause: 'Pause', play: 'Play animation', step: 'Step {n} of {total}',
+    neighbours: 'K = 5', query: 'New point', classA: 'Class A', classB: 'Class B', votes: 'Votes',
+    input: 'Input', output: 'Output', label: 'Label', loss: 'Loss', error: 'Error',
+    weightedSum: 'Weighted sum + bias', activation: 'Activation', weights: 'Update weights', boundary: 'Boundary',
+    pixels: 'Pixels', featureMap: 'Feature map', filter: '3 × 3 filter', pool: '2 × 2 max', pooled: 'Pooled map',
+    maps: 'Second layer', flatten: 'Flatten', prediction: 'Digit scores',
+  },
+  ar: {
+    mode: 'طريقة العرض', simple: 'مبسّط', detailed: 'مفصّل',
+    animation: 'رسم متحرّك للخطوات', pause: 'إيقاف مؤقت', play: 'تشغيل الرسم', step: 'الخطوة {n} من {total}',
+    neighbours: 'K = 5', query: 'نقطة جديدة', classA: 'الفئة أ', classB: 'الفئة ب', votes: 'الأصوات',
+    input: 'المدخل', output: 'المخرج', label: 'الفئة الفعلية', loss: 'الخسارة', error: 'الخطأ',
+    weightedSum: 'مجموع موزون + انحياز', activation: 'تفعيل', weights: 'تحديث الأوزان', boundary: 'الحدّ الفاصل',
+    pixels: 'البكسلات', featureMap: 'خريطة السمات', filter: 'مرشّح 3 × 3', pool: 'أقصى قيمة 2 × 2', pooled: 'خريطة مصغّرة',
+    maps: 'الطبقة الثانية', flatten: 'فرد الخرائط', prediction: 'درجات الأرقام',
+  },
+};
+
 export const common = {
   en: {
     brand: 'ML Visual', nav_course: 'Course', nav_pick: 'Pick an algorithm', nav_compare: 'Compare',

@@ -14,7 +14,7 @@ const presets = pca ? ['stretched', 'round', 'blobs'] : lda ? ['lda_wins', 'pca_
     <div class="chips">
       {presets.map((preset, index) => <button type="button" class:list={['chip', { on: index === 0 }]}
         data-dimred-preset={preset} aria-pressed={index === 0 ? 'true' : 'false'} draggable={pca ? 'true' : undefined}>{ui[preset]}</button>)}
-      <button type="button" class="chip" data-dimred-reset>{ui.reset}</button>
+      <button type="button" class="chip act" data-dimred-reset>{ui.reset}</button>
     </div>
     {!pca && <div class="chips">
       <button type="button" class="chip on" data-dimred-class="0" aria-pressed="true"><span class="swatch a"></span>{ui.class_a}</button>
@@ -24,7 +24,7 @@ const presets = pca ? ['stretched', 'round', 'blobs'] : lda ? ['lda_wins', 'pca_
       <label>{ui.rotate} <input type="range" min="-180" max="180" value="0" step="any" dir="ltr" data-dimred-angle />
         <output data-dimred-angle-value dir="auto">0°</output>
       </label>
-      <button type="button" class="chip" data-dimred-snap>{ui.snap}</button>
+      <button type="button" class="chip act" data-dimred-snap>{ui.snap}</button>
     </div>}
     {kernel && <div class="settings">
       <label>{ui.gamma} <input type="range" min="0" max="2.4" value="1.4" step="0.05" dir="ltr" data-dimred-gamma />

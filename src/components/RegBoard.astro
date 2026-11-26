@@ -66,9 +66,9 @@ const uid = `rg${Math.random().toString(36).slice(2, 8)}`;
       )}
       {!challenge && <div class="box databox" data-phone="data"><span class="label">{t.data}</span><div class="chips">
         {presets.map(p => <button class:list={['chip', { on: p === preset }]} data-preset={p}>{t[`d_${p}`]}</button>)}
-        <button class="chip" data-role="resplit">{t.resplit}</button>
-        <button class="chip" data-role="clear">{t.clear}</button>
-        <button class="chip" data-role="undo" disabled>{t.undo}</button>
+          <button class="chip act" data-role="resplit">{t.resplit}</button>
+          <button class="chip act" data-role="clear">{t.clear}</button>
+          <button class="chip act" data-role="undo" disabled>{t.undo}</button>
       </div></div>}
       <div class:list={['box', { databox: !challenge }]} data-phone={challenge ? undefined : 'data'}><button class="chip" data-role="resid" aria-pressed="false">{t.residuals}</button></div>
       <p class="legend"><span class="swatch ring"></span><span>{t.legend_test}</span> {t.legend_resid}</p>

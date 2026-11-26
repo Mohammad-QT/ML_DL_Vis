@@ -67,6 +67,19 @@ const rail = Astro.slots.has('rail');
 </div>
 <slot name="after" />
 <script>
+  document.addEventListener('DOMContentLoaded', () => {
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches || typeof IntersectionObserver === 'undefined') return;
+    const observer = new IntersectionObserver(entries => {
+      for (const { target, isIntersecting, intersectionRatio } of entries) {
+        if (!isIntersecting || intersectionRatio < .5) continue;
+        observer.unobserve(target);
+        if (!target.matches('.btn:not(:disabled)')) continue;
+        target.setAttribute('data-demo-pulse', '');
+        target.addEventListener('animationend', () => target.removeAttribute('data-demo-pulse'), { once: true });
+      }
+    }, { threshold: .5 });
+    document.querySelectorAll('[data-demo-primary]').forEach(button => observer.observe(button));
+  }, { once: true });
   document.querySelectorAll('[data-theme-toggle]').forEach(b => b.addEventListener('click', () => {
     const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
     document.documentElement.dataset.theme = next;

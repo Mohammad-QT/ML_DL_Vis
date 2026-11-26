@@ -11,6 +11,14 @@ steps:
   - "Apply 2 × 2 max pooling to shrink each map in half. Keeping the strongest signal in each 2 × 2 patch makes the network less sensitive to small shifts."
   - "Run a second convolutional layer (16 filters, 3 × 3 + ReLU) and another 2 × 2 pooling step to combine simple edges into loops, corners and strokes."
   - "Flatten the maps into a dense layer of 64 units, then finish with 10 outputs and softmax so the digit probabilities sum to 1."
+quick:
+  steps:
+    - "Slide a filter across the pixels to build a feature map"
+    - "Keep the largest value in each 2 × 2 patch"
+    - "Combine simple features into shapes in the second layer"
+    - "Flatten the maps and pick the digit with the highest score"
+  caution: "Draw a large, centred digit for the clearest prediction."
+  scene: cnn
 caution:
   h: "It only knows digits like MNIST"
   p: "This network was trained on 70,000 centred handwritten digits (MNIST), where it reaches about 99% test accuracy. Draw large, centred digits for best results. If you draw a letter, a smiley face or a messy scribble, softmax still forces a guess between 0 and 9 — often with high confidence."
