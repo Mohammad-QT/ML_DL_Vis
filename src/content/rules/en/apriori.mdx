@@ -10,6 +10,25 @@ steps:
   - Join frequent groups to make larger candidates. If any smaller subset failed, skip counting that candidate.
   - Scan the baskets for the remaining candidates. Repeat until no larger group can qualify.
   - Split each frequent group into a rule with two sides. Filter by confidence and sort by lift.
+quick:
+  steps:
+    - "Count each item in the baskets and prune the rare ones"
+    - "Build larger candidates only from the items that survived"
+    - "Scan the baskets to count candidates and prune rare pairs"
+    - "Turn frequent groups into rules scored by support, confidence, and lift"
+  caution: "High confidence can mislead when an item is already common; check lift."
+  scene: apriori
+  words:
+    baskets: "Baskets"
+    minSup: "Min"
+    bread: "Bread"
+    milk: "Milk"
+    eggs: "Eggs"
+    tea: "Tea"
+    support: "Support"
+    confidence: "Confidence"
+    lift: "Lift"
+    skipped: "Rare skipped"
 caution:
   h: High confidence can be misleading
   p: If 80% of all shoppers buy milk, a rule that predicts milk with 80% confidence is no better than that baseline. Its lift is 1. Even a high lift does not prove cause and effect.
