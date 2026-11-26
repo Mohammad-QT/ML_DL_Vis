@@ -36,13 +36,18 @@ const ROUNDS = 6;
 // Top plot bounds
 const PX = 34;
 const PW = 332;
-const PY = 48;
-const PH = 128;
+const PY = 42;
+const PH = 120;
 
 // Bottom stump panel bounds
-const TY = 196;
-const TH = 70;
+const TY = 198;
+const TH = 76;
 const TZ = TY + TH / 2;
+const CW = 124;
+const CARD_PAD = 6;
+const FULL_CENTER_X = PX + (PW - CW) / 2;
+const SCALED_X = PX + PW - CW;
+const FULL_SHIFT_X = PX - FULL_CENTER_X;
 
 function fitStump(residuals: number[]): Stump {
   let bestErr = Infinity;
@@ -87,15 +92,22 @@ const edges: number[] = [0.03];
 for (let i = 1; i < points.length; i++) edges.push((points[i - 1].x + points[i].x) / 2);
 edges.push(0.98);
 
+interface StumpCard {
+  group: SVGGElement;
+  left: SVGRectElement;
+  right: SVGRectElement;
+  split: SVGLineElement;
+  baseX: number;
+}
+
 export default function boostScene() {
   const rounds = buildRounds();
   const segments: SVGLineElement[] = [];
   const joins: SVGRectElement[] = [];
   const residBars: SVGRectElement[] = [];
-  let stumpGroup: SVGGElement;
-  let stumpLeft: SVGRectElement;
-  let stumpRight: SVGRectElement;
-  let stumpSplit: SVGLineElement;
+  let fullCard: StumpCard;
+  let scaledCard: StumpCard;
+  let scaleBadge: SVGGElement;
   let bottomLabel: SVGTextElement;
   let status: SVGTextElement;
 
@@ -123,45 +135,69 @@ export default function boostScene() {
     }
   }
 
-  function setStump(stump: Stump | null, scale: number, visible: boolean) {
-    if (!stump || !visible) {
-      stumpGroup.setAttribute('opacity', '0');
-      return;
-    }
-    stumpGroup.setAttribute('opacity', '1');
-    const sx = mapX(stump.split);
-    const leftW = Math.max(4, sx - mapX(0.03));
-    const rightW = Math.max(4, mapX(0.98) - sx);
-    const valToH = (v: number) => Math.max(2, Math.min(TH * 0.46, Math.abs(v) * scale * 78));
+  function setCardStump(card: StumpCard, stump: Stump, scale: number, barOpacity: number) {
+    const innerW = CW - CARD_PAD * 2;
+    const ratio = (stump.split - 0.03) / 0.95;
+    const leftW = Math.max(4, ratio * innerW);
+    const rightW = Math.max(4, innerW - leftW);
+    const leftX = card.baseX + CARD_PAD;
+    const sx = leftX + leftW;
+    const valToH = (v: number) => Math.max(2, Math.min(TH * 0.44, Math.abs(v) * scale * 92));
 
     const lh = valToH(stump.leftVal);
-    stumpLeft.setAttribute('x', String(mapX(0.03)));
-    stumpLeft.setAttribute('width', String(leftW));
-    stumpLeft.setAttribute('fill', stump.leftVal >= 0 ? 'var(--b)' : 'var(--a)');
-    stumpLeft.style.transform = `translateY(${stump.leftVal >= 0 ? TZ - lh : TZ}px) scale(1, ${lh})`;
+    card.left.setAttribute('x', String(leftX));
+    card.left.setAttribute('width', String(leftW));
+    card.left.setAttribute('fill', stump.leftVal >= 0 ? 'var(--b)' : 'var(--a)');
+    card.left.setAttribute('opacity', String(barOpacity));
+    card.left.style.transform = `translateY(${stump.leftVal >= 0 ? TZ - lh : TZ}px) scale(1, ${lh})`;
 
     const rh = valToH(stump.rightVal);
-    stumpRight.setAttribute('x', String(sx));
-    stumpRight.setAttribute('width', String(rightW));
-    stumpRight.setAttribute('fill', stump.rightVal >= 0 ? 'var(--b)' : 'var(--a)');
-    stumpRight.style.transform = `translateY(${stump.rightVal >= 0 ? TZ - rh : TZ}px) scale(1, ${rh})`;
+    card.right.setAttribute('x', String(sx));
+    card.right.setAttribute('width', String(rightW));
+    card.right.setAttribute('fill', stump.rightVal >= 0 ? 'var(--b)' : 'var(--a)');
+    card.right.setAttribute('opacity', String(barOpacity));
+    card.right.style.transform = `translateY(${stump.rightVal >= 0 ? TZ - rh : TZ}px) scale(1, ${rh})`;
 
-    stumpSplit.setAttribute('x1', String(sx));
-    stumpSplit.setAttribute('x2', String(sx));
+    card.split.setAttribute('x1', String(sx));
+    card.split.setAttribute('x2', String(sx));
+  }
+
+  function setStumpComparison(stump: Stump | null, mode: 'hidden' | 'full' | 'scaled') {
+    if (!stump || mode === 'hidden') {
+      fullCard.group.setAttribute('opacity', '0');
+      fullCard.group.style.transform = 'translateX(0px)';
+      scaledCard.group.setAttribute('opacity', '0');
+      scaleBadge.setAttribute('opacity', '0');
+      return;
+    }
+
+    fullCard.group.setAttribute('opacity', '1');
+    if (mode === 'full') {
+      fullCard.group.style.transform = 'translateX(0px)';
+      setCardStump(fullCard, stump, 1, 0.85);
+      scaledCard.group.setAttribute('opacity', '0');
+      scaleBadge.setAttribute('opacity', '0');
+    } else {
+      fullCard.group.style.transform = `translateX(${FULL_SHIFT_X}px)`;
+      setCardStump(fullCard, stump, 1, 0.28);
+      setCardStump(scaledCard, stump, LR, 0.92);
+      scaledCard.group.setAttribute('opacity', '1');
+      scaleBadge.setAttribute('opacity', '1');
+    }
   }
 
   function applyFrame(i: number, api: SceneApi) {
     if (i === 0) {
       setModelCurve(rounds[0].preds);
       setResiduals(rounds[0].preds, false);
-      setStump(null, 1, false);
+      setStumpComparison(null, 'hidden');
       bottomLabel.setAttribute('opacity', '0');
       status.textContent = '';
       status.setAttribute('opacity', '0');
     } else if (i === 1) {
       setModelCurve(rounds[0].preds);
       setResiduals(rounds[0].preds, true);
-      setStump(rounds[1].stump, 1, true);
+      setStumpComparison(rounds[1].stump, 'full');
       bottomLabel.textContent = api.t('tree');
       bottomLabel.setAttribute('opacity', '1');
       status.textContent = api.t('errors');
@@ -169,8 +205,8 @@ export default function boostScene() {
     } else if (i === 2) {
       setModelCurve(rounds[1].preds);
       setResiduals(rounds[1].preds, true);
-      setStump(rounds[1].stump, LR, true);
-      bottomLabel.textContent = api.t('lr');
+      setStumpComparison(rounds[1].stump, 'scaled');
+      bottomLabel.textContent = api.t('scaledTree');
       bottomLabel.setAttribute('opacity', '1');
       status.textContent = api.t('round').replace('{n}', '1');
       status.setAttribute('opacity', '1');
@@ -178,8 +214,8 @@ export default function boostScene() {
       const last = rounds[rounds.length - 1];
       setModelCurve(last.preds);
       setResiduals(last.preds, true);
-      setStump(last.stump, LR, true);
-      bottomLabel.textContent = api.t('lr');
+      setStumpComparison(last.stump, 'scaled');
+      bottomLabel.textContent = api.t('scaledTree');
       bottomLabel.setAttribute('opacity', '1');
       status.textContent = api.t('done');
       status.setAttribute('opacity', '1');
@@ -191,13 +227,31 @@ export default function boostScene() {
     setup(api) {
       const { el, svg, t } = api;
 
+      function createStumpCard(baseX: number, stroke: string, strokeWidth: number): StumpCard {
+        const group = el('g', { opacity: 0, class: 'scene-tween' }, svg);
+        el('rect', {
+          x: baseX, y: TY, width: CW, height: TH, rx: 8, fill: 'var(--sheet)', stroke, 'stroke-width': strokeWidth,
+        }, group);
+        line(api, group, baseX + CARD_PAD, TZ, baseX + CW - CARD_PAD, TZ, {
+          stroke: 'var(--muted)', 'stroke-dasharray': '3 4',
+        });
+        const left = el('rect', { x: baseX + CARD_PAD, y: 0, width: 40, height: 1, opacity: 0.85, class: 'scene-tween' }, group);
+        left.style.transformOrigin = '0 0';
+        const right = el('rect', { x: baseX + CARD_PAD, y: 0, width: 40, height: 1, opacity: 0.85, class: 'scene-tween' }, group);
+        right.style.transformOrigin = '0 0';
+        const split = line(api, group, baseX + CW / 2, TY + 6, baseX + CW / 2, TY + TH - 6, {
+          stroke: 'var(--ink)', 'stroke-width': 1.5, 'stroke-dasharray': '3 3', class: 'scene-tween',
+        });
+        return { group, left, right, split, baseX };
+      }
+
       // Top panel grid
       const grid = el('g');
       for (let x = PX; x <= PX + PW; x += 41.5) line(api, grid, x, PY, x, PY + PH);
-      for (let y = PY; y <= PY + PH; y += 32) line(api, grid, PX, y, PX + PW, y);
+      for (let y = PY; y <= PY + PH; y += 30) line(api, grid, PX, y, PX + PW, y);
 
-      label(api, svg, PX, 30, t('model'), { 'font-size': 15, 'font-weight': 700 });
-      status = label(api, svg, PX + PW, 30, '', {
+      label(api, svg, PX, 28, t('model'), { 'font-size': 15, 'font-weight': 700 });
+      status = label(api, svg, PX + PW, 28, '', {
         'text-anchor': 'end', 'font-size': 15, 'font-weight': 600, opacity: 0, class: 'scene-value scene-tween',
       });
 
@@ -236,23 +290,22 @@ export default function boostScene() {
         }, svg);
       }
 
-      // Bottom panel for the new small tree
-      el('rect', {
-        x: PX, y: TY, width: PW, height: TH, rx: 8, fill: 'var(--sheet)', stroke: 'var(--rule)', 'stroke-width': 1.5,
-      }, svg);
-      line(api, svg, PX + 8, TZ, PX + PW - 8, TZ, { stroke: 'var(--muted)', 'stroke-dasharray': '3 4' });
-      bottomLabel = label(api, svg, PX, TY - 6, t('tree'), {
-        'font-size': 13, fill: 'var(--muted)', opacity: 0, class: 'scene-tween',
+      // Bottom comparison: full tree step (faint) × learning rate -> scaled step (solid)
+      bottomLabel = label(api, svg, 200, TY - 12, t('tree'), {
+        'text-anchor': 'middle', 'font-size': 13, fill: 'var(--muted)', opacity: 0, class: 'scene-tween',
       });
 
-      stumpGroup = el('g', { opacity: 0, class: 'scene-tween' }, svg);
-      stumpLeft = el('rect', { x: PX, y: 0, width: 100, height: 1, opacity: 0.45, class: 'scene-tween' }, stumpGroup);
-      stumpLeft.style.transformOrigin = '0 0';
-      stumpRight = el('rect', { x: PX, y: 0, width: 100, height: 1, opacity: 0.45, class: 'scene-tween' }, stumpGroup);
-      stumpRight.style.transformOrigin = '0 0';
-      stumpSplit = line(api, stumpGroup, 200, TY + 6, 200, TY + TH - 6, {
-        stroke: 'var(--ink)', 'stroke-width': 1.5, 'stroke-dasharray': '3 3', class: 'scene-tween',
+      fullCard = createStumpCard(FULL_CENTER_X, 'var(--rule)', 1.5);
+
+      scaleBadge = el('g', { opacity: 0, class: 'scene-tween' }, svg);
+      label(api, scaleBadge, 200, 230, `× ${LR}`, {
+        'text-anchor': 'middle', 'font-size': 15, 'font-weight': 700, class: 'scene-value',
       });
+      line(api, scaleBadge, 182, 244, 218, 244, { stroke: 'var(--ink)', 'stroke-width': 1.75 });
+      line(api, scaleBadge, 212, 239, 218, 244, { stroke: 'var(--ink)', 'stroke-width': 1.75 });
+      line(api, scaleBadge, 212, 249, 218, 244, { stroke: 'var(--ink)', 'stroke-width': 1.75 });
+
+      scaledCard = createStumpCard(SCALED_X, 'var(--hl)', 2);
 
       applyFrame(0, api);
     },
@@ -263,7 +316,7 @@ export default function boostScene() {
       if (i === 0) {
         setModelCurve(points.map(() => 0.1));
         setResiduals(rounds[0].preds, false);
-        setStump(null, 1, false);
+        setStumpComparison(null, 'hidden');
         bottomLabel.setAttribute('opacity', '0');
         status.setAttribute('opacity', '0');
       } else {
@@ -281,8 +334,8 @@ export default function boostScene() {
         const run = () => {
           setModelCurve(rounds[idx].preds);
           setResiduals(rounds[idx].preds, true);
-          setStump(rounds[idx].stump, LR, true);
-          bottomLabel.textContent = api.t('lr');
+          setStumpComparison(rounds[idx].stump, 'scaled');
+          bottomLabel.textContent = api.t('scaledTree');
           bottomLabel.setAttribute('opacity', '1');
           status.textContent = text;
           status.setAttribute('opacity', '1');
