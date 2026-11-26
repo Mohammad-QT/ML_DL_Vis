@@ -10,6 +10,22 @@ steps:
   - Call a point positive if its score meets or exceeds the threshold.
   - Count correct positives, false alarms, missed positives and correct negatives.
   - Sweep the threshold to trace the ROC curve. Each point compares the hit rate with the false alarm rate.
+quick:
+  steps:
+    - "Score held-out points from 0 to 1"
+    - "Call points positive when their score meets the threshold"
+    - "Count hits, false alarms, missed positives, and correct negatives"
+    - "Sweep the threshold to trace the ROC curve"
+  caution: "Accuracy can hide missed positives when positives are rare; check recall."
+  scene: metrics
+  words:
+    scores: "Test scores"
+    cutoff: "Threshold {n}"
+    tp: "Hits"
+    fp: "Alarms"
+    fn: "Missed"
+    tn: "Correct −"
+    roc: "ROC curve"
 caution:
   h: Accuracy can hide missed positives
   p: If only 8 out of 120 points are positive, calling every point negative is 93% accurate, but catches none of the positives. Check recall alongside accuracy.
