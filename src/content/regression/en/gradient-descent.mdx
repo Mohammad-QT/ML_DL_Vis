@@ -10,6 +10,20 @@ steps:
   - 'Use all the training points to measure the mean squared error and its gradient.'
   - 'Move the slope and intercept against the gradient. The <b>learning rate</b> scales that move.'
   - 'Repeat. The dots on the contour plot show the line’s settings at each step.'
+quick:
+  steps:
+    - "Start with a guess for the line’s slope and intercept"
+    - "Measure the error across all points and find the slope"
+    - "Take a downhill step scaled by the <b>learning rate</b>"
+    - "Repeat until the steps shrink near the bottom"
+  caution: "Too small a learning rate crawls; too large a rate overshoots the bottom."
+  scene: gradient-descent
+  words:
+    lossCurve: "Loss curve"
+    fit: "Fitted line"
+    slope: "Slope"
+    step: "Step {n}"
+    bottom: "At the bottom"
 caution:
   h: The step size can make or break the fit
   p: 'A tiny learning rate barely moves the line. A large one can step past the bottom, making the loss grow instead of shrink.'

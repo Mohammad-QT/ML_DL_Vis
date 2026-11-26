@@ -10,6 +10,21 @@ steps:
   - Hold out fold 1 as the test set. Train on the other k − 1 folds.
   - Score the model on the held-out fold. Then repeat with fold 2, fold 3, and so on.
   - 'You now have k scores. Report their <b>mean</b>, and their spread (the standard deviation).'
+quick:
+  steps:
+    - "Shuffle the data and split it into <b>k</b> equal folds"
+    - "Hold out fold 1 to test; train on the rest"
+    - "Score that fold, then rotate through every other fold"
+    - "Average all <b>k</b> scores and report their spread"
+  caution: "Cross-validation only measures a setup; retrain the final model on all data."
+  scene: cv
+  words:
+    k: "k = 5"
+    data: "All data"
+    fold: "Fold {n}"
+    train: "Train"
+    test: "Test"
+    mean: "Mean ± spread"
 caution:
   h: Cross-validation does not train your final model
   p: 'It only <mark>measures</mark> how well a setup works. Once you have picked the model and its settings, train it once on all the data you have.'
