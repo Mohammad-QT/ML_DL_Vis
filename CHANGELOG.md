@@ -6,8 +6,8 @@ Every change that learners can see, newest first. Each entry links to the pull r
 
 **A new Learn step: less reading, more watching.** ([#24](https://github.com/Mohammad-QT/ML_DL_Vis/pull/24) and the scenes PR)
 
-- **Short steps next to an animation.** The Learn step now opens in a Simple view: 3–4 short steps beside an animation
-  that plays them one by one. Use ← → (or swipe) to move between steps; the animation replays each step you choose. The full text is one
+- **A large animation with short steps.** The Learn step now opens in a Simple view: an animation that plays the
+  lesson's 3–4 short steps one by one. Use ← → (or swipe) to move between steps; the animation replays each step you choose. The full text is one
   click away under **Detailed**, and the site remembers your choice.
 - **35 lessons have animations:** every lesson except simple and multiple linear regression, Start here and the
   sentiment classifier, whose boards already show the whole idea. The animation fills the card; the step's text sits
