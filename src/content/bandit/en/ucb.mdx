@@ -11,6 +11,21 @@ steps:
   - "For each ad, divide clicks by times shown. That is its observed mean."
   - "Add a bonus: the square root of twice the natural log of rounds so far divided by times this ad was shown."
   - "Show the ad with the highest sum. Update only that ad and repeat."
+quick:
+  steps:
+    - "Show each ad once and record which ones get a click"
+    - "Divide clicks by plays to get each ad’s average"
+    - "Add a bonus whisker that shrinks as an ad gets played"
+    - "Play the highest top-of-whisker, update it, and repeat"
+  caution: "The bonus can push a score above 1; it picks ads, not probabilities."
+  scene: ucb
+  words:
+    ad1: "Ad 1"
+    ad2: "Ad 2"
+    ad3: "Ad 3"
+    round: "Round {n}"
+    mean: "Mean"
+    bonus: "Bonus"
 caution:
   h: "A score is not a probability"
   p: "The bonus can push the score above 1. UCB uses the score to choose an ad, not to predict a click. With the round count held fixed, more plays mean a smaller bonus."

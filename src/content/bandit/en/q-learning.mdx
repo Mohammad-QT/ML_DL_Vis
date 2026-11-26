@@ -11,6 +11,21 @@ steps:
   - "Usually pick the highest-scoring move. With probability epsilon, pick a random move instead."
   - "Use the reward and the best score in the next cell to update the score for the move you just made."
   - "Start a new episode when the agent reaches the goal, falls into a pit, or takes 72 steps."
+quick:
+  steps:
+    - "Start with four zero scores in every cell"
+    - "Explore with random moves or pick the highest score"
+    - "Reaching the goal updates the move that led there"
+    - "Repeat across episodes so values spread back to start"
+  caution: "A short episode may end in a pit, not the goal."
+  scene: q-learning
+  words:
+    start: "Start"
+    goal: "Goal +1"
+    pit: "Pit -1"
+    ep: "Episode {n}"
+    explore: "Explore"
+    update: "+1 update"
 caution:
   h: "A short episode is not always a win"
   p: "A pit can end an episode faster than the goal does. Look at the outcome as well as the step count. If you block every route, the step cap still ends each episode."

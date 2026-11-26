@@ -11,6 +11,21 @@ steps:
   - "Draw one possible click rate from each curve. Show the ad with the highest draw."
   - "Add 1 to the first Beta parameter for a click, or to the second for no click. Update only the ad you showed."
   - "Draw again next round. The curve gets narrower as evidence builds up."
+quick:
+  steps:
+    - "Start with a flat Beta(1, 1) curve for every ad"
+    - "Draw one rate from each curve and pick the highest"
+    - "Update only that ad’s curve with the click or miss"
+    - "Repeat each round as curves narrow around true rates"
+  caution: "A wide curve can draw high by chance; one sample isn’t a forecast."
+  scene: thompson
+  words:
+    ad1: "Ad 1"
+    ad2: "Ad 2"
+    ad3: "Ad 3"
+    round: "Round {n}"
+    click: "+1 click"
+    miss: "+1 miss"
 caution:
   h: "A draw is not a forecast"
   p: "An ad with a wide curve can draw a high rate by chance. That is how Thompson sampling explores. A single draw does not tell you the true click rate."
