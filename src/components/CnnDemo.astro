@@ -1,0 +1,102 @@
+---
+import type { Lang } from '../i18n/ui';
+
+interface Props { lang: Lang; ui: Record<string, string>; figure?: boolean }
+const { lang, ui, figure = false } = Astro.props;
+const model = `${import.meta.env.BASE_URL.replace(/\/?$/, '/')}models/mnist-cnn.json`;
+const digits = Array.from({ length: 10 }, (_, d) => d);
+const filters = Array.from({ length: 8 }, (_, k) => k);
+const fill = (s: string, n: number | string) => s.replace(/\{\w\}/, String(n));
+---
+<div class:list={['cnn-demo', { figure }]} data-cnn data-cnn-lang={lang} data-cnn-model={model} data-cnn-ui={JSON.stringify(ui)}
+  data-cnn-figure={figure ? '' : undefined}>
+  <div class="top">
+    <div class="padwrap">
+      <canvas class="pad" role="img" aria-label={figure ? undefined : ui.pad} aria-hidden={figure ? 'true' : undefined} data-cnn-pad></canvas>
+      {!figure && <div class="chips">
+        <button type="button" class="chip" data-cnn-clear>{ui.clear}</button>
+        <button type="button" class="chip" data-cnn-example>{ui.example}</button>
+      </div>}
+    </div>
+    <div class="result">
+      {!figure && <p class="guess display" aria-live="polite"><span data-cnn-guess>{ui.empty}</span> <small class="muted" data-cnn-confidence></small></p>}
+      <div class="inputbox">
+        <canvas class="input" role="img" aria-label={ui.input} data-cnn-input></canvas>
+        {!figure && <p class="muted cap">{ui.input}</p>}
+      </div>
+      <div class="bars" role="list" aria-label={ui.probs}>
+        {!figure && <b>{ui.probs}</b>}
+        {digits.map(d => <div class="bar" role="listitem" data-cnn-bar={d}><bdi class="d">{d}</bdi><span class="track"><i></i></span><output dir="ltr"></output></div>)}
+      </div>
+    </div>
+  </div>
+  {!figure && <>
+    <div class="panel">
+      <b>{ui.maps}</b>
+      <p class="muted">{ui.maps_help}</p>
+      <div class="maps">
+        {filters.map(k => <button type="button" class:list={['map', { on: k === 0 }]} data-cnn-map={k} aria-pressed={k === 0 ? 'true' : 'false'}
+          aria-label={fill(ui.filter, k + 1)}><canvas aria-hidden="true"></canvas><span>{k + 1}</span></button>)}
+      </div>
+    </div>
+    <div class="panel">
+      <b>{ui.filter_h}</b> · <bdi data-cnn-filter-name>{fill(ui.filter, 1)}</bdi>
+      <p class="muted">{ui.filter_help}</p>
+      <div class="sees">
+        <figure><svg viewBox="0 0 90 90" role="img" aria-label={ui.kernel} data-cnn-kernel></svg><figcaption>{ui.kernel}</figcaption></figure>
+        <span class="arr" aria-hidden="true">→</span>
+        <figure><canvas class="big" role="img" aria-label={ui.map} data-cnn-bigmap></canvas><figcaption>{ui.map}</figcaption></figure>
+      </div>
+    </div>
+    <p class="muted" data-cnn-status role="status" data-loading={ui.loading} data-error={ui.load_error}></p>
+  </>}
+</div>
+
+<style>
+  .cnn-demo { min-width: 0; }
+  .top { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+  .padwrap { min-width: 0; }
+  canvas { display: block; max-width: 100%; }
+  .pad { width: 100%; aspect-ratio: 1; border: 1.5px solid var(--rule); border-radius: 14px; touch-action: none; cursor: crosshair; background: var(--sheet); }
+  .figure .pad { cursor: default; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .result { display: grid; gap: 12px; min-width: 0; }
+  .guess { font-size: 26px; line-height: 1.15; margin: 0; }
+  .guess small { font: 600 14px var(--mono); }
+  .inputbox { display: flex; align-items: center; gap: 12px; }
+  .input { width: 84px; aspect-ratio: 1; image-rendering: pixelated; border: 1.5px solid var(--rule); }
+  .cap { font-size: 14px; margin: 0; }
+  .bars { display: grid; gap: 3px; }
+  .bar { display: grid; grid-template-columns: 1.4em minmax(0, 1fr) 4.2em; align-items: center; gap: 8px; font: 600 13px var(--mono); }
+  .track { height: 10px; border-radius: 5px; background: var(--paper); overflow: hidden; border: 1px solid var(--rule); }
+  .track i { display: block; height: 100%; width: 0; background: var(--muted); transition: width .15s; }
+  .bar.best .track i { background: var(--a); }
+  .bar.best .d { color: var(--a); }
+  .bar output { text-align: end; color: var(--muted); }
+  .panel { margin-top: 16px; background: var(--paper); border: 1.5px solid var(--rule); padding: 10px 12px; border-radius: 12px; }
+  .panel p { margin: 2px 0 8px; font-size: 15px; }
+  .maps { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 6px; }
+  .map { position: relative; padding: 0; border: 2px solid var(--rule); border-radius: 8px; background: var(--sheet); cursor: pointer; overflow: hidden; }
+  .map.on { border-color: var(--ink); box-shadow: 0 0 0 2px var(--hl); }
+  .map canvas { width: 100%; aspect-ratio: 1; image-rendering: pixelated; }
+  .map span { position: absolute; inset-inline-start: 3px; top: 1px; font: 600 10px var(--mono); color: var(--muted); }
+  .sees { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .sees figure { margin: 0; text-align: center; font-size: 13px; color: var(--muted); }
+  .sees svg { width: 110px; display: block; direction: ltr; }
+  .big { width: 150px; aspect-ratio: 1; image-rendering: pixelated; border: 1.5px solid var(--rule); }
+  .arr { font-size: 22px; color: var(--muted); }
+  [data-cnn-status]:empty { display: none; }
+  .figure .top { grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 10px; }
+  .figure .input { width: 56px; }
+  .figure .bar { grid-template-columns: 1.2em minmax(0, 1fr) 3.4em; font-size: 11px; }
+  .figure .track { height: 7px; }
+  @media (max-width: 700px) {
+    .cnn-demo:not(.figure) .top { grid-template-columns: minmax(0, 1fr); }
+    .maps { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  }
+</style>
+
+<script>
+  import { mountCnn } from '../deep/cnndemo';
+  document.querySelectorAll<HTMLElement>('[data-cnn]').forEach(mountCnn);
+</script>

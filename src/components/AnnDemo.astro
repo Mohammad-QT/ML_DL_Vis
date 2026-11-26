@@ -1,0 +1,88 @@
+---
+import type { Lang } from '../i18n/ui';
+import { ANN_PRESETS } from '../deep/data';
+
+interface Props { lang: Lang; ui: Record<string, string>; figure?: boolean }
+const { lang, ui, figure = false } = Astro.props;
+const json = JSON.stringify(ui);
+---
+<div class:list={['ann-demo', { figure }]} data-ann data-ann-lang={lang} data-ann-ui={json} data-ann-figure={figure ? '' : undefined}>
+  {!figure && <div class="controls">
+    <div class="chips">
+      {ANN_PRESETS.map(p => <button type="button" class:list={['chip', { on: p === 'xor' }]} data-ann-preset={p} aria-pressed={p === 'xor' ? 'true' : 'false'}>{ui[p]}</button>)}
+    </div>
+    <div class="chips">
+      <button type="button" class="chip on" data-ann-class="0" aria-pressed="true"><span class="swatch a"></span>{ui.class_a}</button>
+      <button type="button" class="chip" data-ann-class="1" aria-pressed="false"><span class="swatch b"></span>{ui.class_b}</button>
+    </div>
+    <div class="settings">
+      <label>{ui.layers} <input type="range" min="1" max="3" step="1" value="2" dir="ltr" data-ann-layers /><output data-ann-layers-value></output></label>
+      <label>{ui.units} <input type="range" min="1" max="8" step="1" value="6" dir="ltr" data-ann-units /><output data-ann-units-value></output></label>
+      <label>{ui.rate} <input type="range" min="-3" max="0" step="0.1" value="-1" dir="ltr" data-ann-rate /><output data-ann-rate-value></output></label>
+    </div>
+    <div class="chips" role="group" aria-label={ui.activation}>
+      <span class="muted">{ui.activation}</span>
+      <button type="button" class="chip on" data-ann-act="relu" aria-pressed="true"><bdi>{ui.relu}</bdi></button>
+      <button type="button" class="chip" data-ann-act="tanh" aria-pressed="false"><bdi>{ui.tanh}</bdi></button>
+      <button type="button" class="chip" data-ann-act="sigmoid" aria-pressed="false"><bdi>{ui.sigmoid}</bdi></button>
+      <button type="button" class="chip" data-ann-act="leaky" aria-pressed="false"><bdi>{ui.leaky}</bdi></button>
+      <svg class="curve" viewBox="0 0 120 64" role="img" aria-label={ui.curve} data-ann-curve>
+        <path d="M4 32H116M60 4V60" stroke="var(--rule)" fill="none" />
+        <path fill="none" stroke="var(--a)" stroke-width="2" data-ann-curve-line />
+      </svg>
+    </div>
+    <div class="chips">
+      <button type="button" class="btn" data-ann-train aria-pressed="false">{ui.train}</button>
+      <button type="button" class="chip" data-ann-step>{ui.step}</button>
+      <button type="button" class="chip" data-ann-reset>{ui.reset}</button>
+    </div>
+  </div>}
+  <div class:list={['layout', { pair: !figure }]}>
+    <canvas class="board" role="img" aria-label={figure ? undefined : ui.board} aria-hidden={figure ? 'true' : undefined} data-ann-board></canvas>
+    {!figure && <div class="side">
+      <div class="panel">
+        <b>{ui.network}</b>
+        <svg viewBox="0 0 300 190" role="img" aria-label={ui.network} data-ann-net></svg>
+        <div class="legend muted"><span class="w pos">{ui.positive}</span><span class="w neg">{ui.negative}</span></div>
+      </div>
+      <div class="panel stats" aria-live="polite">
+        <span data-ann-epoch></span><span data-ann-loss></span><span data-ann-train-acc></span><span data-ann-test-acc></span>
+      </div>
+      <svg class="chart" viewBox="0 0 300 60" role="img" aria-label={ui.loss_chart}>
+        <path d="M8 8V52H292" stroke="var(--rule)" fill="none" />
+        <polyline fill="none" stroke="var(--a)" stroke-width="2" data-ann-loss-trace />
+      </svg>
+    </div>}
+  </div>
+  {!figure && <p class="hint" data-ann-hint hidden>{ui.straight}</p>}
+  {!figure && <p class="muted" data-ann-status role="status"></p>}
+</div>
+
+<style>
+  .ann-demo { min-width: 0; }
+  .controls { display: grid; gap: 10px; margin-bottom: 12px; }
+  .chips, .settings, .legend { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+  .settings label { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+  .settings input { width: 100px; }
+  .settings output { min-width: 3ch; font: 600 13px var(--mono); }
+  .layout.pair { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+  canvas { display: block; width: 100%; aspect-ratio: 1; border: 1.5px solid var(--rule); max-width: 100%; }
+  .figure canvas { cursor: default; }
+  .side { display: grid; gap: 10px; min-width: 0; }
+  .panel { background: var(--paper); border: 1.5px solid var(--rule); padding: 8px 10px; border-radius: 12px; min-width: 0; }
+  .panel svg { display: block; width: 100%; direction: ltr; }
+  .stats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px 12px; font: 600 13px var(--mono); }
+  .chart { display: block; width: 100%; background: var(--sheet); border: 1.5px solid var(--rule); border-radius: 12px; }
+  .curve { width: 96px; height: auto; background: var(--sheet); border: 1.5px solid var(--rule); border-radius: 8px; direction: ltr; }
+  .w::before { content: ''; display: inline-block; width: 18px; margin-inline-end: 6px; vertical-align: middle; border-top: 3px solid; }
+  .w.pos::before { border-color: var(--a); }
+  .w.neg::before { border-color: var(--b); }
+  .hint { margin-top: 10px; border-inline-start: 4px solid var(--hl); padding-inline-start: 12px; }
+  [data-ann-status]:empty { display: none; }
+  @media (max-width: 760px) { .layout.pair { grid-template-columns: minmax(0, 1fr); } }
+</style>
+
+<script>
+  import { mountAnn } from '../deep/ann';
+  document.querySelectorAll<HTMLElement>('[data-ann]').forEach(mountAnn);
+</script>

@@ -31,6 +31,10 @@ export const NLP = ['bag-of-words', 'sentiment'] as const;
 export type NlpId = (typeof NLP)[number];
 export const nlpPath = (id: NlpId) => `learn/7-nlp/${id}/`;
 
+export const DEEP = ['ann', 'cnn'] as const;
+export type DeepId = (typeof DEEP)[number];
+export const deepPath = (id: DeepId) => `learn/8-deep/${id}/`;
+
 export const DIMRED = ['pca', 'lda', 'kernel-pca'] as const;
 export type DimredId = (typeof DIMRED)[number];
 export const dimredPath = (id: DimredId) => `learn/9-dimred/${id}/`;

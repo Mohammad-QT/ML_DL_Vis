@@ -232,6 +232,19 @@ export const dimred = {
   },
 } as const;
 
+export const deep = {
+  en: {
+    part: 'Deep learning', kicker: 'Part 8 · Deep learning · lesson {n} of 2',
+    n_ann: 'Neural networks (MLP)', n_cnn: 'Convolutional networks (CNN)',
+    code_p: 'This is the core of the notebook. Open it in Colab to train the network, plot what it learned and change the layers.',
+  },
+  ar: {
+    part: 'التعلّم العميق', kicker: 'الجزء 8 · التعلّم العميق · الدرس {n} من 2',
+    n_ann: 'الشبكات العصبية (MLP)', n_cnn: 'الشبكات الالتفافية (CNN)',
+    code_p: 'هذا هو جوهر الدفتر. افتحه في Colab لتدريب الشبكة ورسم ما تعلّمته وتغيير الطبقات.',
+  },
+} as const;
+
 export const extras = {
   en: {
     'gradient-descent': 'Gradient descent', regularization: 'Ridge and Lasso', dbscan: 'DBSCAN',
@@ -263,7 +276,6 @@ export const nav = {
   en: {
     course: 'Course', toc: 'Course contents', close: 'Close the course menu',
     part: 'Part {n}', count: '{d} of {n}', overall: '{d} of {n} lessons done', bar: '{p} · {d} of {n} done',
-    later: 'Part 8', later_d: 'Coming later',
     here: 'You are here', st_none: 'Not started', st_started: 'In progress', st_done: 'Done',
     saved: 'Progress is saved in this browser only.',
     reset: 'Reset progress', reset_q: 'Erase all your progress on this device?', reset_yes: 'Yes, erase it', cancel: 'Cancel',
@@ -272,7 +284,7 @@ export const nav = {
     step: 'Step {n} of 4',
     next_h: 'Next lesson', next_part: 'Part {n} · {p}',
     end_h: 'You reached the end of the course for now',
-    end_p: 'Part 8 comes later. Go back to the route to revisit any lesson.', end_cta: 'Back to the route',
+    end_p: 'You finished the last lesson. Go back to the route to revisit any lesson.', end_cta: 'Back to the route',
     cont: 'Continue where you left off', cont_part: 'Part {n} · {p}',
     collapse: 'Collapse the course menu', expand: 'Expand the course menu',
     show_all: 'Show all parts', focus: 'Show only my part', cont_tag: 'Continue here',
@@ -287,12 +299,12 @@ export const nav = {
     local_3: 'Open the downloaded <code>.ipynb</code> file in VS Code (with the Jupyter extension) or in Jupyter, then run the cells from top to bottom.',
     local_builtin: 'The notebook gets its data from scikit-learn, so you can run it offline after installing the libraries.',
     local_generated: 'The notebook creates its own example, so you can run it offline after installing the libraries.',
+    local_mnist: 'The notebook downloads the MNIST digits (about 11 MB) the first time it runs, so keep the internet on for that run.',
     local_net: 'The notebook reads its data from GitHub, so keep the internet on when you run it. To work fully offline, also download the <a href="{u}" target="_blank" rel="noopener">datasets folder</a> and change the URL in the notebook to the local file name.',
   },
   ar: {
     course: 'الدورة', toc: 'محتويات الدورة', close: 'أغلق قائمة الدورة',
     part: 'الجزء {n}', count: '{d} من {n}', overall: 'أنهيت {d} من {n} درسًا', bar: '{p} · أنهيت {d} من {n}',
-    later: 'الجزء 8', later_d: 'لاحقًا',
     here: 'أنت هنا', st_none: 'لم تبدأ', st_started: 'قيد التعلّم', st_done: 'مكتمل',
     saved: 'يُحفظ تقدّمك في هذا المتصفح فقط.',
     reset: 'إعادة ضبط التقدّم', reset_q: 'هل تريد مسح كل تقدّمك على هذا الجهاز؟', reset_yes: 'نعم، امسحه', cancel: 'إلغاء',
@@ -301,7 +313,7 @@ export const nav = {
     step: 'الخطوة {n} من 4',
     next_h: 'الدرس التالي', next_part: 'الجزء {n} · {p}',
     end_h: 'وصلت إلى نهاية الدورة حاليًا',
-    end_p: 'الجزء 8 يأتي لاحقًا. عد إلى المسار لتراجع أي درس.', end_cta: 'العودة إلى المسار',
+    end_p: 'أنهيت آخر درس. عد إلى المسار لتراجع أي درس.', end_cta: 'العودة إلى المسار',
     cont: 'تابع من حيث توقفت', cont_part: 'الجزء {n} · {p}',
     collapse: 'صغّر قائمة الدورة', expand: 'وسّع قائمة الدورة',
     show_all: 'أظهر كل الأجزاء', focus: 'أظهر جزئي فقط', cont_tag: 'تابع من هنا',
@@ -316,6 +328,7 @@ export const nav = {
     local_3: 'افتح ملف <code>.ipynb</code> الذي نزّلته في VS Code (مع إضافة Jupyter) أو في Jupyter، ثم شغّل الخلايا من الأعلى إلى الأسفل.',
     local_builtin: 'يحصل الدفتر على بياناته من <bdi>scikit-learn</bdi>، لذا يمكنك تشغيله دون إنترنت بعد تثبيت المكتبات.',
     local_generated: 'ينشئ الدفتر مثاله بنفسه، لذا يمكنك تشغيله دون إنترنت بعد تثبيت المكتبات.',
+    local_mnist: 'ينزّل الدفتر أرقام <bdi>MNIST</bdi> (نحو 11 ميغابايت) في أول تشغيل، لذا أبقِ الإنترنت متصلًا في تلك المرة.',
     local_net: 'يقرأ الدفتر بياناته من GitHub، لذا أبقِ الإنترنت متصلًا عند تشغيله. لتعمل دون إنترنت تمامًا، نزّل أيضًا <a href="{u}" target="_blank" rel="noopener">مجلد البيانات</a> وغيّر الرابط في الدفتر إلى اسم الملف المحلي.',
   },
 };

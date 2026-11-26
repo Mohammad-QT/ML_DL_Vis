@@ -160,7 +160,10 @@ describe('course', () => {
     expect(nextLesson('6/thompson')?.key).toBe('6/q-learning');
     expect(nextLesson('6/q-learning')?.key).toBe('7/bag-of-words');
     expect(nextLesson('7/bag-of-words')?.key).toBe('7/sentiment');
-    expect(nextLesson('7/sentiment')?.key).toBe('9/pca');
+    expect(nextLesson('7/sentiment')?.key).toBe('8/ann');
+    expect(nextLesson('8/ann')?.key).toBe('8/cnn');
+    expect(nextLesson('8/cnn')?.key).toBe('9/pca');
+    expect(previousLesson('8/ann')?.key).toBe('7/sentiment');
     expect(nextLesson('9/pca')?.key).toBe('9/lda');
     expect(nextLesson('9/lda')?.key).toBe('9/kernel-pca');
     expect(nextLesson('9/kernel-pca')?.key).toBe('10/metrics');
@@ -177,7 +180,7 @@ describe('course', () => {
     expect(previousLesson('6/thompson')?.key).toBe('6/ucb');
     expect(previousLesson('6/q-learning')?.key).toBe('6/thompson');
     expect(previousLesson('7/bag-of-words')?.key).toBe('6/q-learning');
-    expect(previousLesson('9/pca')?.key).toBe('7/sentiment');
+    expect(previousLesson('9/pca')?.key).toBe('8/cnn');
     expect(previousLesson('10/metrics')?.key).toBe('9/kernel-pca');
     expect(previousLesson('10/cv')?.key).toBe('10/metrics');
     expect(nextLesson('10/boost')).toBeUndefined();

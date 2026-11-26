@@ -86,10 +86,9 @@ You can also upload your own CSV on the Compare page. The file stays in your bro
 | **5 · Association rules** | Apriori · Eclat |
 | **6 · Reinforcement learning** | Upper confidence bound · Thompson sampling · Q-learning |
 | **7 · Natural language processing** | Bag of words · Sentiment classifier |
+| **8 · Deep learning** | Neural networks (MLP) · Convolutional networks (draw a digit) |
 | **9 · Dimensionality reduction** | PCA · LDA · Kernel PCA |
 | **10 · Pick the best model** | k-fold cross-validation · Grid search · Gradient boosting (XGBoost) · Precision, recall and the ROC curve |
-
-Part 8 (deep learning) comes later.
 
 ## How a lesson works
 
@@ -106,7 +105,7 @@ Every lesson has a notebook in [`notebooks/`](notebooks/). Three ways to use it:
 
 - **Colab.** Press "Open in Colab" on the lesson's Code tab. Notebooks load data by link from [`datasets/`](datasets/) or use data from scikit-learn, so you upload nothing.
 - **Download.** Save the `.ipynb` file from the lesson page or from this repository.
-- **VS Code or Jupyter.** Open the downloaded file. You need Python with `pandas`, `scikit-learn` and `matplotlib`, plus `xgboost` for the boosting lesson.
+- **VS Code or Jupyter.** Open the downloaded file. You need Python with `pandas`, `scikit-learn` and `matplotlib`, plus `xgboost` for the boosting lesson and `tensorflow` for the CNN lesson.
 
 The datasets are public or original to this project. Sources and licenses are in [`datasets/README.md`](datasets/README.md).
 
@@ -127,7 +126,7 @@ Offline use is being documented. This section will be filled in soon.
 
 ## Tech
 
-[Astro](https://astro.build) and TypeScript, with the models written from scratch in [`src/engine/`](src/engine/) and covered by Vitest tests. It is a static site; pushing to `main` deploys it to GitHub Pages.
+[Astro](https://astro.build) and TypeScript, with the models written from scratch in [`src/engine/`](src/engine/) and covered by Vitest tests. The draw-a-digit CNN is trained offline by [`scripts/train_cnn.py`](scripts/train_cnn.py); the browser runs its exported weights with plain TypeScript, so there is no machine learning library on the site. It is a static site; pushing to `main` deploys it to GitHub Pages.
 
 ## Use it offline
 

@@ -1,0 +1,94 @@
+---
+id: ann
+short: "Neural networks"
+title: "Neural networks (multi-layer perceptron)"
+lede: "Stack simple units into layers and let them bend a decision boundary around curves, rings and spirals."
+figure:
+  caption: "A trained neural network wraps its decision boundary around the inner circle, separating blue class A from pink class B."
+steps_h: "How a neural network learns"
+steps:
+  - "Send a small batch of points forward through the layers. Each unit computes a weighted sum, adds a bias and applies an activation such as ReLU or tanh."
+  - "Score the output probabilities with cross-entropy loss. The loss is high when the network is confident and wrong, and low when it is right."
+  - "Run backpropagation from the output back to the first layer. It works out how much each weight pushed the loss up or down."
+  - "Nudge every weight a small step downhill (gradient descent) scaled by the learning rate. Repeat over mini-batches for many epochs until the boundary settles."
+caution:
+  h: "Watch the learning rate and the test score"
+  p: "A learning rate that is too high makes the loss bounce instead of falling; too low and training crawls. Adding extra layers or units can also memorize the training dots, so check test accuracy on the ringed points."
+play:
+  p: "Start with 1 hidden layer and 1 unit on XOR or Circles and press Train: a single unit can only draw a straight line. Add units and layers, watch the boundary bend and the loss drop, then try Spiral with a larger network. Try all four activations on Spiral and compare. Sigmoid learns slowly in deep networks, so raise the learning rate to 1 to help it. Click the board to add a point of the chosen class, or Shift-click to add the other class."
+  p_touch: "Start with 1 hidden layer and 1 unit on XOR or Circles and tap Train: a single unit can only draw a straight line. Add units and layers, watch the boundary bend and the loss drop, then try Spiral with a larger network. Try all four activations on Spiral and compare. Sigmoid learns slowly in deep networks, so raise the learning rate to 1 to help it. Pick a class and tap the board to add a point."
+ui:
+  board: "Neural network board. Use arrow keys to move the cursor and Enter to add a point."
+  blobs: "Blobs"
+  xor: "XOR"
+  circles: "Circles"
+  spiral: "Spiral"
+  class_a: "Class A"
+  class_b: "Class B"
+  layers: "Hidden layers"
+  units: "Units per layer"
+  activation: "Activation"
+  relu: "ReLU"
+  tanh: "tanh"
+  sigmoid: "Sigmoid"
+  leaky: "Leaky ReLU"
+  curve: "Shape of the activation function"
+  rate: "Learning rate"
+  train: "Train"
+  pause: "Pause"
+  step: "Step one epoch"
+  reset: "Reset network"
+  epoch: "Epoch {n}"
+  loss: "Loss {n}"
+  loss_chart: "Training loss over epochs"
+  train_acc: "Train accuracy {n}"
+  test_acc: "Test accuracy {n}"
+  network: "Network diagram"
+  inputs: "Inputs"
+  output: "Output"
+  positive: "Positive weight"
+  negative: "Negative weight"
+  straight: "One hidden unit can only draw a straight line. Add units or layers to bend the boundary."
+  limit: "300 points max. Reset to start again."
+quiz:
+  - q: "Why does a network with 1 hidden layer and 1 unit fail on the XOR preset?"
+    a:
+      - "A single unit computes one weighted sum, so its boundary is always a straight line"
+      - "The learning rate is automatically set to zero when there is one unit"
+      - "XOR requires three output classes instead of two"
+    correct: 0
+    right: "Right. One unit splits the plane with a single straight line, and no straight line can separate XOR's opposite corners."
+    wrong: "Try 1 layer and 1 unit on XOR in the Play tab. One unit can only draw a straight line, so opposite corners cannot be separated."
+  - q: "What does backpropagation compute during each training step?"
+    a:
+      - "The number of hidden layers to add next"
+      - "How each weight should change to reduce the loss"
+      - "Which test points to remove from the dataset"
+    correct: 1
+    right: "Right. Backpropagation sends the error signal backward so gradient descent knows which direction and how much to nudge every weight."
+    wrong: "Backpropagation does not change the network shape or drop data. It measures how each weight affects the loss so the weights can be updated."
+code: |
+  from sklearn.datasets import make_circles
+  from sklearn.model_selection import train_test_split
+  from sklearn.neural_network import MLPClassifier
+  from sklearn.pipeline import Pipeline
+  from sklearn.preprocessing import StandardScaler
+
+  X, y = make_circles(n_samples=400, factor=0.35, noise=0.08, random_state=42)
+  X_train, X_test, y_train, y_test = train_test_split(
+      X, y, test_size=0.25, stratify=y, random_state=42
+  )
+  model = Pipeline([
+      ("scale", StandardScaler()),
+      ("mlp", MLPClassifier(hidden_layer_sizes=(8, 8), activation="relu", max_iter=1000, random_state=42)),
+  ])
+  model.fit(X_train, y_train)
+  print(model.score(X_test, y_test))
+---
+A single <mark>neuron</mark> looks like logistic regression: it multiplies each input by a weight, adds a bias and passes the sum through an activation function. Stack several units into a hidden layer, feed their outputs into the next layer, and end with an output unit that turns its score into P(class B). In the network diagram, blue lines are positive weights, pink lines are negative weights, and thicker lines carry stronger weights.
+
+The <mark>activation function</mark> (ReLU or tanh) is what lets the boundary bend. Without that non-linear bend, stacking layers would still collapse into one straight line. With it, hidden units combine simple cuts into curves that can wrap around circles or trace a spiral.
+
+<mark>Sigmoid</mark> squashes any number into 0–1 and is what the output unit uses to give P(class B), while softmax extends the same idea to many classes in the CNN lesson. For hidden layers, tanh squashes into −1 to 1 and stays centered on zero. <mark>ReLU</mark> keeps positive values and turns negatives into 0, which trains fast, though a unit can get stuck at 0 ("die"). Leaky ReLU keeps a small slope (0.1) for negatives so units never fully die.
+
+Training repeats a simple loop over small mini-batches of points. A forward pass produces predictions and measures <mark>cross-entropy loss</mark>. <mark>Backpropagation</mark> then works backward to find how each weight contributed to the error, and gradient descent nudges every weight downhill. About a quarter of the points are held out with rings as a test set so you can check whether the network generalizes.

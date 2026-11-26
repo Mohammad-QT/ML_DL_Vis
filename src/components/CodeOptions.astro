@@ -9,7 +9,7 @@ const t = nav[lang];
 const l = findLesson(current)!;
 const base = import.meta.env.BASE_URL.replace(/\/?$/, '/');
 const file = l.notebook.split('/').pop()!;
-const pip = `pip install pandas scikit-learn matplotlib${l.key === '10/boost' ? ' xgboost' : ''}`;
+const pip = `pip install pandas scikit-learn matplotlib${l.key === '10/boost' ? ' xgboost' : l.key === '8/cnn' ? ' tensorflow' : ''}`;
 ---
 <div class="runopts" data-runopts>
   <div class="codecta">
@@ -24,7 +24,7 @@ const pip = `pip install pandas scikit-learn matplotlib${l.key === '10/boost' ? 
       <li><span set:html={t.local_2} /><pre>{pip}</pre></li>
       <li set:html={t.local_3} />
     </ol>
-    <p class="net" set:html={l.extra ? t.local_generated : l.part === '9' ? t.local_builtin : fill(t.local_net, { u: githubUrl('datasets') })} />
+    <p class="net" set:html={l.key === '8/cnn' ? t.local_mnist : l.extra || l.key === '8/ann' ? t.local_generated : l.part === '9' ? t.local_builtin : fill(t.local_net, { u: githubUrl('datasets') })} />
   </details>
 </div>
 
