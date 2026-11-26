@@ -10,6 +10,18 @@ steps:
   - Work out the mean (or median) of the numbers that are there.
   - Write that value into every blank in the column.
   - Repeat for each column that has blanks.
+quick:
+  steps:
+    - "Pick one column and spot its blank cells"
+    - "Compute the mean from the filled cells only"
+    - "Write that mean into every blank in the column"
+    - "Repeat for the next column with blanks"
+  caution: "Learn the fill value from training rows only, then fill test rows."
+  scene: missing
+  words:
+    age: "Age"
+    salary: "Salary"
+    mean: "Mean"
 caution:
   h: Learn the fill value from training rows only
   p: 'Work out the mean on the <b>training</b> rows, then use it to fill both training and test rows. If test data leaks into the mean, the test score <mark>looks better than it should</mark>. The split lesson explains why.'

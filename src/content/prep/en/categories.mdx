@@ -10,6 +10,19 @@ steps:
   - Make one new column for each category.
   - Put a 1 in the column that matches the row and 0 in the others.
   - Drop the original text column.
+quick:
+  steps:
+    - "List every unique category from A to Z"
+    - "Create one new column for each category"
+    - "Put 1 in the matching column and 0 elsewhere"
+    - "Drop the original text column"
+  caution: "Plain label codes (0, 1, 2) invent a fake order; use one-hot when unsure."
+  scene: categories
+  words:
+    country: "Country"
+    france: "France"
+    germany: "Germany"
+    spain: "Spain"
 caution:
   h: Numbers carry an order
   p: 'Tree models cope with label codes, but models built on distance or lines, like K-NN, SVM and logistic regression, <mark>take the order literally</mark>. When in doubt, use one-hot.'
