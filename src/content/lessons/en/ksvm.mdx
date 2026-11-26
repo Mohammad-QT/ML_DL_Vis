@@ -9,6 +9,18 @@ steps:
   - Each support point casts a smooth bump of influence over its neighbourhood.
   - Add up the bumps for class B and subtract those for class A.
   - 'The sign of the total decides the class. <b>Gamma</b> sets how wide each bump is.'
+quick:
+  steps:
+    - "No straight line splits rings; the kernel measures closeness"
+    - "A smooth bump of similarity lifts the inner points up"
+    - "A flat plane slices between the high and low points"
+    - "Back on the board, that slice becomes a circle"
+  caution: "Large gamma makes tiny bumps that memorise points; scale features first."
+  scene: ksvm
+  words:
+    kernel: "Kernel bump"
+    plane: "Flat cut"
+    circle: "Circle boundary"
 caution:
   h: Watch gamma, and scale first
   p: 'A very large gamma makes tiny bumps, so the model <mark>memorises every point</mark> and does worse on new ones. Scale your features first too: the kernel uses distances.'

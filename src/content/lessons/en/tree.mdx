@@ -9,6 +9,19 @@ steps:
   - Pick the question that splits the points into the purest groups.
   - Repeat inside each group until it is pure or the tree reaches its <b>max depth</b>.
   - A new point follows the answers down to a leaf, and the leaf’s majority class wins.
+quick:
+  steps:
+    - "Try yes/no questions along one feature at a time"
+    - "Pick the split that leaves the purest groups"
+    - "Keep splitting mixed groups until pure or max depth"
+    - "Follow a new point down the tree to its leaf"
+  caution: "Limit max depth so the tree does not memorise noise."
+  scene: 3-tree
+  words:
+    ask: "Split?"
+    pure: "Pure"
+    yes: "Yes"
+    no: "No"
 caution:
   h: A deep tree memorises
   p: 'Left to grow, a tree keeps asking questions until it has <mark>memorised every training point</mark>, noise included. Limit the depth, then check the test score. Trees do not need feature scaling.'

@@ -9,6 +9,19 @@ steps:
   - For each line, measure the empty gap (the <b>margin</b>) to the nearest points.
   - Keep the line with the widest margin. The points touching the gap are the <b>support vectors</b>.
   - 'A setting called <b>C</b> decides how many points may sit inside the gap.'
+quick:
+  steps:
+    - "Many straight lines can separate the two classes"
+    - "Measure the empty gap around each candidate line"
+    - "Keep the widest gap; its edge points are support vectors"
+    - "Tune C to allow or forbid points inside the gap"
+  caution: "Scale features first so large values do not dominate the gap."
+  scene: svm
+  words:
+    margin: "Margin"
+    sv: "Support vectors"
+    cLow: "Small C"
+    cHigh: "Large C"
 caution:
   h: Scale your features first
   p: 'The margin is a distance, so a feature with huge numbers (like salary) would <mark>dominate the gap</mark>. Use <code>StandardScaler</code> before fitting, just like K-NN.'
