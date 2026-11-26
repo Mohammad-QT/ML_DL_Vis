@@ -9,11 +9,11 @@ const en = common.en, ar = common.ar;
     <p class="mono code">404</p>
     <h1 class="display">{en.nf_h}</h1>
     <p class="muted">{en.nf_p}</p>
-    <p><a class="chip on" href={href('en')}>{en.nf_home}</a></p>
+    <p><a class="btn" href={href('en')}>{en.nf_home}</a></p>
     <div class="ar" lang="ar" dir="rtl">
       <h2 class="display">{ar.nf_h}</h2>
       <p class="muted">{ar.nf_p}</p>
-      <p><a class="chip on" href={href('ar')}>{ar.nf_home}</a></p>
+      <p><a class="btn" href={href('ar')}>{ar.nf_home}</a></p>
     </div>
   </section>
 </Base>
@@ -23,7 +23,6 @@ const en = common.en, ar = common.ar;
   .code { font-size: 15px; color: var(--muted); margin-bottom: 6px; }
   h1 { font-size: 52px; line-height: 1.05; margin-bottom: 12px; }
   .nf p { margin-bottom: 14px; }
-  .chip { text-decoration: none; display: inline-block; }
   .ar { margin-top: 36px; padding-top: 28px; border-top: 1.5px solid var(--rule); }
   .ar h2 { font-size: 34px; margin-bottom: 10px; }
 </style>

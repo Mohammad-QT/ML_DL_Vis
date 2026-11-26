@@ -7,10 +7,11 @@
 
 /* buttons in the dock and sheets: 44px tap targets, chunky like the site's other buttons */
 .dbtn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 44px; min-width: 44px; padding: 0 13px;
-  border: 1.5px solid var(--rule); background: var(--paper); color: var(--ink); border-radius: 12px; font: 700 15px var(--body);
+  border-radius: 12px; font: 700 15px var(--body);
   cursor: pointer; box-shadow: 0 3px 0 var(--lift); white-space: nowrap; transition: transform .12s, border-color .12s; }
+.dbtn:where(:not(.btn)) { border: 1.5px solid var(--muted); background: var(--paper); color: var(--ink); }
 .dbtn:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--lift); }
-.dbtn:hover { border-color: var(--muted); }
+.dbtn:hover:not(:disabled) { border-color: var(--ink); }
 .dbtn:disabled { opacity: .42; cursor: default; transform: none; }
 .dbtn[aria-pressed="true"], .dbtn.on { background: var(--ink); color: var(--sheet); border-color: var(--ink); }
 .dbtn svg { width: 19px; height: 19px; flex: none; }
@@ -45,7 +46,7 @@
   .bs-head::before { content: ""; position: absolute; top: 0; left: 50%; width: 40px; height: 4px; margin-left: -20px; border-radius: 4px; background: var(--rule); }
   .bs-title { flex: 1; font: 750 20px var(--display); letter-spacing: -.01em; padding-top: 6px; }
   html[dir="rtl"] .bs-title { letter-spacing: 0; }
-  .bs-x { padding: 0; box-shadow: none; background: none; border-color: transparent; }
+  .dbtn.bs-x { padding: 0; box-shadow: none; background: none; border-color: transparent; }
   .bs-body .label { margin-top: 4px; }
   .bs-body .chips { display: flex; flex-wrap: wrap; gap: 8px; }
   .bs-body .chip { min-height: 44px; padding: 6px 14px; font-size: 15px; }

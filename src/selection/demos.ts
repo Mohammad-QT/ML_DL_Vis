@@ -90,11 +90,11 @@ function cv(root: HTMLElement, ui: UI) {
       <label class="box"><span class="label">${ui.model}</span><select data-model>${MODEL_NAMES.map(n => `<option value="${n}">${ui['m_' + n]}</option>`).join('')}</select></label>
       <label class="box" data-setting-box><span class="label"><span data-sname></span> · <b data-sval></b></span><input type="range" data-setting></label>
       <label class="box"><span class="label">${ui.k} · <b data-kval>${state.k}</b></span><input type="range" min="3" max="10" step="1" value="${state.k}" data-k></label>
-      <div class="chips"><button class="btn" data-step>${ui.step}</button><button class="chip" data-anim>${ui.animate}</button><button class="chip" data-data>${ui.new_data}</button></div>
+      <div class="chips"><button class="btn" data-demo-primary data-step>${ui.step}</button><button class="chip act" data-anim>${ui.animate}</button><button class="chip act" data-data>${ui.new_data}</button></div>
     </div></div>
     <p class="dnote" data-fold aria-live="polite"></p>
     <div class="dstrips"><figure class="sheet pane"><figcaption><b>${ui.strip_cv}</b><span data-cvsum></span></figcaption><div data-cvstrip></div></figure>
-    <figure class="sheet pane"><figcaption><b>${ui.strip_one}</b><span data-onesum></span></figcaption><div data-onestrip></div><div class="chips"><button class="btn ghost" data-split>${ui.split_btn}</button></div></figure></div>`;
+    <figure class="sheet pane"><figcaption><b>${ui.strip_one}</b><span data-onesum></span></figcaption><div data-onestrip></div><div class="chips"><button class="btn" data-demo-primary data-split>${ui.split_btn}</button></div></figure></div>`;
   const q = <T extends HTMLElement = HTMLElement>(s: string) => root.querySelector<T>(s)!;
   const store = { points: pts };
   const board = new Board(q<HTMLCanvasElement>('canvas'), store, { static: true, cell: 5 });
@@ -201,7 +201,7 @@ function grid(root: HTMLElement, ui: UI) {
       <div class="prog"><i data-prog></i></div><p class="legend" data-status aria-live="polite"></p></div>
     <div>${frame(300)}<div class="box scores3" aria-live="polite"><div><small>${ui.train}</small><b data-tr>–</b></div><div><small>${ui.cv}</small><b data-cvs>–</b></div><div><small>${ui.gap}</small><b data-gap>–</b></div></div>
     <p class="dnote" data-verdict>${ui.hover_hint}</p></div></div>
-    <div class="chips"><button class="chip" data-data>${ui.new_data}</button></div>
+    <div class="chips"><button class="chip act" data-data>${ui.new_data}</button></div>
     <h3 class="display">${ui.chart_h}</h3>
     <div class="chips" data-which></div>
     <figure class="sheet pane" style="max-width:520px"><div data-chart></div><figcaption data-chartnote></figcaption></figure>`;
@@ -315,10 +315,10 @@ function boost(root: HTMLElement, ui: UI) {
     <div class="dside">
       <div class="box scores" aria-live="polite"><div><small>${ui.train}</small><b data-tr>–</b></div><div><small>${ui.test}</small><b data-te>–</b></div></div>
       <label class="box"><span class="label">${ui.round} · <b data-rval></b> / ${MAX}</span><input type="range" min="0" max="${MAX}" step="1" data-round></label>
-      <div class="chips"><button class="chip" data-prev>${ui.prev}</button><button class="btn" data-next>${ui.next}</button><button class="chip" data-play>${ui.play}</button></div>
+      <div class="chips"><button class="chip act" data-prev>${ui.prev}</button><button class="btn" data-demo-primary data-next>${ui.next}</button><button class="chip act" data-play>${ui.play}</button></div>
       <label class="box"><span class="label">${ui.lr} · <b data-lval></b></span><input type="range" min="0.05" max="1" step="0.05" value="${state.lr}" data-lr></label>
       <label class="box"><span class="label">${ui.depth} · <b data-dval></b></span><input type="range" min="1" max="5" step="1" value="${state.depth}" data-depth></label>
-      <div class="chips"><button class="chip" data-data>${ui.new_data}</button></div>
+      <div class="chips"><button class="chip act" data-data>${ui.new_data}</button></div>
     </div></div>
     <figure class="sheet pane" style="max-width:560px;margin-top:16px"><figcaption><b>${ui.chart_h}</b></figcaption><div data-chart></div><figcaption data-best aria-live="polite"></figcaption></figure>
     <p class="dnote">${ui.note}</p>`;

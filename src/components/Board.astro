@@ -82,9 +82,9 @@ const uid = `pg${Math.random().toString(36).slice(2, 8)}`;
       </div></div>
       <div class="box databox" data-phone="data"><span class="label">{t.data}</span><div class="chips">
         {presets.map(p => <button class:list={['chip', { on: p === preset }]} data-preset={p}>{t[`d_${p}`]}</button>)}
-        <button class="chip" data-role="resplit">{t.resplit}</button>
-        <button class="chip" data-role="clear">{t.clear}</button>
-        <button class="chip" data-role="undo" disabled>{t.undo}</button>
+          <button class="chip act" data-role="resplit">{t.resplit}</button>
+          <button class="chip act" data-role="clear">{t.clear}</button>
+          <button class="chip act" data-role="undo" disabled>{t.undo}</button>
       </div></div></>}
       <p class="legend"><span class="swatch ring"></span><span>{t.legend_test}</span></p>
     </div>

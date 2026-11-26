@@ -97,14 +97,41 @@ html[dir="rtl"] mark { background-position: 100% 0; }
 
 /* sheets & buttons */
 .sheet { background: var(--sheet); border: 1.5px solid var(--rule); border-radius: 20px; box-shadow: 0 5px 0 var(--lift); transition: background-color .25s, border-color .25s; }
-.btn { display: inline-flex; align-items: center; gap: 9px; border: 1.5px solid var(--ink); background: var(--ink); color: var(--sheet); font: 700 16px var(--body); padding: 10px 20px; border-radius: 12px; cursor: pointer; text-decoration: none; box-shadow: 0 4px 0 var(--lift); transition: transform .12s; }
-.btn:hover { transform: translateY(-2px); }
-.btn.ghost { background: var(--sheet); color: var(--ink); border-color: var(--rule); }
-.btn.hl { background: var(--hl); color: #15202b; border-color: #d9b928; box-shadow: 0 4px 0 #c9a821; }
+.btn { display: inline-flex; align-items: center; gap: 9px; min-height: 44px; max-width: 100%; text-align: start; overflow-wrap: anywhere; border: 1.5px solid var(--ink); background: var(--ink); color: var(--sheet); font: 700 16px var(--body); padding: 10px 20px; border-radius: 12px; cursor: pointer; text-decoration: none; box-shadow: 0 4px 0 var(--lift); transition: transform .12s; }
+.btn > svg, .btn > .arr { flex: none; }
+.btn:hover:not(:disabled) { transform: translateY(-2px); }
+.btn.ghost { background: var(--sheet); color: var(--ink); border-color: var(--muted); }
+.btn.hl, .navrow .btn:not(.ghost) { background: var(--hl); color: light-dark(var(--ink), var(--paper)); border-color: var(--ink); }
+.navrow { flex-wrap: wrap; gap: 12px; }
+.navrow .btn:not(.ghost) { margin-inline-start: auto; }
 .arr { display: inline-block; } html[dir="rtl"] .arr { transform: scaleX(-1); }
 .chip { border: 1.5px solid var(--rule); background: var(--sheet); color: var(--ink); border-radius: 9px; padding: 4px 11px; font: 600 14px var(--body); cursor: pointer; transition: border-color .12s; }
 .chip:hover { border-color: var(--muted); }
 .chip.on { background: var(--ink); color: var(--sheet); border-color: var(--ink); }
+.chip.act { display: inline-flex; align-items: center; gap: 6px; max-width: 100%; border: 2px solid var(--muted); text-align: start; overflow-wrap: anywhere; transition: border-color .12s, transform .12s, box-shadow .12s; }
+.chip.act.on { border-color: var(--ink); }
+.chip.act:not(:has(> svg))::before { content: ""; inline-size: 14px; block-size: 14px; flex: none; background: currentColor;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='black' stroke-width='1.6' stroke-linejoin='round' d='M9 1.5 3 9h4l-1 5.5L13 7H9l.5-5.5Z'/%3E%3C/svg%3E") center / contain no-repeat; }
+.chip.act > svg { width: 16px; height: 16px; flex: none; }
+.chip.act:hover:not(:disabled) { border-color: var(--ink); transform: translateY(-2px); box-shadow: 0 2px 0 var(--lift); }
+.btn:disabled, .chip.act:disabled { opacity: .45; cursor: default; }
+@media (hover: none) { .chip.act { min-height: 44px; } }
+
+/* The four lesson templates share the same answer markup and feedback classes. */
+button.ans[data-ans] { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 44px;
+  border: 2px solid var(--muted); background: var(--sheet); color: var(--ink); overflow-wrap: anywhere; }
+button.ans[data-ans]:hover { border-color: var(--ink); }
+button.ans[data-ans].right { border-color: var(--ok); background: color-mix(in srgb, var(--ok) 8%, var(--sheet)); }
+button.ans[data-ans].wrong { border-color: var(--bad); background: color-mix(in srgb, var(--bad) 8%, var(--sheet)); }
+button.ans[data-ans] .tag:empty { display: none; }
+
+@media (prefers-reduced-motion: no-preference) {
+  [data-demo-pulse].btn:not(:disabled) { animation: demo-action-pulse .8s ease-out 2; }
+  @keyframes demo-action-pulse {
+    0%, 100% { box-shadow: 0 4px 0 var(--lift), 0 0 0 0 transparent; }
+    35% { box-shadow: 0 4px 0 var(--lift), 0 0 0 5px color-mix(in srgb, var(--ink) 25%, transparent); }
+  }
+}
 .swatch { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-inline-end: 6px; vertical-align: -1px; }
 .swatch.a { background: var(--a); } .swatch.b { background: var(--b); }
 .swatch.ring { background: none; border: 2px solid var(--muted); }

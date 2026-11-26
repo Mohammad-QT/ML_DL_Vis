@@ -26,7 +26,7 @@ const grid = Array.from({ length: 9 }, (_, index) => (index + 1) * DBSCAN_SIZE /
     <label>{ui.minpts} <input type="range" min="2" max="12" step="1" value={minPts} dir="ltr" data-dbscan-minpts />
       <output data-dbscan-minpts-value>{integer.format(minPts)}</output>
     </label>
-    <button class="btn ghost" type="button" data-dbscan-reset>{ui.reset}</button>
+    <button class="chip act" type="button" data-dbscan-reset>{ui.reset}</button>
   </div>}
   <div class="plots">
     <svg class="board" viewBox={`0 0 ${DBSCAN_SIZE} ${DBSCAN_SIZE}`} data-dbscan-board
@@ -71,7 +71,6 @@ const grid = Array.from({ length: 9 }, (_, index) => (index + 1) * DBSCAN_SIZE /
   .radius[data-dbscan-hidden] { display: none; }
   .controls { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
   .controls label { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
-  .controls .btn { padding: 6px 12px; font-size: 14px; }
   .controls select { color: var(--ink); background: var(--sheet); border: 1px solid var(--rule); border-radius: 7px; padding: 5px; font: inherit; }
   input { width: 96px; accent-color: var(--a); }
   output, .state { font: 600 13px var(--mono); }

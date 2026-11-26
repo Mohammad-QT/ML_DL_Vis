@@ -23,14 +23,14 @@ const number = new Intl.NumberFormat(lang);
   {!figure && <>
     <p class="bandit-status" data-bandit-status role="status"></p>
     <p class="muted bandit-hint" data-bandit-your-score></p>
-    <button class="btn" data-bandit-start hidden>{ui.start}</button>
+    <button class="btn" data-demo-primary={demo === 'ucb' ? '' : undefined} data-bandit-start hidden>{ui.start}</button>
     <div class="bandit-actions" data-bandit-actions hidden>
-      <button class="btn" data-bandit-run="1">{ui.step}</button>
-      <button class="btn ghost" data-bandit-run="100">{ui.run100}</button>
-      <button class="btn ghost" data-bandit-run="1000">{ui.run1000}</button>
+      <button class="btn" data-demo-primary={demo === 'thompson' ? '' : undefined} data-bandit-run="1">{ui.step}</button>
+      <button class="chip act" data-bandit-run="100">{ui.run100}</button>
+      <button class="chip act" data-bandit-run="1000">{ui.run1000}</button>
       <button class="btn ghost" data-bandit-reveal aria-pressed="false">{ui.reveal}</button>
     </div>
-    <button class="btn ghost" data-bandit-reset>{ui.reset}</button>
+    <button class="chip act" data-bandit-reset>{ui.reset}</button>
     <div class="bandit-comparison" data-bandit-comparison hidden>
       <h3 class="display">{ui.chart}</h3>
       <p class="muted" data-bandit-axes></p>
@@ -54,7 +54,7 @@ const number = new Intl.NumberFormat(lang);
   .bandit-hint:empty { display: none; }
   .bandit-status { font-weight: bold; }
   .bandit-actions, .bandit-legend { display: flex; flex-wrap: wrap; gap: 8px; margin-block: 10px; }
-  .bandit-actions .btn, [data-bandit-reset], [data-bandit-start] { min-height: 44px; white-space: normal; }
+  .bandit-actions button, [data-bandit-reset], [data-bandit-start] { min-height: 44px; white-space: normal; }
   .bandit-comparison { margin-block-start: 22px; }
   .bandit-chart { background: var(--paper); border: 1.5px solid var(--rule); border-radius: 8px; }
   .bandit-legend span { border-block-start: 2px solid var(--a); }

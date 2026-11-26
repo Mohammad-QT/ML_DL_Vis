@@ -12,13 +12,13 @@ const next = nextLesson(current);
       <span class="k">{t.next_h}</span>
       <span class="nm display">{lessonName(lang, next)}</span>
       <span class="pp">{fill(t.next_part, { n: next.part, p: partName(lang, next.part) })}</span>
-      <span class="go" aria-hidden="true"><span class="arr">→</span></span>
+      <span class="go btn hl" aria-hidden="true"><span class="arr">→</span></span>
     </a>
   : <a class="sheet nextcard" href={href(lang) + '#route'}>
       <span class="k">{t.end_cta}</span>
       <span class="nm display">{t.end_h}</span>
       <span class="pp">{t.end_p}</span>
-      <span class="go" aria-hidden="true"><span class="arr">→</span></span>
+      <span class="go btn hl" aria-hidden="true"><span class="arr">→</span></span>
     </a>}
 
 <style>
@@ -29,6 +29,6 @@ const next = nextLesson(current);
   :global(html[dir="rtl"]) .k { letter-spacing: 0; font-family: var(--body); }
   .nm { grid-area: nm; font-size: 26px; line-height: 1.15; margin: 2px 0; }
   .pp { grid-area: pp; color: var(--muted); font-size: 15px; }
-  .go { grid-area: go; width: 48px; height: 48px; border-radius: 14px; display: grid; place-items: center; background: var(--hl); color: #15202b; border: 1.5px solid #d9b928; box-shadow: 0 4px 0 #c9a821; font-size: 22px; font-weight: 700; }
-  @media (max-width: 600px) { .nm { font-size: 22px; } .nextcard { padding: 16px; } .go { width: 40px; height: 40px; } }
+  .go { grid-area: go; width: 48px; height: 48px; padding: 0; justify-content: center; font-size: 22px; pointer-events: none; }
+  @media (max-width: 600px) { .nm { font-size: 22px; } .nextcard { padding: 16px; } .go { width: 44px; height: 44px; } }
 </style>
