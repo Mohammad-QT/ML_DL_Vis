@@ -109,6 +109,8 @@ const l = learn[lang];
   .learn-scene :global(.scene-value) { font-family: var(--mono); }
   .learn-scene :global(.scene-tween) { transition: opacity .35s, fill .35s, stroke-dashoffset .45s, stroke-width .45s, transform .5s; }
   .learn-scene :global(.scene-filter) { transition: x .06s linear, y .06s linear; }
+  /* The player rewinds a held step instantly before replaying it. */
+  .learn-scene:global(.learn-instant), .learn-scene:global(.learn-instant) :global(*) { transition: none !important; }
   .learn-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; padding-top: 8px; color: var(--muted); font-size: 13px; }
   .learn-dots { display: flex; align-items: center; gap: 4px; }
   .learn-dots span { width: 8px; height: 8px; border: 1.5px solid var(--muted); border-radius: 50%; }
