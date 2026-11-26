@@ -6,6 +6,19 @@ lede: "A model can’t read a review. Give it a row of word counts instead."
 figure: {"caption":"Each column is a word. The second review has two coffees and no cake."}
 steps_h: "How a review becomes a row"
 steps: ["Lowercase the text and replace punctuation and digits with spaces.","Split at spaces. Drop common words such as “the” and “and”.","Strip a few endings. For example, “cakes” becomes “cake”.","Keep the most frequent words as columns. Count each one in every review."]
+quick:
+  steps:
+    - "Lowercase the text and strip punctuation and digits"
+    - "Split into words and drop common stop words"
+    - "Trim word endings down to their stems"
+    - "Build a vocabulary of columns and count each word"
+  caution: "Counts ignore word order, so opposite reviews can share the same numbers."
+  scene: bag-of-words
+  words:
+    clean: "Clean"
+    drop: "Drop stop words"
+    stem: "Stem endings"
+    counts: "Word counts"
 caution: {"h":"Counts do not record order","p":"“Good coffee, bad cake” and “Bad coffee, good cake” give the same counts. This stemmer just strips a few endings. It is not Porter and may produce fragments such as “lik”."}
 play: {"p":"Type or pick an English sentence. Compare each row of chips, then shrink the vocabulary and watch columns disappear. The examples set the vocabulary; your review adds a count row, not new columns."}
 ui: {"input":"Your review (English)","original":"Original","cleaned":"Cleaned","words":"Words","filtered":"Without stop words","stems":"Stems","empty":"—","vocab":"Vocabulary size","review":"Review","yours":"Your review","table":"Word counts (scroll for more columns)"}

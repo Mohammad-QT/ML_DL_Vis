@@ -11,6 +11,19 @@ steps:
   - "Use gamma to set how quickly similarity falls with distance."
   - "Find the directions with the most spread in the feature space described by those similarities. Keep two new coordinates."
   - "Fit logistic regression on the new coordinates. Compare it with the same classifier on the original coordinates."
+quick:
+  steps:
+    - "Measure RBF similarity for each pair: close points score high"
+    - "Use gamma to set how fast similarity drops with distance"
+    - "Keep the two directions with the most spread as new coordinates"
+    - "Fit a straight boundary on the new coordinates instead of the rings"
+  caution: "Test gamma on held-out data: too small blurs points, too large isolates them."
+  scene: kernel-pca
+  words:
+    original: "Original"
+    projected: "KPC1 × KPC2"
+    gamma: "Gamma"
+    line: "Straight line"
 caution:
   h: "Try different gamma values"
   p: "If gamma is too low, most points look similar. If it is too high, most pairs look unrelated. Check the accuracy on held-out data before you pick a setting for real use."

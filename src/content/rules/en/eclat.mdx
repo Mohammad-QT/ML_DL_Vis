@@ -9,6 +9,20 @@ steps:
   - Read the baskets once. For each item, record the IDs of baskets that contain it.
   - Intersect two lists to keep only shared IDs. Divide their count by the total number of baskets to get support.
   - Extend groups that pass minimum support. Intersect their shared IDs with the next item’s IDs instead of reading the baskets again.
+quick:
+  steps:
+    - "Read the baskets once and list each item’s basket IDs"
+    - "Intersect two ID lists to keep shared baskets and count support"
+    - "Extend frequent pairs by intersecting ID lists, never rescanning baskets"
+  caution: "Frequent pairs are not rules yet; check confidence and lift too."
+  scene: eclat
+  words:
+    baskets: "Baskets"
+    tidLists: "ID lists"
+    pasta: "Pasta"
+    sauce: "Sauce"
+    cheese: "Cheese"
+    support: "Support {n}"
 caution:
   h: A frequent pair is not a rule
   p: Support only tells you how often the pair occurs. To say pasta → sauce and judge how useful that rule is, also check how often sauce occurs among pasta baskets and among all baskets.

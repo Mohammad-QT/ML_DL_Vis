@@ -10,6 +10,19 @@ steps:
   - 'Grow a regression tree on that sample.'
   - 'Repeat for as many trees as you set.'
   - 'A new x is sent through every tree, and the forest predicts the average of their answers.'
+quick:
+  steps:
+    - "Draw a random <b>bootstrap</b> sample with repeats for each tree"
+    - "Grow a staircase regression tree on that sample"
+    - "Repeat to grow many different trees"
+    - "Send a new x through every tree and average the answers"
+  caution: "Extra trees calm jitter, but predictions go flat outside the training data."
+  scene: 2-forest
+  words:
+    bootstrap: "Bootstrap"
+    treeN: "Tree {n}"
+    trees: "3 trees"
+    avg: "Average"
 caution:
   h: More trees will not fix a bad idea
   p: 'Extra trees calm the jitter and almost never hurt, but they cost time and stop helping after a point. A forest also cannot predict beyond the y values it saw: <mark>outside the data, it goes flat</mark>.'
