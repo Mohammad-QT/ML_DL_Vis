@@ -18,7 +18,10 @@ export async function mountLearn(root: HTMLElement) {
   const window = document.defaultView!;
   const lang: Lang = document.documentElement.lang === 'ar' ? 'ar' : 'en';
   const ui = learn[lang];
-  const words: Record<string, string> = ui;
+  // Shared scene words, plus the lesson's own `quick.words` from its frontmatter.
+  let own: Record<string, string> = {};
+  try { own = JSON.parse(root.dataset.learnWords ?? '{}'); } catch { /* bad words: fall back to the shared ones */ }
+  const words: Record<string, string> = { ...ui, ...own };
   const heading = root.querySelector<HTMLElement>('[data-learn-heading]')!;
   const simple = root.querySelector<HTMLElement>('[data-learn-simple]')!;
   const detailed = root.querySelector<HTMLElement>('[data-learn-detailed]')!;

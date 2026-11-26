@@ -6,7 +6,7 @@ interface Props {
   stepsHeading: string;
   steps: string[];
   caution: { h: string; p: string };
-  quick?: { steps: string[]; caution: string; scene: string };
+  quick?: { steps: string[]; caution: string; scene: string; words?: Record<string, string> };
   previous?: { href: string; label: string };
   previousPlaceholder?: boolean;
   rich?: boolean;
@@ -16,7 +16,7 @@ const { lang, stepsHeading, steps, caution, quick, previous, previousPlaceholder
 const t = lesson[lang];
 const l = learn[lang];
 ---
-<section class="sheet card on learn-card" role="tabpanel" data-learn={quick?.scene}>
+<section class="sheet card on learn-card" role="tabpanel" data-learn={quick?.scene} data-learn-words={quick?.words ? JSON.stringify(quick.words) : undefined}>
   {quick && (
     <>
       <div class="learn-heading" data-learn-heading hidden>
