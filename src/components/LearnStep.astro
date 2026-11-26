@@ -1,0 +1,148 @@
+---
+import { fill, learn, lesson, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+  stepsHeading: string;
+  steps: string[];
+  caution: { h: string; p: string };
+  quick?: { steps: string[]; caution: string; scene: string };
+  previous?: { href: string; label: string };
+  previousPlaceholder?: boolean;
+  rich?: boolean;
+}
+
+const { lang, stepsHeading, steps, caution, quick, previous, previousPlaceholder, rich } = Astro.props;
+const t = lesson[lang];
+const l = learn[lang];
+---
+<section class="sheet card on learn-card" role="tabpanel" data-learn={quick?.scene}>
+  {quick && (
+    <>
+      <div class="learn-heading" data-learn-heading hidden>
+        <h2 class="display">{t.idea_h}</h2>
+        <div class="seg learn-mode" role="radiogroup" aria-label={l.mode}>
+          <button type="button" role="radio" data-learn-mode="simple" aria-checked="true">{l.simple}</button>
+          <button type="button" role="radio" data-learn-mode="detailed" aria-checked="false" tabindex="-1">{l.detailed}</button>
+        </div>
+      </div>
+      <div class="learn-simple" data-learn-simple hidden>
+        <div class="learn-visual" data-learn-visual>
+          <svg class="learn-scene" viewBox="0 0 400 300" direction="ltr" role="img" aria-label={l.animation}></svg>
+          <div class="learn-controls">
+            <span class="learn-dots" aria-hidden="true">
+              {quick.steps.map((_, i) => <span data-learn-dot class:list={{ current: i === 0 }} />)}
+            </span>
+            <span class="learn-status" data-learn-status>{fill(l.step, { n: 1, total: quick.steps.length })}</span>
+            <button type="button" class="learn-pause" data-learn-pause aria-pressed="false">{l.pause}</button>
+          </div>
+        </div>
+        <div class="learn-guide">
+          <ol class="learn-list" data-learn-list>
+            {quick.steps.map((step, i) => (
+              <li>
+                <button type="button" class="learn-step" data-learn-frame={i} aria-current={i === 0 ? 'step' : undefined} tabindex={i === 0 ? 0 : -1}>
+                  <span class="learn-number" aria-hidden="true">{i + 1}</span>
+                  <span class="learn-copy"><mark set:html={step} /></span>
+                </button>
+              </li>
+            ))}
+          </ol>
+          <p class="learn-caution">{quick.caution}</p>
+        </div>
+      </div>
+    </>
+  )}
+  <div data-learn-detailed>
+    <div class:list={['read', { rich }]}>
+      <h2 class="display">{t.idea_h}</h2>
+      <slot />
+    </div>
+    <h3 class="display" set:html={stepsHeading} />
+    <ol class="how" style={`--cols:${steps.length}`}>{steps.map(step => <li set:html={step} />)}</ol>
+    <div class="note read"><h3 class="display" style="margin-top:0" set:html={caution.h} /><p set:html={caution.p} /></div>
+  </div>
+  <div class="navrow">
+    {previous
+      ? <a class="btn ghost" data-learn-previous href={previous.href}><span class="arr">←</span> <span>{previous.label}</span></a>
+      : previousPlaceholder && <span></span>}
+    <button class="btn" data-goto="1"><span>{t.s2}</span> <span class="arr">→</span></button>
+  </div>
+</section>
+
+<script>
+  import { mountLearn } from '../learn/player';
+  document.querySelectorAll<HTMLElement>('[data-learn]').forEach(root => void mountLearn(root));
+</script>
+
+<style>
+  .card { display: none; padding: 34px 36px; }
+  .card.on { display: block; animation: rise .3s ease; }
+  @keyframes rise { from { opacity: 0; transform: translateY(6px); } }
+  .card h2 { font-size: 34px; line-height: 1.1; margin-bottom: 12px; }
+  .card h3 { font-size: 21px; margin: 26px 0 10px; }
+  .read { max-width: 640px; }
+  .read :global(p), .rich :global(ul) { margin-bottom: 12px; }
+  .rich :global(ul) { padding-inline-start: 22px; }
+  .rich :global(li) { margin-bottom: 6px; }
+  .rich :global(h3.display) { font-size: 21px; margin: 26px 0 10px; }
+  .card :global(code) { font: 500 .86em var(--mono); background: var(--paper); padding: 1px 6px; border-radius: 5px; }
+  .how { list-style: none; display: grid; grid-template-columns: repeat(var(--cols, 4), 1fr); gap: 12px; counter-reset: s; }
+  .how li { counter-increment: s; background: var(--paper); border-radius: 14px; padding: 14px; font-size: 15.5px; line-height: 1.45; }
+  .how li::before { content: counter(s); display: block; font: 600 13px var(--mono); color: var(--muted); margin-bottom: 6px; }
+  .note { margin-top: 22px; border-inline-start: 4px solid var(--hl); padding: 4px 0 4px 16px; }
+  :global(html[dir="rtl"]) .note { padding: 4px 16px 4px 0; }
+  .navrow { display: flex; justify-content: space-between; margin-top: 28px; }
+
+  .learn-heading:not([hidden]) { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 18px; }
+  .learn-heading h2 { margin: 0; }
+  .learn-card[data-mode="detailed"] { position: relative; }
+  .learn-card[data-mode="detailed"] .learn-heading { position: absolute; inset-block-start: 34px; inset-inline-end: 36px; margin: 0; }
+  .learn-card[data-mode="detailed"] .learn-heading h2 { display: none; }
+  .learn-mode { flex: none; overflow: visible; }
+  .learn-mode button { border-radius: 8px; min-height: 34px; font-family: var(--body); }
+  .learn-simple:not([hidden]) { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 22px; align-items: start; }
+  .learn-visual { grid-column: 2; grid-row: 1; min-width: 0; background: var(--sheet); }
+  .learn-guide { grid-column: 1; grid-row: 1; min-width: 0; }
+  .learn-scene { display: block; width: 100%; max-height: 330px; aspect-ratio: 4 / 3; direction: ltr; background: var(--paper); border: 1.5px solid var(--rule); border-radius: 14px; }
+  .learn-scene :global(text) { font-family: var(--body); }
+  .learn-scene :global(.scene-value) { font-family: var(--mono); }
+  .learn-scene :global(.scene-tween) { transition: opacity .35s, fill .35s, stroke-dashoffset .45s, stroke-width .45s, transform .5s; }
+  .learn-scene :global(.scene-filter) { transition: x .06s linear, y .06s linear; }
+  .learn-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; padding-top: 8px; color: var(--muted); font-size: 13px; }
+  .learn-dots { display: flex; align-items: center; gap: 4px; }
+  .learn-dots span { width: 8px; height: 8px; border: 1.5px solid var(--muted); border-radius: 50%; }
+  .learn-dots .current { background: var(--ink); border-color: var(--ink); }
+  .learn-pause { margin-inline-start: auto; min-height: 36px; border: 1.5px solid var(--rule); border-radius: 9px; padding: 4px 9px; font: 600 13px var(--body); color: var(--ink); background: var(--sheet); cursor: pointer; }
+  .learn-pause:hover { border-color: var(--muted); }
+  .learn-pause:disabled { color: var(--muted); cursor: default; }
+  .learn-list { list-style: none; display: grid; gap: 6px; }
+  .learn-step { display: flex; align-items: baseline; gap: 10px; width: 100%; min-height: 44px; position: relative; text-align: start; border: 1.5px solid transparent; border-radius: 10px; padding: 8px 10px; background: var(--sheet); color: var(--ink); font: 600 16px/1.45 var(--body); cursor: pointer; }
+  .learn-step[aria-current] { border-color: var(--rule); background: var(--paper); }
+  .learn-step mark { padding-inline: .14em; background-size: 0 100%; }
+  .learn-step[aria-current] mark { background-size: 100% 100%; transition-delay: 0s; }
+  .learn-step::after { content: ''; position: absolute; inset-inline: 10px; inset-block-end: 1px; height: 2px; border-radius: 2px; background: var(--hl); transform: scaleX(0); transform-origin: left; }
+  :global(html[dir="rtl"]) .learn-step::after { transform-origin: right; }
+  .learn-card[data-playing] .learn-step[aria-current]::after { animation: progress var(--frame-time) linear both; }
+  @keyframes progress { to { transform: scaleX(1); } }
+  .learn-copy { min-width: 0; overflow-wrap: anywhere; }
+  .learn-number { display: grid; place-items: center; flex: 0 0 24px; height: 24px; border-radius: 8px; background: var(--paper); color: var(--muted); font: 600 13px var(--mono); }
+  .learn-step[aria-current] .learn-number { background: var(--sheet); color: var(--ink); }
+  .learn-caution { margin-top: 14px; border-inline-start: 4px solid var(--hl); padding-inline-start: 10px; color: var(--muted); font-size: 15px; }
+  .learn-card[data-mode="simple"] .navrow { justify-content: flex-end; }
+  [data-learn-previous][hidden] { display: none; }
+
+  @media (max-width: 860px) {
+    .card { padding: 22px; }
+    .how { grid-template-columns: 1fr 1fr; }
+    .learn-card[data-mode="detailed"] .learn-heading { inset-block-start: 22px; inset-inline-end: 22px; }
+    .learn-simple:not([hidden]) { grid-template-columns: minmax(0, 1fr); gap: 14px; }
+    .learn-visual { grid-column: 1; grid-row: 1; position: sticky; top: 0; z-index: 1; padding-block: 4px; }
+    .learn-scene { max-height: min(300px, 42svh); }
+    .learn-guide { grid-row: 2; }
+    .learn-step { scroll-margin-top: calc(min(300px, 42svh) + 68px); }
+  }
+  @media (max-width: 340px) {
+    .learn-card[data-mode="detailed"] .learn-heading { position: static; justify-content: flex-end; margin-bottom: 8px; }
+  }
+</style>

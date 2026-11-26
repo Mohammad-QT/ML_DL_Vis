@@ -11,6 +11,14 @@ steps:
   - "Score the output probabilities with cross-entropy loss. The loss is high when the network is confident and wrong, and low when it is right."
   - "Run backpropagation from the output back to the first layer. It works out how much each weight pushed the loss up or down."
   - "Nudge every weight a small step downhill (gradient descent) scaled by the learning rate. Repeat over mini-batches for many epochs until the boundary settles."
+quick:
+  steps:
+    - "Pass inputs through weighted sums, biases, and activations"
+    - "Compare the prediction with the label and measure the loss"
+    - "Send the error backward to find each weight’s effect"
+    - "Update the weights to reduce the loss"
+  caution: "Use a small learning rate so updates don’t overshoot."
+  scene: ann
 caution:
   h: "Watch the learning rate and the test score"
   p: "A learning rate that is too high makes the loss bounce instead of falling; too low and training crawls. Adding extra layers or units can also memorize the training dots, so check test accuracy on the ringed points."

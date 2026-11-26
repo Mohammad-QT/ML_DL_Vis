@@ -5,6 +5,8 @@ import Base from '../layouts/Base.astro';
 import CourseNav from './CourseNav.astro';
 import PartProgress from './PartProgress.astro';
 import StepOf from './StepOf.astro';
+import LearnStep from './LearnStep.astro';
+import LessonHero from './LessonHero.astro';
 import CodeOptions from './CodeOptions.astro';
 import NextLesson from './NextLesson.astro';
 import Board from './Board.astro';
@@ -53,29 +55,22 @@ const play = d.play;
   <PartProgress slot="bar" lang={lang} part={partId} />
   <CourseNav slot="rail" lang={lang} current={key} />
 
-  <section class="hero">
-    <div>
-      <div class="kicker">{fill(pt.kicker, { n, total: partLessons.length })}</div>
-      <h1 class="display" set:html={d.title} />
-      <p class="lede">{d.lede}</p>
-    </div>
-    <figure class="sheet fp">
-      {entry.collection === 'clustering'
-        ? entry.data.id === 'dbscan' ? <DbscanDemo lang={lang} ui={entry.data.ui} figure /> : <ClusterDemo demo={entry.data.id} ui={entry.data.ui} figure />
-        : entry.collection === 'bandit'
-          ? entry.data.id === 'q-learning' ? <QLearningDemo lang={lang} ui={entry.data.ui} figure /> : <BanditDemo lang={lang} demo={entry.data.id} ui={entry.data.ui} figure />
-        : entry.collection === 'dimred'
-          ? <DimredDemo lang={lang} demo={entry.data.id} ui={entry.data.ui} figure />
-        : entry.collection === 'deep'
-          ? entry.data.id === 'ann' ? <AnnDemo lang={lang} ui={entry.data.ui} figure /> : <CnnDemo lang={lang} ui={entry.data.ui} figure />
-        : entry.collection === 'rules'
-          ? <RulesFigure eclat={entry.data.id === 'eclat'} />
-          : entry.collection === 'nlp'
-            ? <NlpDemo lang={lang} demo={entry.data.id} ui={entry.data.ui} figure />
-            : <Board lang={lang} model={entry.data.figure.model as never} variant="figure" preset={entry.data.figure.preset} seed={entry.data.figure.seed} cell={4} dot={3.6} tint={0.24} />}
-      <figcaption><b>{d.figure.caption}</b></figcaption>
-    </figure>
-  </section>
+  <LessonHero kicker={fill(pt.kicker, { n, total: partLessons.length })} title={d.title} lede={d.lede}>
+    {entry.collection === 'clustering'
+      ? entry.data.id === 'dbscan' ? <DbscanDemo lang={lang} ui={entry.data.ui} figure /> : <ClusterDemo demo={entry.data.id} ui={entry.data.ui} figure />
+      : entry.collection === 'bandit'
+        ? entry.data.id === 'q-learning' ? <QLearningDemo lang={lang} ui={entry.data.ui} figure /> : <BanditDemo lang={lang} demo={entry.data.id} ui={entry.data.ui} figure />
+      : entry.collection === 'dimred'
+        ? <DimredDemo lang={lang} demo={entry.data.id} ui={entry.data.ui} figure />
+      : entry.collection === 'deep'
+        ? entry.data.id === 'ann' ? <AnnDemo lang={lang} ui={entry.data.ui} figure /> : <CnnDemo lang={lang} ui={entry.data.ui} figure />
+      : entry.collection === 'rules'
+        ? <RulesFigure eclat={entry.data.id === 'eclat'} />
+        : entry.collection === 'nlp'
+          ? <NlpDemo lang={lang} demo={entry.data.id} ui={entry.data.ui} figure />
+          : <Board lang={lang} model={entry.data.figure.model as never} variant="figure" preset={entry.data.figure.preset} seed={entry.data.figure.seed} cell={4} dot={3.6} tint={0.24} />}
+    <figcaption><b>{d.figure.caption}</b></figcaption>
+  </LessonHero>
 
   <div class="tabs" role="tablist">
     {steps.map((s, i) => (
@@ -84,19 +79,10 @@ const play = d.play;
     <StepOf lang={lang} />
   </div>
 
-  <section class="sheet card on" role="tabpanel">
-    <div class="read">
-      <h2 class="display">{t.idea_h}</h2>
-      <slot />
-    </div>
-    <h3 class="display" set:html={d.steps_h} />
-    <ol class="how" style={`--cols:${d.steps.length}`}>{d.steps.map(s => <li set:html={s} />)}</ol>
-    <div class="note read"><h3 class="display" style="margin-top:0" set:html={d.caution.h} /><p set:html={d.caution.p} /></div>
-    <div class="navrow">
-      {prev && <a class="btn ghost" href={href(lang, prev.path)}><span class="arr">←</span> <span>{fill(t.prev, { m: lessonName(lang, prev) })}</span></a>}
-      <button class="btn" data-goto="1"><span>{t.s2}</span> <span class="arr">→</span></button>
-    </div>
-  </section>
+  <LearnStep lang={lang} stepsHeading={d.steps_h} steps={d.steps} caution={d.caution} quick={d.quick} rich
+    previous={prev ? { href: href(lang, prev.path), label: fill(t.prev, { m: lessonName(lang, prev) }) } : undefined}>
+    <slot />
+  </LearnStep>
 
   <section class="sheet card" role="tabpanel">
     <h2 class="display">{t.play_h}</h2>
@@ -144,16 +130,6 @@ const play = d.play;
 </Base>
 
 <style>
-  .hero { display: grid; grid-template-columns: 1.3fr 1fr; gap: 40px; align-items: end; padding: 26px 0 30px; }
-  .kicker { font: 600 13px var(--mono); color: var(--muted); }
-  h1 { font-size: 68px; line-height: .98; margin: 12px 0 14px; }
-  .lede { font-size: 20px; color: var(--muted); max-width: 30em; }
-  .fp { padding: 12px; transform: rotate(1.2deg); }
-  :global(html[dir="rtl"]) .fp { transform: rotate(-1.2deg); }
-  .fp figcaption { font: 500 13px var(--mono); color: var(--muted); padding: 10px 4px 2px; }
-  .fp figcaption b { color: var(--ink); font-family: var(--body); font-size: 15px; }
-
-
   .tabs { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
   .tab { display: flex; align-items: center; gap: 9px; border: 1.5px solid var(--rule); background: var(--sheet); color: var(--muted); font: 700 16px var(--body); padding: 8px 18px 8px 9px; border-radius: 13px; cursor: pointer; box-shadow: 0 3px 0 var(--lift); transition: transform .12s; }
   :global(html[dir="rtl"]) .tab { padding: 8px 9px 8px 18px; }
@@ -174,11 +150,6 @@ const play = d.play;
   .read :global(li) { margin-bottom: 6px; }
   .read :global(h3.display) { font-size: 21px; margin: 26px 0 10px; }
   .card :global(code) { font: 500 .86em var(--mono); background: var(--paper); padding: 1px 6px; border-radius: 5px; }
-  .how { list-style: none; display: grid; grid-template-columns: repeat(var(--cols, 4), 1fr); gap: 12px; counter-reset: s; }
-  .how li { counter-increment: s; background: var(--paper); border-radius: 14px; padding: 14px; font-size: 15.5px; line-height: 1.45; }
-  .how li::before { content: counter(s); display: block; font: 600 13px var(--mono); color: var(--muted); margin-bottom: 6px; }
-  .note { margin-top: 22px; border-inline-start: 4px solid var(--hl); padding: 4px 0 4px 16px; }
-  :global(html[dir="rtl"]) .note { padding: 4px 16px 4px 0; }
 
   .q { font: 700 21px/1.35 var(--body); margin-bottom: 8px; }
   .ans { display: block; width: 100%; text-align: start; border: 1.5px solid var(--rule); background: var(--sheet); color: var(--ink); border-radius: 14px; padding: 14px 18px; margin: 10px 0; font: 700 16.5px var(--body); cursor: pointer; box-shadow: 0 3px 0 var(--lift); transition: transform .12s; }
@@ -194,19 +165,20 @@ const play = d.play;
   .navrow { display: flex; justify-content: space-between; margin-top: 28px; }
 
   @media (max-width: 860px) {
-    .hero { grid-template-columns: 1fr; } h1 { font-size: 46px; }
-    .how { grid-template-columns: 1fr 1fr; }
     .card { padding: 22px; }
     :global(.crumbs) { display: none; }
   }
 </style>
 
 <script>
+  import { setLessonHeroStep } from '../learn/hero';
+
   const $$ = (s: string) => [...document.querySelectorAll<HTMLElement>(s)];
   const tabs = $$('.tab'), cards = $$('.card');
   const lit = (el: HTMLElement) => { el.classList.remove('lit'); requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('lit'))); };
 
   function go(i: number) {
+    setLessonHeroStep(i);
     tabs.forEach((t, j) => { t.classList.toggle('on', j === i); t.setAttribute('aria-selected', String(j === i)); if (j < i) t.classList.add('done'); });
     cards.forEach((c, j) => c.classList.toggle('on', j === i));
     lit(cards[i]);

@@ -19,6 +19,11 @@ const quiz = z.array(z.object({
   wrong: z.string(),
 })).min(1);
 const hint = z.object({ text: z.string() });
+const quick = z.object({
+  steps: z.array(z.string()).min(3).max(4),
+  caution: z.string(),
+  scene: z.string(),
+}).optional();
 
 // One MDX file per lesson per language: `lessons/<lang>/<model>.mdx`. The body is the "idea" text.
 const lessons = defineCollection({
@@ -32,6 +37,7 @@ const lessons = defineCollection({
     lede: z.string(),
     figure: z.object({ preset, seed: z.number(), cell: z.number().optional(), dot: z.number().optional(), tint: z.number().optional() }),
     steps: z.array(z.string()).min(3).max(4),
+    quick,
     caution: z.object({ h: z.string(), p: z.string() }),
     play: z.object({
       p: z.string(),
@@ -69,6 +75,7 @@ const prep = defineCollection({
     figure: z.object({ preset, seed: z.number(), model: model.optional(), caption: z.string() }),
     steps_h: z.string(),
     steps: z.array(z.string()).min(3).max(4),
+    quick,
     caution: z.object({ h: z.string(), p: z.string() }),
     play: z.object({ p: z.string(), p_touch: z.string().optional() }),
     /** Words used by the interactive (labels, notes). Same keys in every language. */
@@ -92,6 +99,7 @@ const regression = defineCollection({
     lede: z.string(),
     figure: z.object({ preset: regPreset, seed: z.number(), caption: z.string().optional() }),
     steps: z.array(z.string()).min(3).max(4),
+    quick,
     caution: z.object({ h: z.string(), p: z.string() }),
     play: z.object({
       p: z.string(),
@@ -126,6 +134,7 @@ const selection = defineCollection({
     figure: z.object({ preset, seed: z.number(), model, caption: z.string() }),
     steps_h: z.string(),
     steps: z.array(z.string()).min(3).max(4),
+    quick,
     caution: z.object({ h: z.string(), p: z.string() }),
     play: z.object({ p: z.string(), p_touch: z.string().optional() }),
     ui: z.record(z.string(), z.string()).default({}),
@@ -141,6 +150,7 @@ const customBoardLesson = z.object({
   figure: z.object({ caption: z.string() }),
   steps_h: z.string(),
   steps: z.array(z.string()).min(3).max(4),
+  quick,
   caution: z.object({ h: z.string(), p: z.string() }),
   play: z.object({ p: z.string(), p_touch: z.string().optional() }),
   ui: z.record(z.string(), z.string()),
