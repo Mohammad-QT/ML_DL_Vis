@@ -3,13 +3,13 @@
 import { CLASSIFICATION, CLUSTERING, DIMRED, PREP, REGRESSION, SELECTION, clusterPath, dimredPath, lessonPath, prepPath, regPath, selPath } from './lessons';
 import { RULES, rulesPath } from './rules/lessons';
 import { cluster, common, dimred, extras, prep, rules, sel, type Lang } from './i18n/ui';
-import { NLP, nlpPath } from './lessons';
-import { nlp } from './i18n/ui';
+import { DEEP, NLP, deepPath, nlpPath } from './lessons';
+import { deep, nlp } from './i18n/ui';
 import { home } from './i18n/pages';
 import { rl } from './i18n/ui';
 import { RL, rlPath } from './rl/lessons';
 
-export type PartId = '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '9' | '10';
+export type PartId = '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' | '10';
 
 const EXTRA_IDS = ['gradient-descent', 'regularization', 'dbscan', 'q-learning', 'metrics'] as const;
 type ExtraId = (typeof EXTRA_IDS)[number];
@@ -40,6 +40,7 @@ export const PARTS: CoursePart[] = [
   { id: '5', lessons: RULES.map(id => mk('5', id, rulesPath(id), `5-rules/${id}`)) },
   { id: '6', lessons: RL.map(id => mk('6', id, rlPath(id), `6-rl/${id}`)) },
   { id: '7', lessons: NLP.map(id => mk('7', id, nlpPath(id), `7-nlp/${id.replaceAll('-', '_')}`)) },
+  { id: '8', lessons: DEEP.map(id => mk('8', id, deepPath(id), `8-deep/${id}`)) },
   { id: '9', lessons: DIMRED.map(id => mk('9', id, dimredPath(id), `9-dimred/${id.replace('-', '_')}`)) },
   { id: '10', lessons: SELECTION.map(id => mk('10', id, selPath(id), `10-selection/${id}`)) },
 ];
@@ -64,6 +65,7 @@ export function lessonName(lang: Lang, l: CourseLesson): string {
   if (l.part === '5') return rules[lang][`n_${l.id}` as keyof (typeof rules)['en']];
   if (l.part === '6') return rl[lang][`n_${l.id}` as keyof (typeof rl)['en']];
   if (l.part === '7') return nlp[lang][`n_${l.id}` as keyof (typeof nlp)['en']];
+  if (l.part === '8') return deep[lang][`n_${l.id}` as keyof (typeof deep)['en']];
   if (l.part === '9') return dimred[lang][`n_${l.id}` as keyof (typeof dimred)['en']];
   if (l.part === '10') return sel[lang][`n_${l.id}` as keyof (typeof sel)['en']];
   return common[lang][`m_${l.id}` as keyof (typeof common)['en']];

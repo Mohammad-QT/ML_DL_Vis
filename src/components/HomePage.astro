@@ -19,6 +19,7 @@ const clustering = PARTS.find(part => part.id === '4')!.lessons;
 const rules = PARTS.find(part => part.id === '5')!.lessons;
 const bandit = PARTS.find(part => part.id === '6')!.lessons;
 const nlp = PARTS.find(part => part.id === '7')!.lessons;
+const deep = PARTS.find(part => part.id === '8')!.lessons;
 const dimred = PARTS.find(part => part.id === '9')!.lessons;
 const selection = PARTS.find(part => part.id === '10')!.lessons;
 const [metrics, ...selectionCore] = selection;
@@ -185,7 +186,24 @@ const REG: Array<[keyof typeof t, string]> = [
           </a>
         ))}</div>
       </div></li>
-      <li class="stop later"><div class="pt">8</div><div class="sheet body"><h3 class="display"><span>{t.later}</span></h3><p>{t.later_d}</p></div></li>
+      <li class="stop"><div class="pt">8</div><div class="sheet body"><h3 class="display"><span>{t.p8}</span><small>{deep.length} {t.lessons}</small></h3><p>{t.p8_d}</p>
+        <div class="minis">{deep.map(item => (
+          <a class="mini" href={href(lang, item.path)} data-lesson={item.key}>
+            <svg viewBox="0 0 80 48" preserveAspectRatio="none" aria-hidden="true" fill="none" stroke-width="1.2">
+              {item.id === 'ann' ? <>
+                <path d="M12 14L40 8M12 14L40 24M12 14L40 40M12 34L40 8M12 34L40 24M12 34L40 40" stroke="var(--a)" />
+                <path d="M40 8L68 24M40 24L68 24M40 40L68 24" stroke="var(--b)" stroke-width="2" />
+                <g fill="var(--sheet)" stroke="var(--ink)" stroke-width="1.5">{[[12, 14], [12, 34], [40, 8], [40, 24], [40, 40], [68, 24]].map(([x, y]) => <circle cx={x} cy={y} r="3.5" />)}</g>
+              </> : <>
+                <path d="M6 6H30V30H6ZM12 6V30M18 6V30M24 6V30M6 12H30M6 18H30M6 24H30" stroke="var(--rule)" />
+                <path d="M12 12H24V24H12Z" stroke="var(--a)" stroke-width="2" />
+                <path d="M24 12L46 14M24 24L46 22" stroke="var(--muted)" stroke-dasharray="2 2" />
+                <path d="M46 8H62V24H46Z" stroke="var(--ink)" /><path d="M66 38H74M66 32H72M66 44H70" stroke="var(--ok)" stroke-width="3" />
+              </>}
+            </svg><span><bdi>{lessonName(lang, item)}</bdi></span>
+          </a>
+        ))}</div>
+      </div></li>
       <li class="stop"><div class="pt">9</div><div class="sheet body"><h3 class="display"><span>{t.p9}</span><small>{dimred.length} {t.lessons}</small></h3><p>{t.p9_d}</p>
         <div class="minis">{dimred.map(item => (
           <a class="mini" href={href(lang, item.path)} data-lesson={item.key}>
@@ -298,8 +316,6 @@ const REG: Array<[keyof typeof t, string]> = [
   .stop h3 a:hover { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 4px; }
   .stop .links { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
   .stop .links a.chip { text-decoration: none; }
-  .stop.later .pt { border-style: dashed; color: var(--muted); background: transparent; box-shadow: none; }
-  .stop.later .body { border-style: dashed; background: transparent; box-shadow: none; }
   .minis { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 10px; margin-top: 14px; }
   .mini { text-decoration: none; border: 1.5px solid var(--rule); border-radius: 12px; padding: 6px; background: var(--paper); transition: border-color .12s, transform .12s; }
   a.mini:hover { border-color: var(--ink); transform: translateY(-2px); }

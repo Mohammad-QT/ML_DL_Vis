@@ -1,0 +1,81 @@
+---
+id: cnn
+short: "CNN"
+title: "Convolutional neural networks (draw a digit)"
+lede: "Images are grids of pixels where neighbors matter. A convolutional network slides small filters across the grid to spot strokes, shapes and whole digits."
+figure:
+  caption: "An example drawn digit, the 28 × 28 image the network actually sees, and its top prediction."
+steps_h: "How a CNN reads a digit"
+steps:
+  - "Slide 8 small 3 × 3 filters across the 28 × 28 image, reusing the same weights at every position. ReLU keeps only the positive responses, creating 8 feature maps."
+  - "Apply 2 × 2 max pooling to shrink each map in half. Keeping the strongest signal in each 2 × 2 patch makes the network less sensitive to small shifts."
+  - "Run a second convolutional layer (16 filters, 3 × 3 + ReLU) and another 2 × 2 pooling step to combine simple edges into loops, corners and strokes."
+  - "Flatten the maps into a dense layer of 64 units, then finish with 10 outputs and softmax so the digit probabilities sum to 1."
+caution:
+  h: "It only knows digits like MNIST"
+  p: "This network was trained on 70,000 centred handwritten digits (MNIST), where it reaches about 99% test accuracy. Draw large, centred digits for best results. If you draw a letter, a smiley face or a messy scribble, softmax still forces a guess between 0 and 9 — often with high confidence."
+play:
+  p: "Draw a digit from 0 to 9 on the pad, or click Example to load one. Watch the 28 × 28 input and probability bars update as you draw. Then pick any of the 8 first-layer filters to compare its 3 × 3 weights with the bright strokes it detects."
+  p_touch: "Draw a digit from 0 to 9 with your finger or pen, or tap Example to load one. Watch the 28 × 28 input and probability bars update as you draw. Then tap any of the 8 first-layer filters to compare its 3 × 3 weights with the bright strokes it detects."
+ui:
+  pad: "Drawing pad. Draw a digit from 0 to 9."
+  clear: "Clear"
+  example: "Example"
+  empty: "Draw a digit from 0 to 9 to see what the network thinks."
+  guess: "It looks like a {d}"
+  confidence: "{n} sure"
+  probs: "Probability of each digit"
+  input: "What the network sees (28 × 28)"
+  maps: "First-layer feature maps"
+  maps_help: "Each map shows where one filter fires. Select a map to inspect its filter."
+  filter_h: "What a filter sees"
+  filter_help: "Blue weights look for ink, pink weights look for blank space, and bright pixels show where the pattern matches."
+  filter: "Filter {n}"
+  kernel: "3 × 3 weights"
+  map: "Feature map"
+  loading: "Loading the network…"
+  load_error: "The network could not load. Check your connection and reload the page."
+quiz:
+  - q: "Why does a convolutional layer reuse the same 3 × 3 filter across the whole image?"
+    a:
+      - "So the network can spot the same edge or stroke wherever it appears, using far fewer weights"
+      - "So the network only looks at the top-left corner of the image"
+      - "So every pixel is treated as independent of its neighbors"
+    correct: 0
+    right: "Right. Weight sharing lets one filter detect a pattern anywhere on the grid without learning separate weights for every pixel."
+    wrong: "A filter slides across every location using the same weights. That lets it recognize a stroke anywhere in the image with far fewer parameters."
+  - q: "What does a 2 × 2 max pooling layer do to a feature map?"
+    a:
+      - "It doubles the width and height by adding new pixels"
+      - "It shrinks the map and keeps the strongest response in each 2 × 2 patch, tolerating small shifts"
+      - "It converts the 10 class scores into probabilities that sum to 1"
+    correct: 1
+    right: "Right. Max pooling halves each dimension and passes along the strongest activation in every 2 × 2 window, so tiny shifts barely change the output."
+    wrong: "Max pooling shrinks the map by keeping the maximum value in each 2 × 2 patch. Converting final scores into probabilities is softmax's job."
+code: |
+  from tensorflow import keras
+  from tensorflow.keras import layers
+
+  (X_train, y_train), (X_test, y_test) = keras.datasets.mnist.load_data()
+  X_train = X_train[..., None].astype("float32") / 255.0
+  X_test = X_test[..., None].astype("float32") / 255.0
+
+  model = keras.Sequential([
+      layers.Input(shape=(28, 28, 1)),
+      layers.Conv2D(8, (3, 3), activation="relu"),
+      layers.MaxPooling2D((2, 2)),
+      layers.Conv2D(16, (3, 3), activation="relu"),
+      layers.MaxPooling2D((2, 2)),
+      layers.Flatten(),
+      layers.Dense(64, activation="relu"),
+      layers.Dense(10, activation="softmax"),
+  ])
+  model.compile(optimizer="adam", loss="sparse_categorical_crossentropy", metrics=["accuracy"])
+  model.fit(X_train, y_train, epochs=3, batch_size=64, validation_split=0.1)
+  print(model.evaluate(X_test, y_test, verbose=0))
+---
+A 28 × 28 digit image has 784 pixels. If you flatten it straight into a plain multi-layer perceptron, the network treats pixel 1 and pixel 29 as unrelated columns, ignoring that one sits directly above the other. A <mark>convolution</mark> keeps the grid intact: a tiny 3 × 3 filter slides over the image and reuses the same 9 weights at every spot to look for a local pattern such as a slanted edge.
+
+After <mark>ReLU</mark> removes negative scores, each filter outputs a 26 × 26 <mark>feature map</mark> that lights up wherever its pattern appears. A 2 × 2 <mark>max pooling</mark> layer then shrinks the map by keeping only the strongest response in each small square, so shifting a stroke by a pixel barely matters. Deeper layers stack more filters to turn simple edges into loops, corners and digit parts.
+
+At the end, a dense layer of 64 units combines those parts and 10 outputs pass through <mark>softmax</mark> to produce probabilities that sum to 1. The model here was trained offline in Keras on MNIST and runs right in your browser. As you draw, your sketch is cropped, scaled into a 20 × 20 box and centred in a 28 × 28 frame to match the training images.

@@ -18,10 +18,12 @@ import RulesFigure from './RulesFigure.astro';
 import BanditDemo from './BanditDemo.astro';
 import QLearningDemo from './QLearningDemo.astro';
 import NlpDemo from './NlpDemo.astro';
-import { href, common, extras, lesson, cluster as clusterText, dimred as dimredText, rules as rulesText, rl as rlText, nlp as nlpText, sel as selText, type Lang } from '../i18n/ui';
+import AnnDemo from './AnnDemo.astro';
+import CnnDemo from './CnnDemo.astro';
+import { href, common, extras, lesson, cluster as clusterText, dimred as dimredText, rules as rulesText, rl as rlText, nlp as nlpText, deep as deepText, sel as selText, type Lang } from '../i18n/ui';
 import { PARTS, findLesson, lessonName, previousLesson } from '../course';
 
-interface Props { lang: Lang; entry: CollectionEntry<'selection'> | CollectionEntry<'clustering'> | CollectionEntry<'dimred'> | CollectionEntry<'rules'> | CollectionEntry<'bandit'> | CollectionEntry<'nlp'> }
+interface Props { lang: Lang; entry: CollectionEntry<'selection'> | CollectionEntry<'clustering'> | CollectionEntry<'dimred'> | CollectionEntry<'rules'> | CollectionEntry<'bandit'> | CollectionEntry<'nlp'> | CollectionEntry<'deep'> }
 const { lang, entry } = Astro.props;
 const d = entry.data;
 const c = common[lang];
@@ -31,9 +33,10 @@ const dimred = entry.collection === 'dimred';
 const rules = entry.collection === 'rules';
 const bandit = entry.collection === 'bandit';
 const nlp = entry.collection === 'nlp';
-const pt = clustering ? clusterText[lang] : rules ? rulesText[lang] : bandit ? rlText[lang] : nlp ? nlpText[lang] : dimred ? dimredText[lang] : selText[lang];
+const deep = entry.collection === 'deep';
+const pt = clustering ? clusterText[lang] : rules ? rulesText[lang] : bandit ? rlText[lang] : nlp ? nlpText[lang] : deep ? deepText[lang] : dimred ? dimredText[lang] : selText[lang];
 const fill = (s: string, vars: Record<string, string | number>) => s.replace(/\{(\w+)\}/g, (_, k) => String(vars[k]));
-const partId = clustering ? '4' : rules ? '5' : bandit ? '6' : nlp ? '7' : dimred ? '9' : '10';
+const partId = clustering ? '4' : rules ? '5' : bandit ? '6' : nlp ? '7' : deep ? '8' : dimred ? '9' : '10';
 const key = `${partId}/${d.id}`;
 const partLessons = PARTS.find(part => part.id === partId)!.lessons;
 const n = partLessons.findIndex(item => item.key === key) + 1;
@@ -63,6 +66,8 @@ const play = d.play;
           ? entry.data.id === 'q-learning' ? <QLearningDemo lang={lang} ui={entry.data.ui} figure /> : <BanditDemo lang={lang} demo={entry.data.id} ui={entry.data.ui} figure />
         : entry.collection === 'dimred'
           ? <DimredDemo lang={lang} demo={entry.data.id} ui={entry.data.ui} figure />
+        : entry.collection === 'deep'
+          ? entry.data.id === 'ann' ? <AnnDemo lang={lang} ui={entry.data.ui} figure /> : <CnnDemo lang={lang} ui={entry.data.ui} figure />
         : entry.collection === 'rules'
           ? <RulesFigure eclat={entry.data.id === 'eclat'} />
           : entry.collection === 'nlp'
@@ -102,6 +107,8 @@ const play = d.play;
         ? entry.data.id === 'q-learning' ? <QLearningDemo lang={lang} ui={entry.data.ui} /> : <BanditDemo lang={lang} demo={entry.data.id} ui={entry.data.ui} />
       : entry.collection === 'dimred'
         ? <DimredDemo lang={lang} demo={entry.data.id} ui={entry.data.ui} />
+      : entry.collection === 'deep'
+        ? entry.data.id === 'ann' ? <AnnDemo lang={lang} ui={entry.data.ui} /> : <CnnDemo lang={lang} ui={entry.data.ui} />
       : entry.collection === 'rules'
         ? <RulesDemo lang={lang} demo={entry.data.id} />
         : entry.collection === 'nlp'
