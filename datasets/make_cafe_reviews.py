@@ -1,7 +1,7 @@
 """Generate datasets/cafe_reviews.csv: short fictional reviews of an imaginary café.
 
 Every review is built from original templates and word lists below, so the dataset is
-original to ML Visual (CC0). Sentiment words repeat across many reviews, as they do in real
+original to AI Visual (CC0). Sentiment words repeat across many reviews, as they do in real
 reviews, so a bag-of-words model has something to learn. About 6% of labels come from
 mixed reviews ("great coffee but rude staff"), which keeps the task from being trivial.
 

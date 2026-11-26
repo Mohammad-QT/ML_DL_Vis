@@ -1,4 +1,4 @@
-# ML Visual — working notes for Claude
+# AI Visual — working notes for Claude
 
 Read `PLAN.md` first: it holds every settled decision, the stack, the site map and the milestones.
 
