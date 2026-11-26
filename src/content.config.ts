@@ -27,6 +27,19 @@ const quick = z.object({
   words: z.record(z.string(), z.string()).optional(),
 }).optional();
 
+const playLine = z.string().refine(line => {
+  const text = line.trim();
+  return text.length > 0 && !/[<>\r\n\u2028\u2029]/u.test(line) && text.split(/\s+/u).length <= 14;
+}, 'Use one line of plain text with 1–14 words.');
+const playIntro = z.object({
+  p: z.string(),
+  /** Touch-screen wording; falls back to `p`. */
+  p_touch: z.string().optional(),
+  short: playLine.optional(),
+  /** Touch-screen wording; falls back to `short`. */
+  short_touch: playLine.optional(),
+});
+
 // One MDX file per lesson per language: `lessons/<lang>/<model>.mdx`. The body is the "idea" text.
 const lessons = defineCollection({
   loader: glob({ pattern: '**/*.mdx', base: './src/content/lessons' }),
@@ -41,10 +54,7 @@ const lessons = defineCollection({
     steps: z.array(z.string()).min(3).max(4),
     quick,
     caution: z.object({ h: z.string(), p: z.string() }),
-    play: z.object({
-      p: z.string(),
-      /** Touch-screen wording; falls back to `p`. */
-      p_touch: z.string().optional(),
+    play: playIntro.extend({
       preset,
       seed: z.number(),
       /** Label for the model's one setting; omit for models with none. */
@@ -79,7 +89,7 @@ const prep = defineCollection({
     steps: z.array(z.string()).min(3).max(4),
     quick,
     caution: z.object({ h: z.string(), p: z.string() }),
-    play: z.object({ p: z.string(), p_touch: z.string().optional() }),
+    play: playIntro,
     /** Words used by the interactive (labels, notes). Same keys in every language. */
     ui: z.record(z.string(), z.string()).default({}),
     quiz,
@@ -103,9 +113,7 @@ const regression = defineCollection({
     steps: z.array(z.string()).min(3).max(4),
     quick,
     caution: z.object({ h: z.string(), p: z.string() }),
-    play: z.object({
-      p: z.string(),
-      p_touch: z.string().optional(),
+    play: playIntro.extend({
       preset: regPreset,
       seed: z.number(),
       /** Hints for the lesson's first setting. */
@@ -138,7 +146,7 @@ const selection = defineCollection({
     steps: z.array(z.string()).min(3).max(4),
     quick,
     caution: z.object({ h: z.string(), p: z.string() }),
-    play: z.object({ p: z.string(), p_touch: z.string().optional() }),
+    play: playIntro,
     ui: z.record(z.string(), z.string()).default({}),
     quiz,
     code: z.string(),
@@ -154,7 +162,7 @@ const customBoardLesson = z.object({
   steps: z.array(z.string()).min(3).max(4),
   quick,
   caution: z.object({ h: z.string(), p: z.string() }),
-  play: z.object({ p: z.string(), p_touch: z.string().optional() }),
+  play: playIntro,
   ui: z.record(z.string(), z.string()),
   quiz: quiz.length(2),
   code: z.string(),

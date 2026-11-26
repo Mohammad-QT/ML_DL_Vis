@@ -6,6 +6,7 @@ import CourseNav from './CourseNav.astro';
 import PartProgress from './PartProgress.astro';
 import StepOf from './StepOf.astro';
 import LearnStep from './LearnStep.astro';
+import PlayIntro from './PlayIntro.astro';
 import LessonHero from './LessonHero.astro';
 import CodeOptions from './CodeOptions.astro';
 import NextLesson from './NextLesson.astro';
@@ -57,7 +58,7 @@ const hl = (code: string) => code.replace(/&/g, '&amp;').replace(/</g, '&lt;')
 
   <section class="sheet card" role="tabpanel">
     <h2 class="display">{t.play_h}</h2>
-    <p class="muted read"><span class="on-mouse">{play.p}</span><span class="on-touch">{play.p_touch ?? play.p}</span></p>
+    <PlayIntro {lang} {play} />
     <Board lang={lang} model={d.model as never} preset={play.preset} seed={play.seed} paramLabel={play.param_label}
       hints={{ low: play.hints.low && { max: play.hints.low.max, text: play.hints.low.text }, high: play.hints.high && { min: play.hints.high.min, text: play.hints.high.text } }} />
     <div class="navrow"><button class="btn ghost" data-goto="0"><span class="arr">←</span> <span>{t.s1}</span></button><button class="btn" data-goto="2"><span>{t.s3}</span> <span class="arr">→</span></button></div>
