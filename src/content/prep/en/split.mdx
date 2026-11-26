@@ -10,6 +10,19 @@ steps:
   - Take the first share (the test size) as the test set.
   - Everything else is the training set.
   - Train on the training set only. Score on the test set at the end.
+quick:
+  steps:
+    - "Shuffle all rows using a fixed <b>random_state</b> seed"
+    - "Set aside the first share as the test set"
+    - "Keep every remaining row as the training set"
+    - "Train on training rows, then score on test rows"
+  caution: "Split first: never fit a scaler or imputer on test rows."
+  scene: split
+  words:
+    train: "Train"
+    test: "Test"
+    model: "Model"
+    score: "Test score"
 caution:
   h: Split before you fit anything
   p: 'Scalers and imputers learn numbers (means, spreads) from data. Fit them on the <b>training</b> set only. If test information leaks in, the test score <mark>looks better than it should</mark>.'

@@ -10,6 +10,19 @@ steps:
   - Subtract the mean from every value.
   - Divide by the spread.
   - Apply the same two numbers to the test set.
+quick:
+  steps:
+    - "Find the mean and spread of each training column"
+    - "Subtract the mean so every column centres on zero"
+    - "Divide by the spread to equalise the axes"
+    - "Apply those same training numbers to the test set"
+  caution: "Never fit the scaler on test data: reuse the training mean and spread."
+  scene: scaling
+  words:
+    age: "Age"
+    salary: "Salary"
+    train: "Train"
+    test: "Test"
 caution:
   h: Never fit the scaler on test data
   p: 'Call <code>fit_transform</code> on the training set, then only <code>transform</code> on the test set. The test set must be scaled with the <mark>training set''s numbers</mark>.'
