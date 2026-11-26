@@ -9,6 +9,19 @@ steps:
   - For a new point, work out how likely it is under each class, one feature at a time.
   - Multiply those chances together (the “naive” part), and weigh by how common each class is.
   - The class with the higher score wins.
+quick:
+  steps:
+    - "Learn each class’s average and spread on every feature"
+    - "Check how likely a new point is on each feature"
+    - "Multiply those feature chances together with the class share"
+    - "Pick the class with the higher score"
+  caution: "It assumes features are independent, so linked clues get counted twice."
+  scene: nb
+  words:
+    f1: "Feature 1"
+    f2: "Feature 2"
+    multiply: "Multiply"
+    wins: "Wins"
 caution:
   h: The features are not really independent
   p: 'Naive Bayes <mark>pretends</mark> each feature tells you something separate. If two features move together, like height and weight, it counts the same clue twice and becomes overconfident. It still often works well.'

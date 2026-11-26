@@ -9,6 +9,19 @@ steps:
   - Squash the score into a probability between 0 and 1.
   - 'Above 0.5 means class B. Below means class A.'
   - Training nudges the weights until the training points get the best probabilities.
+quick:
+  steps:
+    - "Combine features with weights into a single score"
+    - "Squash that score into a probability between 0 and 1"
+    - "Predict class B above 0.5, and class A below"
+    - "Training nudges the weights to separate the classes best"
+  caution: "The boundary is always a straight line, so rings cannot be split."
+  scene: logistic
+  words:
+    score: "Score"
+    prob: "Probability"
+    cutoff: "0.5"
+    train: "Fit weights"
 caution:
   h: One straight line, nothing else
   p: 'The boundary is always a straight line. If one group wraps around the other, like rings or moons, logistic regression <mark>cannot separate them</mark>. Switch to a model that bends.'

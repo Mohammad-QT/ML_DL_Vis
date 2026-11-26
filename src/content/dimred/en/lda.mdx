@@ -11,6 +11,19 @@ steps:
   - "Measure how far apart the class centres are and how spread out each class is."
   - "Choose a direction with a large gap between centres compared with the spread within each class."
   - "Give each point a coordinate on that axis. With more classes, you can keep more axes."
+quick:
+  steps:
+    - "Use class labels to find each class’s centre"
+    - "Compare the gap between centres with each class’s spread"
+    - "Pick the direction with the widest gap and tightest classes"
+    - "Project every point onto that new axis"
+  caution: "Test separation on held-out points, not just the points that built the axis."
+  scene: lda
+  words:
+    centres: "Class centres"
+    gap: "Gap vs spread"
+    ld1: "LD1"
+    coords: "1D coordinates"
 caution:
   h: "Check separation on new points"
   p: "The strips score the best single cut on the points you used to find the axes. Use held-out data to check how well a classifier will do on new points."
