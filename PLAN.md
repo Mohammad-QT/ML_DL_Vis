@@ -56,7 +56,7 @@ The approved mockups live in `sketches/` (run `python -m http.server 8765 --dire
 /learn/10-selection/  Part 10 k-fold cross-validation, Grid search, XGBoost (gradient boosting)
 /ar/...               Same pages in Arabic
 ```
-Parts 4–9 appear on the route as "come later".
+Parts 4–9 were added after v1 (see `src/course.ts` for the full order and `CHANGELOG.md` for what shipped when).
 
 ## Milestones
 
