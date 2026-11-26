@@ -49,10 +49,58 @@ export default function aprioriScene() {
   let step3Group: SVGGElement;
 
   let singleRows: BarRow[] = [];
-  let joinLines: SVGLineElement[] = [];
+  let chipHighlights = new Map<string, SVGRectElement>();
   let candidateCards: SVGGElement[] = [];
+  let cardHighlights: SVGRectElement[] = [];
   let pairRows: BarRow[] = [];
   let metricBars: SVGRectElement[] = [];
+
+  const delay = (el: Element, ms: number) => (el as SVGElement).style.setProperty('--delay', `${ms}ms`);
+
+  function resetDelays() {
+    basketRows.forEach(row => {
+      delay(row.card, 0);
+      row.pills.forEach(p => {
+        delay(p.rect, 0);
+        delay(p.text, 0);
+      });
+    });
+    delay(scanFrame, 0);
+    delay(minHeader, 0);
+    delay(step0Group, 0);
+    delay(step1Group, 0);
+    delay(step2Group, 0);
+    delay(step3Group, 0);
+    singleRows.forEach(r => { delay(r.bar, 0); delay(r.strike, 0); });
+    chipHighlights.forEach(r => delay(r, 0));
+    candidateCards.forEach(c => delay(c, 0));
+    cardHighlights.forEach(r => delay(r, 0));
+    pairRows.forEach(r => { delay(r.bar, 0); delay(r.strike, 0); });
+    metricBars.forEach(b => delay(b, 0));
+  }
+
+  function highlightPair(pairIdx: number | null) {
+    chipHighlights.forEach(ring => ring.setAttribute('opacity', '0'));
+    cardHighlights.forEach(ring => ring.setAttribute('opacity', '0'));
+
+    if (pairIdx === null) {
+      candidateCards.forEach(card => {
+        card.setAttribute('opacity', '1');
+        card.setAttribute('transform', 'translate(0, 0)');
+      });
+      return;
+    }
+
+    const [a, b] = pairList[pairIdx];
+    chipHighlights.get(a)?.setAttribute('opacity', '1');
+    chipHighlights.get(b)?.setAttribute('opacity', '1');
+    cardHighlights[pairIdx]?.setAttribute('opacity', '1');
+    candidateCards.forEach((card, idx) => {
+      const shown = idx <= pairIdx;
+      card.setAttribute('opacity', shown ? '1' : '0.2');
+      card.setAttribute('transform', shown ? 'translate(0, 0)' : 'translate(0, -6)');
+    });
+  }
 
   function setBasketState(highlightMask: boolean[], dimMask: boolean[], accentColor = 'var(--a)') {
     basketRows.forEach((row, idx) => {
@@ -99,6 +147,7 @@ export default function aprioriScene() {
   }
 
   function applyFrame(i: number, _api: SceneApi) {
+    resetDelays();
     step0Group.setAttribute('opacity', i === 0 ? '1' : '0');
     step1Group.setAttribute('opacity', i === 1 ? '1' : '0');
     step2Group.setAttribute('opacity', i === 2 ? '1' : '0');
@@ -109,30 +158,24 @@ export default function aprioriScene() {
     if (i === 0) {
       setBasketState([false, false, false, false], [false, false, false, false]);
       showSingles(baskets.length - 1, true);
-      joinLines.forEach(l => {
-        l.setAttribute('stroke-dashoffset', '1');
-        l.setAttribute('opacity', '0');
-      });
+      highlightPair(null);
       candidateCards.forEach(card => {
         card.setAttribute('opacity', '0');
         card.setAttribute('transform', 'translate(0, -8)');
       });
     } else if (i === 1) {
       setBasketState([false, false, false, false], [false, false, false, false]);
-      joinLines.forEach(l => {
-        l.setAttribute('stroke-dashoffset', '0');
-        l.setAttribute('opacity', '0.7');
-      });
-      candidateCards.forEach(card => {
-        card.setAttribute('opacity', '1');
-        card.setAttribute('transform', 'translate(0, 0)');
-      });
+      highlightPair(null);
     } else if (i === 2) {
       setBasketState([true, true, false, false], [false, false, false, true], 'var(--ok)');
       showPairs(baskets.length - 1, true);
     } else {
       setBasketState([true, true, false, false], [false, false, false, true], 'var(--a)');
-      metricBars.forEach(bar => bar.setAttribute('transform', 'scale(1 1)'));
+      delay(step3Group, 150);
+      metricBars.forEach((bar, idx) => {
+        bar.setAttribute('transform', 'scale(1 1)');
+        delay(bar, 450 + idx * 300);
+      });
     }
   }
 
@@ -209,44 +252,42 @@ export default function aprioriScene() {
         { item: 'eggs', x: 278, w: 46, alive: true },
         { item: 'tea', x: 332, w: 44, alive: false },
       ];
+      chipHighlights = new Map();
       topSlots.forEach(s => {
         el('rect', {
           x: s.x, y: 52, width: s.w, height: 28, rx: 7, fill: 'var(--sheet)',
-          stroke: s.alive ? 'var(--ok)' : 'var(--bad)', 'stroke-width': 1.5, opacity: s.alive ? 1 : 0.45,
+          stroke: s.alive ? 'var(--ok)' : 'var(--bad)', 'stroke-width': 1.5, opacity: s.alive ? 1 : 0.55,
         }, step1Group);
         label(api, step1Group, s.x + s.w / 2, 70, t(s.item), {
           'text-anchor': 'middle', 'font-size': 13, 'font-weight': 600,
           fill: s.alive ? 'var(--ink)' : 'var(--muted)', opacity: s.alive ? 1 : 0.55,
         });
-        if (!s.alive) {
-          line(api, step1Group, s.x + 5, 66, s.x + s.w - 5, 66, { stroke: 'var(--bad)', 'stroke-width': 2 });
+        if (s.alive) {
+          const hl = el('rect', {
+            x: s.x - 2, y: 50, width: s.w + 4, height: 32, rx: 8, fill: 'none',
+            stroke: 'var(--hl)', 'stroke-width': 2.5, opacity: 0, class: 'scene-tween',
+          }, step1Group);
+          chipHighlights.set(s.item, hl);
+        } else {
+          line(api, step1Group, s.x + 5, 66, s.x + s.w - 5, 66, { stroke: 'var(--bad)', 'stroke-width': 2.4 });
         }
       });
 
-      const pairTargets = [
-        { fromA: 197, fromB: 249, y: 122 },
-        { fromA: 197, fromB: 301, y: 170 },
-        { fromA: 249, fromB: 301, y: 218 },
-      ];
-      joinLines = [];
+      const pairYs = [122, 170, 218];
+      cardHighlights = [];
       candidateCards = pairList.map(([a, b], idx) => {
-        const target = pairTargets[idx];
-        const l1 = line(api, step1Group, target.fromA, 80, 214, target.y + 16, {
-          stroke: 'var(--a)', 'stroke-width': 1.5, pathLength: 1, 'stroke-dasharray': '1 1',
-          'stroke-dashoffset': 1, opacity: 0, class: 'scene-tween',
-        });
-        const l2 = line(api, step1Group, target.fromB, 80, 214, target.y + 16, {
-          stroke: 'var(--b)', 'stroke-width': 1.5, pathLength: 1, 'stroke-dasharray': '1 1',
-          'stroke-dashoffset': 1, opacity: 0, class: 'scene-tween',
-        });
-        joinLines.push(l1, l2);
-
+        const y = pairYs[idx];
         const card = el('g', { class: 'scene-tween', opacity: 0 }, step1Group);
         el('rect', {
-          x: 214, y: target.y, width: 146, height: 32, rx: 8, fill: 'var(--sheet)',
+          x: 186, y, width: 178, height: 32, rx: 8, fill: 'var(--sheet)',
           stroke: 'var(--rule)', 'stroke-width': 1.5,
         }, card);
-        label(api, card, 287, target.y + 21, `${t(a)} + ${t(b)}`, {
+        const hl = el('rect', {
+          x: 186, y, width: 178, height: 32, rx: 8, fill: 'none',
+          stroke: 'var(--hl)', 'stroke-width': 2.5, opacity: 0, class: 'scene-tween',
+        }, card);
+        cardHighlights.push(hl);
+        label(api, card, 275, y + 21, `${t(a)} + ${t(b)}`, {
           'text-anchor': 'middle', 'font-size': 13.5, 'font-weight': 600,
         });
         return card;
@@ -369,9 +410,10 @@ export default function aprioriScene() {
 
       if (i === 0 || i === 2) {
         const timers: number[] = [];
-        const stepMs = 480;
+        const stepMs = 460;
         for (let b = 0; b < baskets.length; b++) {
           const run = () => {
+            resetDelays();
             scanFrame.setAttribute('y', String(46 + b * 54));
             scanFrame.setAttribute('opacity', '1');
             if (i === 0) showSingles(b, b === baskets.length - 1);
@@ -380,7 +422,22 @@ export default function aprioriScene() {
           if (b === 0) run();
           else timers.push(browser.setTimeout(run, b * stepMs));
         }
-        timers.push(browser.setTimeout(() => applyFrame(i, api), baskets.length * stepMs + 150));
+        timers.push(browser.setTimeout(() => applyFrame(i, api), baskets.length * stepMs + 60));
+        return () => timers.forEach(id => browser.clearTimeout(id));
+      }
+
+      if (i === 1) {
+        const timers: number[] = [];
+        const pairMs = 580;
+        for (let p = 0; p < pairList.length; p++) {
+          const run = () => {
+            resetDelays();
+            highlightPair(p);
+          };
+          if (p === 0) run();
+          else timers.push(browser.setTimeout(run, p * pairMs));
+        }
+        timers.push(browser.setTimeout(() => applyFrame(1, api), pairList.length * pairMs + 60));
         return () => timers.forEach(id => browser.clearTimeout(id));
       }
 

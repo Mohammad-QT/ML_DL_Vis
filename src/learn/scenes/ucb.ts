@@ -48,12 +48,31 @@ export default function ucbScene() {
   const whiskers: SVGLineElement[] = [];
   const caps: SVGLineElement[] = [];
   const rings: SVGCircleElement[] = [];
+  const pulses: SVGCircleElement[] = [];
+  const outcomes: SVGGElement[] = [];
   const counts: SVGTextElement[] = [];
+  let shownTag: SVGTextElement;
   let status: SVGTextElement;
   let legendMean: SVGGElement;
   let legendBonus: SVGGElement;
 
+  const delay = (el: Element, ms: number) => (el as SVGElement).style.setProperty('--delay', `${ms}ms`);
+
+  function resetDelays() {
+    bars.forEach(b => delay(b, 0));
+    whiskers.forEach(w => delay(w, 0));
+    caps.forEach(c => delay(c, 0));
+    rings.forEach(r => delay(r, 0));
+    pulses.forEach(p => delay(p, 0));
+    outcomes.forEach(o => delay(o, 0));
+    counts.forEach(c => delay(c, 0));
+    delay(shownTag, 0);
+    delay(legendMean, 0);
+    delay(legendBonus, 0);
+  }
+
   function renderSnapshot(snap: RoundSnapshot, opts: { showBars: boolean; showWhiskers: boolean; highlight: number }, api: SceneApi) {
+    resetDelays();
     const scores = snap.plays.map((n, a) => {
       const mean = snap.wins[a] / n;
       const bonus = Math.sqrt((2 * Math.log(snap.round)) / n);
@@ -105,23 +124,41 @@ export default function ucbScene() {
     if (i === 0) {
       renderSnapshot(history[0], { showBars: false, showWhiskers: false, highlight: -1 }, api);
       bars.forEach(b => b.setAttribute('opacity', '0'));
+      outcomes.forEach(o => o.setAttribute('opacity', '1'));
+      pulses.forEach(p => p.setAttribute('opacity', '0'));
+      shownTag.setAttribute('opacity', '0');
       counts.forEach(c => c.setAttribute('opacity', '1'));
       legendMean.setAttribute('opacity', '0');
       legendBonus.setAttribute('opacity', '0');
     } else if (i === 1) {
       renderSnapshot(history[0], { showBars: true, showWhiskers: false, highlight: -1 }, api);
+      bars.forEach((b, a) => delay(b, a * 220));
+      outcomes.forEach(o => o.setAttribute('opacity', '0'));
+      pulses.forEach(p => p.setAttribute('opacity', '0'));
+      shownTag.setAttribute('opacity', '0');
       counts.forEach(c => c.setAttribute('opacity', '1'));
       legendMean.setAttribute('opacity', '1');
+      delay(legendMean, 450);
       legendBonus.setAttribute('opacity', '0');
     } else if (i === 2) {
       const snap = history[0];
       renderSnapshot(snap, { showBars: true, showWhiskers: true, highlight: highestTop(snap) }, api);
+      whiskers.forEach((w, a) => delay(w, 150 + a * 180));
+      caps.forEach(c => delay(c, 650));
+      rings.forEach(r => delay(r, 950));
+      outcomes.forEach(o => o.setAttribute('opacity', '0'));
+      pulses.forEach(p => p.setAttribute('opacity', '0'));
+      shownTag.setAttribute('opacity', '0');
       counts.forEach(c => c.setAttribute('opacity', '1'));
       legendMean.setAttribute('opacity', '1');
       legendBonus.setAttribute('opacity', '1');
+      delay(legendBonus, 650);
     } else {
       const last = history[history.length - 1];
       renderSnapshot(last, { showBars: true, showWhiskers: true, highlight: highestTop(last) }, api);
+      outcomes.forEach(o => o.setAttribute('opacity', '0'));
+      pulses.forEach(p => p.setAttribute('opacity', '0'));
+      shownTag.setAttribute('opacity', '0');
       counts.forEach(c => c.setAttribute('opacity', '1'));
       legendMean.setAttribute('opacity', '1');
       legendBonus.setAttribute('opacity', '1');
@@ -187,6 +224,31 @@ export default function ucbScene() {
         }, svg);
         rings.push(ring);
 
+        const pulse = el('circle', {
+          cx, cy: 196, r: 22, fill: 'none', stroke: 'var(--hl)', 'stroke-width': 2.5,
+          opacity: 0, class: 'scene-tween',
+        }, svg);
+        pulse.style.transformOrigin = `${cx}px 196px`;
+        pulses.push(pulse);
+
+        const win = history[0].wins[a] > 0;
+        const outcome = el('g', { opacity: 0, class: 'scene-tween' }, svg);
+        el('circle', {
+          cx, cy: 196, r: 16, fill: 'var(--sheet)',
+          stroke: win ? 'var(--ok)' : 'var(--bad)', 'stroke-width': 1.75,
+        }, outcome);
+        if (win) {
+          el('path', {
+            d: `M ${cx - 7} 197 L ${cx - 2} 202 L ${cx + 8} 190`,
+            fill: 'none', stroke: 'var(--ok)', 'stroke-width': 2.75,
+            'stroke-linecap': 'round', 'stroke-linejoin': 'round',
+          }, outcome);
+        } else {
+          line(api, outcome, cx - 6, 190, cx + 6, 202, { stroke: 'var(--bad)', 'stroke-width': 2.5 });
+          line(api, outcome, cx + 6, 190, cx - 6, 202, { stroke: 'var(--bad)', 'stroke-width': 2.5 });
+        }
+        outcomes.push(outcome);
+
         label(api, svg, cx, 258, t(adKeys[a]), {
           'text-anchor': 'middle', 'font-size': 14, 'font-weight': 600,
         });
@@ -194,6 +256,11 @@ export default function ucbScene() {
           'text-anchor': 'middle', fill: 'var(--muted)', 'font-size': 13, class: 'scene-value scene-tween',
         }));
       }
+
+      shownTag = label(api, svg, 0, 158, t('shown'), {
+        'text-anchor': 'middle', 'font-size': 13, 'font-weight': 600, opacity: 0, class: 'scene-tween',
+      });
+      shownTag.style.transform = `translateX(${AD_X[0]}px)`;
 
       applyFrame(0, api);
     },
@@ -203,18 +270,64 @@ export default function ucbScene() {
     before(i, api) {
       if (i === 0) {
         applyFrame(0, api);
-        counts.forEach(c => c.setAttribute('opacity', '0'));
+        outcomes.forEach(o => o.setAttribute('opacity', '0'));
+        counts.forEach(c => {
+          c.textContent = '0/0';
+          c.setAttribute('opacity', '0');
+        });
+        status.textContent = api.t('round').replace('{n}', '0');
       } else {
         applyFrame(i - 1, api);
       }
     },
     loop(i, api) {
       const browser = api.svg.ownerDocument.defaultView;
-      if (i !== 3 || api.reduced || !browser) return () => {};
+      if (api.reduced || !browser) return () => {};
+
+      if (i === 0) {
+        const timers: number[] = [];
+        const anims: Animation[] = [];
+        const showTrial = (ad: number, revealOutcome: boolean) => {
+          status.textContent = api.t('round').replace('{n}', String(ad + 1));
+          shownTag.style.transform = `translateX(${AD_X[ad]}px)`;
+          shownTag.setAttribute('opacity', '1');
+          for (let a = 0; a < 3; a++) {
+            pulses[a].setAttribute('opacity', a === ad ? '1' : '0');
+            const done = a < ad || (a === ad && revealOutcome);
+            outcomes[a].setAttribute('opacity', done ? '1' : '0');
+            counts[a].textContent = done ? `${history[0].wins[a]}/1` : '0/0';
+            counts[a].setAttribute('opacity', '1');
+          }
+          if (!revealOutcome) {
+            const anim = pulses[ad].animate?.(
+              [{ transform: 'scale(0.84)', opacity: 1 }, { transform: 'scale(1.16)', opacity: 0.45 }],
+              { duration: 480, easing: 'ease-out' },
+            );
+            if (anim) anims.push(anim);
+          }
+        };
+
+        const adStepMs = 680;
+        const revealDelay = 280;
+        for (let a = 0; a < 3; a++) {
+          const start = a * adStepMs;
+          if (a === 0) showTrial(0, false);
+          else timers.push(browser.setTimeout(() => showTrial(a, false), start));
+          timers.push(browser.setTimeout(() => showTrial(a, true), start + revealDelay));
+        }
+        timers.push(browser.setTimeout(() => applyFrame(0, api), 3 * adStepMs + 80));
+
+        return () => {
+          timers.forEach(id => browser.clearTimeout(id));
+          anims.forEach(anim => anim.cancel());
+        };
+      }
+
+      if (i !== 3) return () => {};
 
       const timers: number[] = [];
       const steps = history.slice(1);
-      const stepMs = Math.min(85, Math.floor(2200 / steps.length));
+      const stepMs = Math.min(75, Math.floor(2000 / steps.length));
       steps.forEach((snap, idx) => {
         const draw = () => {
           renderSnapshot(snap, { showBars: true, showWhiskers: true, highlight: highestTop(snap) }, api);

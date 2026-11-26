@@ -10,6 +10,20 @@ steps:
   - 'Scale each feature using the training points so the penalty treats the weights on the same footing.'
   - 'Fit the curve while penalizing large weights. Ridge adds their squares; Lasso adds their absolute values.'
   - 'Raise <b>alpha</b> to make the penalty stronger, and compare the error on training and test points.'
+quick:
+  steps:
+    - "Expand x into polynomial columns up to your degree"
+    - "Scale every column so the penalty treats all weights fairly"
+    - "Penalize big weights: Ridge shrinks them; Lasso can zero them"
+    - "Raise <b>alpha</b> to smooth the curve and check test error"
+  caution: "Too much alpha flattens the curve; check it on held-out test points."
+  scene: regularization
+  words:
+    scale: "Scaled"
+    ridge: "Ridge"
+    lasso: "Lasso"
+    alphaLow: "α = 0"
+    alphaMid: "α = 0.04"
 caution:
   h: Too much penalty can hide the pattern
   p: 'A larger alpha can make the curve nearly flat. Judge it on new points, not just on how smooth it looks.'

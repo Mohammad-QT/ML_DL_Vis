@@ -25,11 +25,23 @@ async function mount(id: keyof typeof paths = 'knn', lang: Lang = 'en') {
   return {
     root,
     svg: root.querySelector('svg')!,
-    simple: get('simple'), detailed: get('detailed'), list: get('list'), pause: get<HTMLButtonElement>('pause'),
+    simple: get('simple'),
+    detailed: get('detailed'),
+    caption: get('caption'),
+    prev: get<HTMLButtonElement>('prev'),
+    next: get<HTMLButtonElement>('next'),
+    status: get('status'),
+    pause: get<HTMLButtonElement>('pause'),
     radios: [...root.querySelectorAll<HTMLButtonElement>('[role="radio"]')],
-    steps: [...root.querySelectorAll<HTMLButtonElement>('[data-learn-frame]')],
-    active: () => Number(root.querySelector<HTMLElement>('[aria-current="step"]')!.dataset.learnFrame),
+    dots: [...root.querySelectorAll<HTMLButtonElement>('[data-learn-dot]')],
+    steps: [...root.querySelectorAll<HTMLElement>('[data-learn-step]')],
+    active: () => Number(root.querySelector<HTMLElement>('[data-learn-dot][aria-current="step"]')!.dataset.learnDot),
   };
+}
+
+function swipe(target: Element, dx: number, dy = 0) {
+  target.dispatchEvent(new PointerEvent('pointerdown', { pointerType: 'touch', clientX: 200, clientY: 120, pointerId: 1 }));
+  document.dispatchEvent(new PointerEvent('pointerup', { pointerType: 'touch', clientX: 200 + dx, clientY: 120 + dy, pointerId: 1 }));
 }
 
 beforeEach(() => {
@@ -47,66 +59,135 @@ afterEach(() => {
 });
 
 describe('Learn playback on built lesson pages', () => {
-  it('advances, loops and follows the pause button', async () => {
-    const { active, pause, root } = await mount();
+  it('advances every 4 s, loops and follows Pause / Play', async () => {
+    const { active, pause, root, status } = await mount();
     expect(active()).toBe(0);
-    vi.advanceTimersByTime(3000);
+    expect(status.textContent).toBe('1 / 4');
+    vi.advanceTimersByTime(3999);
+    expect(active()).toBe(0);
+    vi.advanceTimersByTime(1);
     expect(active()).toBe(1);
-    expect(root.querySelector('[data-learn-status]')!.textContent).toBe('Step 2 of 4');
+    expect(status.textContent).toBe('2 / 4');
+
     pause.click();
     expect(pause.getAttribute('aria-pressed')).toBe('true');
+    expect(pause.textContent).toBe(learn.en.play);
     expect(root.hasAttribute('data-playing')).toBe(false);
-    vi.advanceTimersByTime(9000);
+    vi.advanceTimersByTime(12000);
     expect(active()).toBe(1);
+
     pause.click();
-    vi.advanceTimersByTime(9000);
-    expect(active()).toBe(0);
-  });
-
-  it('scrubs while hovering and waits to resume after leaving the list', async () => {
-    const { active, list, root, steps } = await mount();
-    for (const i of [1, 3]) {
-      steps[i].dispatchEvent(new PointerEvent('pointerenter', { pointerType: 'mouse' }));
-      expect(active()).toBe(i);
-      // The held step keeps playing (it replays) but autoplay does not move on.
-      expect(root.hasAttribute('data-playing')).toBe(true);
-      vi.advanceTimersByTime(6000);
-      expect(active()).toBe(i);
-    }
-    list.dispatchEvent(new PointerEvent('pointerleave', { pointerType: 'mouse' }));
-    vi.advanceTimersByTime(1499);
-    expect(root.hasAttribute('data-playing')).toBe(false);
-    vi.advanceTimersByTime(1);
-    expect(root.hasAttribute('data-playing')).toBe(true);
-    vi.advanceTimersByTime(2999);
-    expect(active()).toBe(3);
-    vi.advanceTimersByTime(1);
-    expect(active()).toBe(0);
-  });
-
-  it('keeps a tapped step playing until the same step is tapped again', async () => {
-    const { active, pause, root, steps } = await mount();
-    const tap = () => steps[2].dispatchEvent(new PointerEvent('click', { pointerType: 'touch' }));
-    tap();
-    expect(active()).toBe(2);
+    expect(pause.getAttribute('aria-pressed')).toBe('false');
     expect(pause.textContent).toBe(learn.en.pause);
     expect(root.hasAttribute('data-playing')).toBe(true);
-    vi.advanceTimersByTime(9000);
+    vi.advanceTimersByTime(8000);
+    expect(active()).toBe(3);
+    vi.advanceTimersByTime(4000);
+    expect(active()).toBe(0);
+  });
+
+  it('holds on arrow buttons and dot clicks, and Play resumes autoplay from the current step', async () => {
+    const { active, dots, next, pause, prev, root, steps } = await mount();
+    next.click();
+    expect(active()).toBe(1);
+    expect(root.hasAttribute('data-playing')).toBe(true);
+    expect(pause.textContent).toBe(learn.en.play);
+    expect(pause.getAttribute('aria-pressed')).toBe('true');
+    vi.advanceTimersByTime(10000);
+    expect(active()).toBe(1);
+
+    prev.click();
+    expect(active()).toBe(0);
+    prev.click();
+    expect(active()).toBe(3);
+
+    dots[2].click();
     expect(active()).toBe(2);
-    tap();
-    vi.advanceTimersByTime(1500 + 3000);
+    expect(steps.map(s => !s.hidden)).toEqual([false, false, true, false]);
+    vi.advanceTimersByTime(10000);
+    expect(active()).toBe(2);
+
+    pause.click();
+    expect(pause.textContent).toBe(learn.en.pause);
+    expect(pause.getAttribute('aria-pressed')).toBe('false');
+    vi.advanceTimersByTime(4000);
     expect(active()).toBe(3);
   });
 
-  it('replays the held step: rewinds to the step before, then animates into it again', async () => {
-    const { steps, svg } = await mount();
+  it('supports touch swiping with a 40 px threshold and RTL mirroring', async () => {
+    const en = await mount('knn', 'en');
+    swipe(en.svg, -39);
+    expect(en.active()).toBe(0);
+    swipe(en.svg, -45, 50);
+    expect(en.active()).toBe(0);
+    swipe(en.svg, -40);
+    expect(en.active()).toBe(1);
+    swipe(en.svg, 40);
+    expect(en.active()).toBe(0);
+
+    mounted.pop()!();
+    const ar = await mount('knn', 'ar');
+    expect(ar.prev.getAttribute('aria-label')).toBe(learn.ar.prevStep);
+    expect(ar.next.getAttribute('aria-label')).toBe(learn.ar.nextStep);
+    swipe(ar.svg, 40);
+    expect(ar.active()).toBe(1);
+    swipe(ar.svg, -40);
+    expect(ar.active()).toBe(0);
+  });
+
+  it('moves steps with Left/Right keys on the focused caption bar (RTL-aware)', async () => {
+    const en = await mount('knn', 'en');
+    en.caption.focus();
+    expect(document.activeElement).toBe(en.caption);
+    en.caption.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
+    expect(en.active()).toBe(1);
+    en.caption.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft' }));
+    expect(en.active()).toBe(0);
+    en.caption.dispatchEvent(new KeyboardEvent('keydown', { key: 'End' }));
+    expect(en.active()).toBe(3);
+    en.caption.dispatchEvent(new KeyboardEvent('keydown', { key: 'Home' }));
+    expect(en.active()).toBe(0);
+
+    mounted.pop()!();
+    const ar = await mount('knn', 'ar');
+    ar.caption.focus();
+    ar.caption.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft' }));
+    expect(ar.active()).toBe(1);
+    ar.caption.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight' }));
+    expect(ar.active()).toBe(0);
+  });
+
+  it('replays the held step: shows before(i) instantly, waits 600 ms, then animates frame(i) and restarts loop(i)', async () => {
+    const setIntervalSpy = vi.spyOn(window, 'setInterval');
+    const clearIntervalSpy = vi.spyOn(window, 'clearInterval');
+    const { dots, svg } = await mount('cnn');
     const add = vi.spyOn(svg.classList, 'add');
     const remove = vi.spyOn(svg.classList, 'remove');
-    steps[1].dispatchEvent(new PointerEvent('pointerenter', { pointerType: 'mouse' }));
-    vi.advanceTimersByTime(2600 * 2 + 50);
-    expect(add.mock.calls.filter(([name]) => name === 'learn-instant')).toHaveLength(2);
-    expect(remove.mock.calls.filter(([name]) => name === 'learn-instant')).toHaveLength(2);
+
+    dots[0].click();
+    setIntervalSpy.mockClear();
+    clearIntervalSpy.mockClear();
+
+    // First replay fires at 3500 ms: rewinds instantly, stops loop, waits 600 ms before frame + loop.
+    vi.advanceTimersByTime(3500);
+    expect(add.mock.calls.filter(([name]) => name === 'learn-instant')).toHaveLength(1);
+    expect(remove.mock.calls.filter(([name]) => name === 'learn-instant')).toHaveLength(1);
     expect(svg.classList.contains('learn-instant')).toBe(false);
+    expect(clearIntervalSpy).toHaveBeenCalledTimes(1);
+    expect(setIntervalSpy).not.toHaveBeenCalled();
+
+    vi.advanceTimersByTime(599);
+    expect(setIntervalSpy).not.toHaveBeenCalled();
+    vi.advanceTimersByTime(1);
+    expect(setIntervalSpy.mock.calls.filter(([, delay]) => delay === 65)).toHaveLength(1);
+    expect(svg.querySelector('.scene-filter')!.getAttribute('x')).toBe('30');
+
+    // Second cycle at 7000 ms (2900 ms later) + 600 ms.
+    vi.advanceTimersByTime(2900);
+    expect(add.mock.calls.filter(([name]) => name === 'learn-instant')).toHaveLength(2);
+    expect(clearIntervalSpy).toHaveBeenCalledTimes(2);
+    vi.advanceTimersByTime(600);
+    expect(setIntervalSpy.mock.calls.filter(([, delay]) => delay === 65)).toHaveLength(2);
   });
 
   it('persists the view across lessons and languages', async () => {
@@ -134,28 +215,21 @@ describe('Learn playback on built lesson pages', () => {
 
   it('shows frame one without autoplay or scene loops under reduced motion', async () => {
     vi.stubGlobal('matchMedia', () => ({ matches: true, addEventListener() {} }));
-    const { active, pause, steps } = await mount('cnn');
+    const setIntervalSpy = vi.spyOn(window, 'setInterval');
+    const { active, dots, next, pause } = await mount('cnn');
     expect(active()).toBe(0);
     expect(pause.disabled).toBe(true);
     expect(vi.getTimerCount()).toBe(0);
-    vi.advanceTimersByTime(9000);
+    vi.advanceTimersByTime(12000);
     expect(active()).toBe(0);
-    steps[2].click();
-    expect(active()).toBe(2);
-  });
 
-  it('moves keyboard focus and pauses until focus leaves the list', async () => {
-    const { active, pause, root, steps } = await mount();
-    steps[0].focus();
-    steps[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown' }));
-    expect(document.activeElement).toBe(steps[1]);
-    expect(steps.map(step => step.tabIndex)).toEqual([-1, 0, -1, -1]);
-    vi.advanceTimersByTime(6000);
-    expect(active()).toBe(1);
-    pause.focus();
-    expect(root.hasAttribute('data-playing')).toBe(false);
-    vi.advanceTimersByTime(4500);
+    dots[2].click();
     expect(active()).toBe(2);
+    next.click();
+    expect(active()).toBe(3);
+    vi.advanceTimersByTime(7000);
+    expect(setIntervalSpy).not.toHaveBeenCalled();
+    expect(vi.getTimerCount()).toBe(0);
   });
 
   it('stops the CNN scan offscreen, in a hidden tab and outside Learn', async () => {
@@ -177,7 +251,7 @@ describe('Learn playback on built lesson pages', () => {
     vi.mocked(Object.getOwnPropertyDescriptor(document, 'hidden')!.get!).mockReturnValue(true);
     document.dispatchEvent(new Event('visibilitychange'));
     expect(vi.getTimerCount()).toBe(0);
-    vi.advanceTimersByTime(6000);
+    vi.advanceTimersByTime(8000);
     expect(active()).toBe(0);
     vi.mocked(Object.getOwnPropertyDescriptor(document, 'hidden')!.get!).mockReturnValue(false);
     document.dispatchEvent(new Event('visibilitychange'));
@@ -189,18 +263,20 @@ describe('Learn playback on built lesson pages', () => {
 
   it.each(Object.keys(paths) as (keyof typeof paths)[])('mounts all four %s frames in English and Arabic', async id => {
     for (const lang of ['en', 'ar'] as const) {
-      const { active, radios, simple, svg, steps } = await mount(id, lang);
+      const { active, dots, radios, simple, svg, steps } = await mount(id, lang);
       expect(simple.hidden).toBe(false);
       expect(document.documentElement.dir).toBe(lang === 'ar' ? 'rtl' : 'ltr');
       expect(svg.getAttribute('direction')).toBe('ltr');
       expect(svg.getAttribute('viewBox')).toBe('0 0 400 300');
       expect(svg.querySelectorAll('text').length).toBeGreaterThan(0);
       expect(radios.map(radio => radio.textContent)).toEqual([learn[lang].simple, learn[lang].detailed]);
+      expect(dots).toHaveLength(4);
       expect(steps).toHaveLength(4);
-      for (const [i, step] of steps.entries()) {
-        step.click();
+      for (const [i, dot] of dots.entries()) {
+        dot.click();
         expect(active()).toBe(i);
-        expect(svg.getAttribute('aria-label')).toContain(step.querySelector('mark')!.textContent);
+        expect(dot.getAttribute('aria-label')).toBe(learn[lang].goToStep.replace('{n}', String(i + 1)));
+        expect(svg.getAttribute('aria-label')).toContain(steps[i].querySelector('mark')!.textContent);
       }
     }
   });

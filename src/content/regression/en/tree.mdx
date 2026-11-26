@@ -10,6 +10,19 @@ steps:
   - 'Keep the cut that makes the two sides most similar in y (the smallest squared error).'
   - 'Repeat inside each side until the tree reaches its <b>max depth</b>.'
   - 'A new x lands in one piece, and the answer is the average y of that piece.'
+quick:
+  steps:
+    - "Try cuts along x like “is x below this value?”"
+    - "Pick the cut that gives the flattest y in each side"
+    - "Split each side again until you hit <b>max depth</b>"
+    - "Drop a new x into one piece and predict its average y"
+  caution: "A deep tree builds one step per point and memorises noise."
+  scene: 2-tree
+  words:
+    ask: "Cut?"
+    step1: "2 steps"
+    step2: "4 steps"
+    avg: "Piece mean"
 caution:
   h: A deep tree memorises
   p: 'Each extra level doubles the number of steps. Left alone, the tree ends up with <mark>one step per training point</mark>, so train R² is perfect and test R² falls. The curve is also always a staircase, even when the real trend is smooth.'

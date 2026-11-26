@@ -36,10 +36,13 @@ function arrow(api: SceneApi, parent: Element, x: number, y: number, tip: number
 export default function cnnScene() {
   const frames: SVGGElement[] = [];
   const bars: SVGRectElement[] = [];
+  const stackMaps: SVGGElement[] = [];
   let window: SVGRectElement;
   let cells: SVGRectElement[];
   let poolCells: SVGRectElement[];
   let merging: SVGRectElement[];
+
+  const delay = (el: Element, ms: number) => (el as SVGElement).style.setProperty('--delay', `${ms}ms`);
 
   function reveal(count: number) {
     const index = Math.min(count, cells.length - 1);
@@ -86,7 +89,11 @@ export default function cnnScene() {
       title(stacking, 293, 57, 'maps');
       grid(api, stacking, pooled, 39, 92, 38);
       arrow(api, stacking, 171, 148, 222);
-      second.forEach((map, i) => grid(api, stacking, map, 257 + i * 15, 99 + (2 - i) * 20, 33));
+      second.forEach((map, i) => {
+        const g = el('g', { class: 'scene-tween' }, stacking);
+        grid(api, g, map, 257 + i * 15, 99 + (2 - i) * 20, 33);
+        stackMaps.push(g);
+      });
 
       title(scoring, 71, 31, 'maps');
       title(scoring, 173, 31, 'flatten');
@@ -105,8 +112,18 @@ export default function cnnScene() {
       });
     },
     frame(i) {
-      frames.forEach((group, index) => group.setAttribute('opacity', index === i ? '1' : '0'));
-      bars.forEach(bar => bar.setAttribute('transform', i === 3 ? 'scale(1 1)' : 'scale(0 1)'));
+      frames.forEach((group, index) => {
+        delay(group, index === i ? 150 : 0);
+        group.setAttribute('opacity', index === i ? '1' : '0');
+      });
+      stackMaps.forEach((group, idx) => {
+        delay(group, i === 2 ? 350 + idx * 250 : 0);
+        group.setAttribute('opacity', i === 2 ? '1' : '0');
+      });
+      bars.forEach((bar, idx) => {
+        delay(bar, i === 3 ? 350 + idx * 60 : 0);
+        bar.setAttribute('transform', i === 3 ? 'scale(1 1)' : 'scale(0 1)');
+      });
       if (i === 0) reveal(cells.length);
     },
     loop(i, { svg }) {
@@ -126,14 +143,14 @@ export default function cnnScene() {
           const [destination, value] = [poolCells[n], Number(poolCells[n].getAttribute('opacity'))];
           const dx = Number(destination.getAttribute('x')) - Number(cell.getAttribute('x')) + 8;
           const dy = Number(destination.getAttribute('y')) - Number(cell.getAttribute('y')) + 8;
-          const delay = n * 65;
+          const stepDelay = n * 140;
           const move = cell.animate?.([
             { opacity: 0, transform: 'translate(0, 0)' },
             { opacity: value, offset: .15 },
             { opacity: value, offset: .85 },
             { opacity: 0, transform: `translate(${dx}px, ${dy}px)` },
-          ], { duration: 440, delay });
-          const appear = destination.animate?.([{ opacity: 0 }, { opacity: value }], { duration: 200, delay: delay + 340, fill: 'backwards' });
+          ], { duration: 560, delay: stepDelay });
+          const appear = destination.animate?.([{ opacity: 0 }, { opacity: value }], { duration: 260, delay: stepDelay + 420, fill: 'backwards' });
           if (move) animations.push(move);
           if (appear) animations.push(appear);
         }

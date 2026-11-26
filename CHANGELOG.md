@@ -6,12 +6,12 @@ Every change that learners can see, newest first. Each entry links to the pull r
 
 **A new Learn step: less reading, more watching.** ([#24](https://github.com/Mohammad-QT/ML_DL_Vis/pull/24) and the scenes PR)
 
-- **Short steps next to an animation.** The Learn step now opens in a Simple view: 3–4 short steps beside an animation
-  that plays them one by one. Point at (or tap) a step and the animation replays just that step. The full text is one
+- **A large animation with short steps.** The Learn step now opens in a Simple view: an animation that plays the
+  lesson's 3–4 short steps one by one. Use ← → (or swipe) to move between steps; the animation replays each step you choose. The full text is one
   click away under **Detailed**, and the site remembers your choice.
-- **19 lessons have animations:** K-NN, decision tree, random forest, SVM, kernel SVM, K-Means, hierarchical
-  clustering, DBSCAN, Apriori, gradient descent, XGBoost, k-fold cross-validation, grid search, PCA, Q-learning, UCB,
-  Thompson sampling, neural networks and CNN. More are coming.
+- **35 lessons have animations:** every lesson except simple and multiple linear regression, Start here and the
+  sentiment classifier, whose boards already show the whole idea. The animation fills the card; the step's text sits
+  under it with ← → buttons (or swipe on a phone), and each step plays as a short staged story.
 - **More room for the board.** After the Learn step, the big header shrinks to the title, which helps most on phones.
 - **Easier-to-spot buttons.** Next-step buttons are larger and highlighted, buttons that *do* something look different
   from buttons that *choose* something, and each demo's main action pulses once when you first see it.

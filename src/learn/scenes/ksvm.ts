@@ -97,6 +97,27 @@ export default function ksvmScene() {
   let dotGroups: SVGGElement[] = [];
   let dots: SVGCircleElement[] = [];
 
+  const delay = (el: Element, ms: number) => (el as SVGElement).style.setProperty('--delay', `${ms}ms`);
+
+  function resetDelays() {
+    delay(heading, 0);
+    delay(flatGroup, 0);
+    delay(badLine, 0);
+    delay(badCross, 0);
+    simRings.forEach(r => delay(r, 0));
+    delay(circleTintA, 0);
+    delay(circleTintMask, 0);
+    delay(circleTintB, 0);
+    delay(circleCut, 0);
+    delay(isoGroup, 0);
+    delay(bumpSurface, 0);
+    stems.forEach(s => delay(s, 0));
+    shadows.forEach(s => delay(s, 0));
+    delay(planeGroup, 0);
+    dotGroups.forEach(g => delay(g, 0));
+    dots.forEach(d => delay(d, 0));
+  }
+
   function positionDots(isometric: boolean, liftFactor: number) {
     pts.forEach((p, idx) => {
       const [x, y] = isometric ? isoXY(p.u, p.v, p.z * liftFactor) : flatXY(p.u, p.v);
@@ -106,6 +127,7 @@ export default function ksvmScene() {
 
   function applyFrame(i: number, api: SceneApi) {
     const { t } = api;
+    resetDelays();
     const isFlat = i === 0 || i === 3;
     const isCut = i === 2;
     const isCircle = i === 3;
@@ -115,28 +137,41 @@ export default function ksvmScene() {
 
     flatGroup.setAttribute('opacity', isFlat ? '1' : '0');
     badLine.setAttribute('opacity', i === 0 ? '0.75' : '0');
+    delay(badLine, i === 0 ? 300 : 0);
     badCross.setAttribute('opacity', i === 0 ? '1' : '0');
+    delay(badCross, i === 0 ? 650 : 0);
     simRings.forEach(r => r.setAttribute('opacity', i === 0 ? '0.45' : '0'));
 
     circleTintA.setAttribute('opacity', isCircle ? '0.14' : '0');
+    delay(circleTintA, isCircle ? 950 : 0);
     circleTintMask.setAttribute('opacity', isCircle ? '1' : '0');
+    delay(circleTintMask, isCircle ? 950 : 0);
     circleTintB.setAttribute('opacity', isCircle ? '0.16' : '0');
+    delay(circleTintB, isCircle ? 950 : 0);
     circleCut.setAttribute('stroke-dashoffset', isCircle ? '0' : '1');
     circleCut.setAttribute('opacity', isCircle ? '1' : '0');
+    delay(circleCut, isCircle ? 650 : 0);
 
     isoGroup.setAttribute('opacity', isFlat ? '0' : '1');
     bumpSurface.setAttribute('opacity', isFlat ? '0' : '0.55');
-    stems.forEach(s => s.setAttribute('opacity', isFlat ? '0' : '0.45'));
+    delay(bumpSurface, i === 1 ? 300 : 0);
+    stems.forEach(s => {
+      s.setAttribute('opacity', isFlat ? '0' : '0.45');
+      delay(s, i === 1 ? 300 : 0);
+    });
     shadows.forEach(s => s.setAttribute('opacity', isFlat ? '0' : '0.3'));
 
     planeGroup.setAttribute('opacity', isCut ? '1' : '0');
     planeGroup.style.transform = isCut ? 'translateY(0px)' : 'translateY(-24px)';
+    delay(planeGroup, isCut ? 250 : 0);
 
     // Slightly dim points below the translucent cutting plane in frame 2 for depth.
     dots.forEach((d, idx) => {
       d.setAttribute('opacity', isCut && pts[idx].z < CUT_Z ? '0.55' : '1');
+      delay(d, isCut ? 750 : 0);
     });
 
+    dotGroups.forEach(g => delay(g, i === 1 ? 350 : i === 3 ? 150 : 0));
     positionDots(!isFlat, 1);
   }
 
@@ -246,7 +281,7 @@ export default function ksvmScene() {
       const cloud = el('g');
       dots = [];
       dotGroups = pts.map(p => {
-        const g = el('g', { class: 'scene-tween' }, cloud);
+        const g = el('g', { class: 'scene-tween scene-slow' }, cloud);
         dots.push(el('circle', {
           cx: 0, cy: 0, r: 5.5, fill: p.c === 1 ? 'var(--b)' : 'var(--a)', stroke: 'var(--paper)', 'stroke-width': 1.5, class: 'scene-tween',
         }, g));
@@ -285,6 +320,7 @@ export default function ksvmScene() {
         let angle = 0;
         const angles = [0, 35, -35];
         const id = browser.setInterval(() => {
+          delay(badLine, 0);
           angle = (angle + 1) % angles.length;
           badLine.style.transform = `rotate(${angles[angle]}deg)`;
         }, 850);
@@ -299,7 +335,7 @@ export default function ksvmScene() {
           { transform: 'scale(1)' },
           { transform: 'scale(1.06)' },
           { transform: 'scale(1)' },
-        ], { duration: 1500, iterations: Infinity });
+        ], { duration: 1500, delay: 1100, iterations: Infinity });
         return () => anim?.cancel();
       }
 

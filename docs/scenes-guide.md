@@ -53,12 +53,19 @@ export default function myScene() {
   a good starting point.
 - **`frame` must be idempotent and complete.** It sets every attribute it controls from scratch, so any frame can follow
   any other frame (learners jump around).
+- **Timing: each step is a ~1.5–2 s story, not a 0.5 s blink.** Owner feedback: a step's animation was too short to
+  follow. `.scene-tween` transitions last about **0.9 s** (ease-in-out). Stage the changes inside a step with a delay per
+  element: set the CSS variable `--delay` on it, e.g. `el.style.setProperty('--delay', '400ms')`. For example: first the
+  lines draw (0 ms), then the points recolour (400 ms), then the label appears (800 ms). Use `scene-slow` (1.4 s) for a big
+  movement such as a centre sliding or an axis rotating. Clear or keep delays consistently in `frame`, so jumping between
+  steps never leaves an element stuck halfway. When replaying a held step, the player shows the `before` state for
+  ~0.6 s, then plays `frame(i)` and restarts `loop(i)`.
 - **Animate with CSS transitions.** Add `class: 'scene-tween'` to an element, then change `opacity`, `fill`, `stroke`,
   `stroke-dashoffset` (with `pathLength: 1` and `'stroke-dasharray': '1 1'` to "draw" a line), `stroke-width` or
   `transform` in `frame`. For motion that has to repeat while a step shows (a scanning window, rounds ticking), use
   `loop` with `requestAnimationFrame` or `element.animate(...)`, and return a function that stops it.
 - **`api.reduced` is true under reduced motion.** Then `loop` must not start, and the player shows still frames.
-- **Canvas:** `viewBox="0 0 400 300"`, always left-to-right (even in Arabic). Leave ~20px margins. Keep text ≥ 13px and
+- **Canvas:** `viewBox="0 0 400 300"` (it is now shown large, filling the Learn card's width, with the step caption under it), always left-to-right (even in Arabic). Leave ~20px margins. Keep text ≥ 13px and
   avoid more than ~4 labels on screen at once.
 - **Colours only through CSS variables:** `var(--a)` (class A, blue), `var(--b)` (class B, pink), `var(--ink)`,
   `var(--muted)`, `var(--rule)` (grid), `var(--sheet)`, `var(--paper)` (scene background), `var(--hl)` (yellow

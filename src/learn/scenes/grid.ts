@@ -49,7 +49,22 @@ export default function gridScene() {
   const cellY = (r: number) => GY + r * CELL;
   const pct = (v: number) => String(Math.round(v * 100));
 
+  const delay = (el: Element, ms: number) => (el as SVGElement).style.setProperty('--delay', `${ms}ms`);
+
+  function resetDelays() {
+    cells.forEach(c => {
+      delay(c.base, 0);
+      delay(c.fill, 0);
+    });
+    delay(scanRing, 0);
+    delay(boardGroup, 0);
+    boundaryPaths.forEach(p => delay(p, 0));
+    delay(finalLabel, 0);
+    delay(status, 0);
+  }
+
   function showGrid(opts: { filledThrough: number; activeIdx: number; highlightBest: boolean; showFinal: boolean; text: string }) {
+    resetDelays();
     for (let idx = 0; idx < 16; idx++) {
       const filled = idx <= opts.filledThrough;
       const isWinner = opts.highlightBest && idx === bestIdx;
@@ -87,6 +102,11 @@ export default function gridScene() {
   function applyFrame(i: number, api: SceneApi) {
     if (i === 0) {
       showGrid({ filledThrough: -1, activeIdx: -1, highlightBest: false, showFinal: false, text: '' });
+      cells.forEach((cell, idx) => {
+        const r = Math.floor(idx / 4);
+        const c = idx % 4;
+        delay(cell.base, (r + c) * 90);
+      });
     } else if (i === 1) {
       showGrid({
         filledThrough: 15, activeIdx: 15, highlightBest: false, showFinal: false,
@@ -97,11 +117,14 @@ export default function gridScene() {
         filledThrough: 15, activeIdx: bestIdx, highlightBest: true, showFinal: false,
         text: api.t('best').replace('{s}', pct(bestScore)),
       });
+      delay(scanRing, 250);
+      delay(status, 600);
     } else {
       showGrid({
         filledThrough: 15, activeIdx: bestIdx, highlightBest: true, showFinal: true,
         text: api.t('best').replace('{s}', pct(bestScore)),
       });
+      boundaryPaths.forEach(p => delay(p, 450));
     }
   }
 
@@ -178,7 +201,7 @@ export default function gridScene() {
       const browser = api.svg.ownerDocument.defaultView;
       if (i !== 1 || api.reduced || !browser) return () => {};
       const timers: number[] = [];
-      const phaseMs = 140;
+      const phaseMs = 130;
       for (let idx = 0; idx < 16; idx++) {
         const k = idx;
         const run = () => showGrid({

@@ -60,6 +60,24 @@ export default function svmScene() {
 
   const optimalDeg = (Math.atan2(NX, -NY) * 180) / Math.PI; // ~126.87 deg, line vector (-0.6, 0.8)
 
+  const delay = (el: Element, ms: number) => (el as SVGElement).style.setProperty('--delay', `${ms}ms`);
+
+  function resetDelays() {
+    delay(status, 0);
+    delay(bottomNote, 0);
+    candidates.forEach(c => delay(c, 0));
+    delay(streetGroup, 0);
+    delay(streetBand, 0);
+    delay(marginRailTop, 0);
+    delay(marginRailBot, 0);
+    delay(gapArrow, 0);
+    dotsA.forEach(d => delay(d, 0));
+    dotsB.forEach(d => delay(d, 0));
+    svRings.forEach(r => delay(r, 0));
+    delay(strayDot, 0);
+    delay(strayRing, 0);
+  }
+
   function setStreet(degOffset: number, shiftX: number, shiftY: number, halfWidth: number, bandOpacity: string) {
     const scale = halfWidth / MARGIN;
     streetGroup.style.transform = `translate(${shiftX}px, ${shiftY}px) rotate(${degOffset}deg)`;
@@ -71,8 +89,12 @@ export default function svmScene() {
 
   function applyFrame(i: number, api: SceneApi) {
     const { t } = api;
+    resetDelays();
 
-    candidates.forEach(c => c.setAttribute('opacity', i === 0 ? '0.65' : '0'));
+    candidates.forEach((c, idx) => {
+      c.setAttribute('opacity', i === 0 ? '0.65' : '0');
+      delay(c, i === 0 ? idx * 250 : 0);
+    });
     streetGroup.setAttribute('opacity', i === 0 ? '0' : '1');
     gapArrow.setAttribute('opacity', i === 1 ? '1' : '0');
 
@@ -82,8 +104,13 @@ export default function svmScene() {
       bottomNote.setAttribute('opacity', '0');
     } else if (i === 1) {
       setStreet(0, 0, 0, MARGIN, '0.14');
+      delay(streetBand, 200);
+      delay(marginRailTop, 200);
+      delay(marginRailBot, 200);
+      delay(gapArrow, 750);
       status.textContent = t('margin');
       status.setAttribute('opacity', '1');
+      delay(status, 750);
       bottomNote.setAttribute('opacity', '0');
     } else if (i === 2) {
       setStreet(0, 0, 0, MARGIN, '0.16');
@@ -91,6 +118,7 @@ export default function svmScene() {
       status.setAttribute('opacity', '1');
       bottomNote.textContent = t('sv');
       bottomNote.setAttribute('opacity', '1');
+      delay(bottomNote, 750);
     } else {
       // Frame 3: Small C — wide street keeps the stray point inside the gap
       setStreet(0, 0, 0, MARGIN, '0.16');
@@ -102,10 +130,14 @@ export default function svmScene() {
     const fadeNonSv = i === 2;
     classA.forEach((pt, idx) => dotsA[idx].setAttribute('opacity', fadeNonSv && !pt.sv ? '0.32' : '1'));
     classB.forEach((pt, idx) => dotsB[idx].setAttribute('opacity', fadeNonSv && !pt.sv ? '0.32' : '1'));
-    svRings.forEach(r => r.setAttribute('opacity', i === 2 ? '1' : '0'));
+    svRings.forEach(r => {
+      r.setAttribute('opacity', i === 2 ? '1' : '0');
+      delay(r, i === 2 ? 400 : 0);
+    });
 
     strayDot.setAttribute('opacity', i === 3 ? '1' : '0');
     strayRing.setAttribute('opacity', i === 3 ? '1' : '0');
+    delay(strayRing, i === 3 ? 700 : 0);
   }
 
   return defineScene({
@@ -140,7 +172,7 @@ export default function svmScene() {
 
       // Street group centered at (CX, CY), rotated so local X runs along the boundary and local Y is the normal!
       const streetAnchor = el('g', { transform: `translate(${CX} ${CY}) rotate(${optimalDeg - 90})` }, clipped);
-      streetGroup = el('g', { class: 'scene-tween' }, streetAnchor);
+      streetGroup = el('g', { class: 'scene-tween scene-slow' }, streetAnchor);
       streetBand = el('rect', {
         x: -180, y: -MARGIN, width: 360, height: MARGIN * 2,
         fill: 'var(--hl)', opacity: 0, class: 'scene-tween',
@@ -233,16 +265,18 @@ export default function svmScene() {
         const id = browser.setInterval(() => {
           step = (step + 1) % 3;
           candidates.forEach((c, idx) => {
+            delay(c, 0);
             c.setAttribute('opacity', idx === step ? '1' : '0.35');
             c.setAttribute('stroke', idx === step ? 'var(--ink)' : 'var(--muted)');
           });
-        }, 720);
+        }, 750);
         return () => browser.clearInterval(id);
       }
 
       if (i === 3) {
         let strict = false;
         const id = browser.setInterval(() => {
+          resetDelays();
           strict = !strict;
           if (strict) {
             setStreet(-20, 14, 10, 12, '0.16');
@@ -251,7 +285,7 @@ export default function svmScene() {
             setStreet(0, 0, 0, MARGIN, '0.16');
             status.textContent = api.t('cLow');
           }
-        }, 1250);
+        }, 1400);
         return () => browser.clearInterval(id);
       }
 

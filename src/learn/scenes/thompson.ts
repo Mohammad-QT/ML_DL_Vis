@@ -91,6 +91,16 @@ export default function thompsonScene() {
   let badge: SVGTextElement;
   let status: SVGTextElement;
 
+  const delay = (el: Element, ms: number) => (el as SVGElement).style.setProperty('--delay', `${ms}ms`);
+
+  function resetDelays() {
+    curves.forEach(c => delay(c, 0));
+    dots.forEach(d => delay(d, 0));
+    delay(winRing, 0);
+    delay(guide, 0);
+    delay(badge, 0);
+  }
+
   function drawCurves(alpha: number[], beta: number[], opacity = '1', focus = -1) {
     for (let a = 0; a < 3; a++) {
       curves[a].setAttribute('d', betaPath(alpha[a], beta[a], ROW_Y[a]));
@@ -116,25 +126,32 @@ export default function thompsonScene() {
   }
 
   function applyFrame(i: number, api: SceneApi) {
+    resetDelays();
     const first = history[0];
     if (i === 0) {
       drawCurves(first.alpha, first.beta, '1');
+      curves.forEach((c, a) => delay(c, a * 220));
       drawSamples(first.samples, first.chosen, false);
       badge.setAttribute('opacity', '0');
       status.textContent = api.t('round').replace('{n}', '0');
     } else if (i === 1) {
       drawCurves(first.alpha, first.beta, '1');
       drawSamples(first.samples, first.chosen, true);
+      dots.forEach((d, a) => delay(d, a * 200));
+      delay(winRing, 750);
+      delay(guide, 750);
       badge.setAttribute('opacity', '0');
       status.textContent = api.t('round').replace('{n}', '1');
     } else if (i === 2) {
       const next = history[1];
       drawCurves(next.alpha, next.beta, '1', first.chosen);
+      delay(curves[first.chosen], 300);
       drawSamples(first.samples, first.chosen, false);
       badge.textContent = api.t(first.click ? 'click' : 'miss');
       badge.setAttribute('fill', first.click ? 'var(--ok)' : 'var(--bad)');
       badge.setAttribute('y', String(ROW_Y[first.chosen] - 26));
       badge.setAttribute('opacity', '1');
+      delay(badge, 700);
       status.textContent = api.t('round').replace('{n}', '1');
     } else {
       const last = history[history.length - 1];
@@ -218,9 +235,10 @@ export default function thompsonScene() {
 
       const timers: number[] = [];
       const steps = history.slice(1);
-      const stepMs = Math.min(95, Math.floor(2200 / steps.length));
+      const stepMs = Math.min(85, Math.floor(2000 / steps.length));
       steps.forEach((snap, idx) => {
         const draw = () => {
+          resetDelays();
           drawCurves(snap.alpha, snap.beta, '1');
           drawSamples(snap.samples, snap.chosen, true);
           status.textContent = api.t('round').replace('{n}', String(snap.round));

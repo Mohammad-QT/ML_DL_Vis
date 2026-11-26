@@ -94,6 +94,23 @@ export default function qLearningScene() {
   let greedyTrail: SVGPathElement;
   let status: SVGTextElement;
 
+  const delay = (el: Element, ms: number) => (el as SVGElement).style.setProperty('--delay', `${ms}ms`);
+
+  function resetDelays() {
+    for (let r = 0; r < ROWS; r++) {
+      for (let c = 0; c < COLS; c++) {
+        if (cellTint[r][c]) delay(cellTint[r][c], 0);
+        if (zeroDots[r][c]) delay(zeroDots[r][c], 0);
+        if (arrows[r][c]) delay(arrows[r][c], 0);
+      }
+    }
+    delay(agent, 0);
+    delay(updateRing, 0);
+    delay(trail, 0);
+    delay(greedyTrail, 0);
+    delay(status, 0);
+  }
+
   function moveAgent(r: number, c: number, opacity = '1') {
     const { x, y } = cellCenter(r, c);
     agent.style.transform = `translate(${x}px, ${y}px)`;
@@ -143,6 +160,7 @@ export default function qLearningScene() {
 
   function applyFrame(i: number, api: SceneApi) {
     const { t } = api;
+    resetDelays();
     updateRing.setAttribute('opacity', '0');
     trail.setAttribute('opacity', '0');
     trail.setAttribute('stroke-dashoffset', '1');
@@ -152,6 +170,7 @@ export default function qLearningScene() {
     if (i === 0) {
       clearQ();
       moveAgent(START[0], START[1], '1');
+      delay(agent, 450);
       status.textContent = '';
       status.setAttribute('opacity', '0');
     } else if (i === 1) {
@@ -162,18 +181,24 @@ export default function qLearningScene() {
       moveAgent(last[0], last[1], '1');
       status.textContent = t('explore');
       status.setAttribute('opacity', '1');
+      delay(status, 250);
     } else if (i === 2) {
       clearQ();
       cellTint[0][2].setAttribute('fill', 'var(--ok)');
       cellTint[0][2].setAttribute('opacity', '0.4');
+      delay(cellTint[0][2], 600);
       zeroDots[0][2].setAttribute('opacity', '0');
+      delay(zeroDots[0][2], 600);
       arrows[0][2].setAttribute('d', ARROW_PATHS[1]);
       arrows[0][2].setAttribute('stroke', 'var(--ok)');
       arrows[0][2].setAttribute('opacity', '1');
+      delay(arrows[0][2], 600);
       updateRing.setAttribute('opacity', '1');
+      delay(updateRing, 350);
       moveAgent(GOAL[0], GOAL[1], '1');
       status.textContent = t('update');
       status.setAttribute('opacity', '1');
+      delay(status, 750);
     } else {
       showQ(snapshots[60], true);
       greedyTrail.setAttribute('opacity', '0.55');
@@ -336,19 +361,20 @@ export default function qLearningScene() {
           timers.push(browser.setTimeout(() => {
             step = s;
             moveAgent(EXPLORE_PATH[step][0], EXPLORE_PATH[step][1], '1');
-          }, s * 320));
+          }, s * 300));
         }
       } else if (i === 3) {
         const eps = [1, 2, 5, 10, 20, 40, 60];
         eps.forEach((ep, idx) => {
           const run = () => {
+            resetDelays();
             showQ(snapshots[ep], ep === 60);
             status.textContent = api.t('ep').replace('{n}', String(ep));
             greedyTrail.setAttribute('opacity', ep === 60 ? '0.55' : '0');
             greedyTrail.setAttribute('stroke-dashoffset', ep === 60 ? '0' : '1');
           };
           if (idx === 0) run();
-          else timers.push(browser.setTimeout(run, idx * 330));
+          else timers.push(browser.setTimeout(run, idx * 310));
         });
       }
 

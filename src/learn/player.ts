@@ -3,10 +3,12 @@ import { fill, learn, type Lang } from '../i18n/ui';
 import type { Scene, SceneApi } from './scene';
 import { loadScene } from './scenes';
 
-const frameTime = 3000;
-const resumeDelay = 1500;
-/** While a step is held (pointed at, focused or tapped), it replays this often. */
-const replayTime = 2600;
+const frameTime = 4000;
+/** While a step is held (via arrows, dots, swipe or keyboard), it replays this often. */
+const replayTime = 3500;
+/** Hold the `before` state for this long before animating `frame(i)` on replay. */
+const replayWait = 600;
+const swipeThreshold = 40;
 const modeKey = 'mlv-learn-mode';
 type Mode = 'simple' | 'detailed';
 
@@ -29,9 +31,11 @@ export async function mountLearn(root: HTMLElement) {
   const visual = root.querySelector<HTMLElement>('[data-learn-visual]')!;
   const svg = visual.querySelector('svg')!;
   const modes = [...heading.querySelectorAll<HTMLButtonElement>('[data-learn-mode]')];
-  const list = root.querySelector<HTMLOListElement>('[data-learn-list]')!;
-  const steps = [...list.querySelectorAll<HTMLButtonElement>('[data-learn-frame]')];
-  const dots = [...root.querySelectorAll<HTMLElement>('[data-learn-dot]')];
+  const caption = root.querySelector<HTMLElement>('[data-learn-caption]')!;
+  const prevBtn = root.querySelector<HTMLButtonElement>('[data-learn-prev]')!;
+  const nextBtn = root.querySelector<HTMLButtonElement>('[data-learn-next]')!;
+  const steps = [...root.querySelectorAll<HTMLElement>('[data-learn-step]')];
+  const dots = [...root.querySelectorAll<HTMLButtonElement>('[data-learn-dot]')];
   const status = root.querySelector<HTMLElement>('[data-learn-status]')!;
   const pause = root.querySelector<HTMLButtonElement>('[data-learn-pause]')!;
   const motion = window.matchMedia?.('(prefers-reduced-motion: reduce)');
@@ -57,38 +61,37 @@ export async function mountLearn(root: HTMLElement) {
   let visible = !window.IntersectionObserver;
   let open = root.classList.contains('on');
   let paused = false;
-  let hovering = false;
-  let focused = false;
-  /** A touch tap holds a step until the same step is tapped again. */
-  let tapped = false;
-  let pointerType = '';
+  let held = false;
+  let swipe: { id: number; x: number; y: number } | null = null;
   let advance: number | undefined;
   let replaying: number | undefined;
-  let resume: number | undefined;
+  let replayFrame: number | undefined;
   let stopLoop: (() => void) | undefined;
+  let replayToken = 0;
   let disposed = false;
 
   function stop() {
+    replayToken++;
     window.clearTimeout(advance);
     advance = undefined;
     window.clearInterval(replaying);
     replaying = undefined;
+    window.clearTimeout(replayFrame);
+    replayFrame = undefined;
     root.removeAttribute('data-playing');
     stopLoop?.();
     stopLoop = undefined;
   }
 
   function sync() {
-    const isPaused = paused || api.reduced;
-    pause.textContent = isPaused ? ui.play : ui.pause;
-    pause.setAttribute('aria-pressed', String(isPaused));
+    const autoplayOff = paused || held || api.reduced;
+    pause.textContent = autoplayOff ? ui.play : ui.pause;
+    pause.setAttribute('aria-pressed', String(autoplayOff));
     pause.disabled = api.reduced;
-    const held = hovering || focused || tapped;
-    if (!scene || mode !== 'simple' || !open || !visible || document.hidden || isPaused ||
-        (!held && resume !== undefined)) {
+    if (!scene || mode !== 'simple' || !open || !visible || document.hidden || paused || api.reduced) {
       stop();
     } else if (held) {
-      // Keep the held step playing instead of freezing it.
+      // Keep the held step replaying on a ~3.5 s cycle while holding autoplay.
       if (advance !== undefined) stop();
       if (replaying === undefined) {
         replaying = window.setInterval(replay, replayTime);
@@ -109,40 +112,46 @@ export async function mountLearn(root: HTMLElement) {
       scene?.frame(current, api);
     }
     steps.forEach((step, i) => {
-      step.tabIndex = i === current ? 0 : -1;
-      if (i === current) step.setAttribute('aria-current', 'step');
-      else step.removeAttribute('aria-current');
-      dots[i].classList.toggle('current', i === current);
+      step.hidden = i !== current;
     });
-    status.textContent = fill(ui.step, { n: current + 1, total: steps.length });
+    dots.forEach((dot, i) => {
+      dot.classList.toggle('current', i === current);
+      if (i === current) dot.setAttribute('aria-current', 'step');
+      else dot.removeAttribute('aria-current');
+    });
+    status.textContent = `${current + 1} / ${steps.length}`;
+    status.setAttribute('aria-label', fill(ui.step, { n: current + 1, total: steps.length }));
     svg.setAttribute('aria-label', steps[current].querySelector('mark')?.textContent?.trim() || ui.animation);
     sync();
   }
 
-  /** Jump, without animating, to the state before the current step, then animate into the step again. */
+  function holdStep(index: number) {
+    held = true;
+    paused = false;
+    select((index + steps.length) % steps.length);
+  }
+
+  /** Jump, without animating, to the state before the current step, wait ~600 ms, then animate into the step again. */
   function replay() {
     if (!scene) return;
+    stopLoop?.();
+    stopLoop = undefined;
+    window.clearTimeout(replayFrame);
+    replayFrame = undefined;
     svg.classList.add('learn-instant');
     if (scene.before) scene.before(current, api);
     else scene.frame((current + steps.length - 1) % steps.length, api);
     svg.getBoundingClientRect();
     svg.classList.remove('learn-instant');
-    window.requestAnimationFrame(() => scene?.frame(current, api));
-  }
-
-  function clearResume() {
-    window.clearTimeout(resume);
-    resume = undefined;
-  }
-
-  function release() {
-    if (hovering || focused || tapped) return;
-    clearResume();
-    resume = window.setTimeout(() => {
-      resume = undefined;
-      sync();
-    }, resumeDelay);
-    sync();
+    const token = ++replayToken;
+    replayFrame = window.setTimeout(() => {
+      replayFrame = undefined;
+      if (disposed || token !== replayToken) return;
+      scene?.frame(current, api);
+      if (!api.reduced) {
+        stopLoop = scene?.loop?.(current, api);
+      }
+    }, replayWait);
   }
 
   async function setMode(value: Mode) {
@@ -157,8 +166,7 @@ export async function mountLearn(root: HTMLElement) {
       button.setAttribute('aria-checked', String(active));
       button.tabIndex = active ? 0 : -1;
     }
-    hovering = focused = tapped = false;
-    clearResume();
+    held = false;
     sync();
     if (value === 'detailed' || scene) return;
 
@@ -210,64 +218,52 @@ export async function mountLearn(root: HTMLElement) {
     }, options);
   }
 
-  for (const [i, step] of steps.entries()) {
-    step.addEventListener('pointerenter', event => {
-      if (event.pointerType === 'touch') return;
-      hovering = true;
-      clearResume();
-      select(i);
-    }, options);
-    step.addEventListener('pointerdown', event => {
-      pointerType = event.pointerType;
-      // Pointer selection should not hold the keyboard-focus pause after the pointer leaves.
-      event.preventDefault();
-    }, options);
-    step.addEventListener('pointercancel', () => { pointerType = ''; }, options);
-    step.addEventListener('focus', () => {
-      focused = true;
-      clearResume();
-      select(i);
-    }, options);
-    step.addEventListener('click', event => {
-      const touch = (event as PointerEvent).pointerType === 'touch' || pointerType === 'touch';
-      pointerType = '';
-      if (touch) {
-        // Tap a step to keep it playing; tap it again to let the whole animation run.
-        const release_ = tapped && current === i;
-        tapped = !release_;
-        clearResume();
-        select(i);
-        if (release_) release();
-        return;
-      }
-      select(i);
-    }, options);
-    step.addEventListener('keydown', event => {
-      const next = arrow(event, i, steps.length);
-      if (next === undefined) return;
-      event.preventDefault();
-      steps[next].focus();
-    }, options);
+  prevBtn.addEventListener('click', () => holdStep(current - 1), options);
+  nextBtn.addEventListener('click', () => holdStep(current + 1), options);
+  for (const [i, dot] of dots.entries()) {
+    dot.addEventListener('click', () => holdStep(i), options);
   }
-  list.addEventListener('pointerleave', event => {
-    if (!hovering || event.pointerType === 'touch') return;
-    hovering = false;
-    release();
+
+  caption.addEventListener('keydown', event => {
+    if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight' && event.key !== 'Home' && event.key !== 'End') return;
+    const next = arrow(event, current, steps.length, true);
+    if (next === undefined) return;
+    event.preventDefault();
+    holdStep(next);
   }, options);
-  list.addEventListener('focusout', event => {
-    if (list.contains(event.relatedTarget as Node | null)) return;
-    focused = false;
-    release();
+
+  svg.addEventListener('pointerdown', event => {
+    if (event.pointerType !== 'touch') return;
+    swipe = { id: event.pointerId, x: event.clientX, y: event.clientY };
   }, options);
+  document.addEventListener('pointerup', event => {
+    if (!swipe || event.pointerId !== swipe.id) return;
+    const dx = event.clientX - swipe.x;
+    const dy = event.clientY - swipe.y;
+    swipe = null;
+    if (Math.abs(dx) < swipeThreshold || Math.abs(dx) <= Math.abs(dy)) return;
+    const dir = dx < 0 ? 1 : -1;
+    const delta = lang === 'ar' ? -dir : dir;
+    holdStep(current + delta);
+  }, options);
+  document.addEventListener('pointercancel', event => {
+    if (swipe && event.pointerId === swipe.id) swipe = null;
+  }, options);
+
   pause.addEventListener('click', () => {
-    paused = !paused;
-    tapped = false;
-    clearResume();
+    if (paused || held) {
+      paused = false;
+      held = false;
+    } else {
+      paused = true;
+    }
     sync();
   }, options);
+
   motion?.addEventListener('change', () => {
     api.reduced = motion.matches;
     if (api.reduced) {
+      held = false;
       stop();
       scene?.frame(0, api);
       select(0);
@@ -285,8 +281,7 @@ export async function mountLearn(root: HTMLElement) {
     const next = root.classList.contains('on');
     if (open === next) return;
     open = next;
-    hovering = focused = tapped = false;
-    clearResume();
+    held = false;
     sync();
   });
   panel.observe(root, { attributes: true, attributeFilter: ['class'] });
@@ -299,7 +294,6 @@ export async function mountLearn(root: HTMLElement) {
   return () => {
     disposed = true;
     stop();
-    clearResume();
     listeners.abort();
     intersection?.disconnect();
     panel.disconnect();

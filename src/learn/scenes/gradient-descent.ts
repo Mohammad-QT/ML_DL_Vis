@@ -91,7 +91,23 @@ export default function gradientDescentScene() {
   let lossBar: SVGRectElement;
   let status: SVGTextElement;
 
-  function showStep(stepIndex: number, opts: { showSlope: boolean; showResiduals: boolean; showRing: boolean; text: string }) {
+  const delay = (el: Element, ms: number) => (el as SVGElement).style.setProperty('--delay', `${ms}ms`);
+
+  function resetDelays() {
+    delay(ball, 0);
+    delay(ballRing, 0);
+    delay(slopeArrow, 0);
+    delay(slopeLabel, 0);
+    trailDots.forEach(d => delay(d, 0));
+    trailSegs.forEach(s => delay(s, 0));
+    delay(fitLine, 0);
+    residuals.forEach(r => delay(r, 0));
+    delay(lossBar, 0);
+    delay(status, 0);
+  }
+
+  function showStep(stepIndex: number, opts: { showSlope: boolean; showResiduals: boolean; showRing: boolean; text: string; staged?: number }) {
+    resetDelays();
     const s = states[stepIndex];
     const bx = bowlX(s.w);
     const by = bowlY(s.loss);
@@ -139,15 +155,29 @@ export default function gradientDescentScene() {
 
     status.textContent = opts.text;
     status.setAttribute('opacity', opts.text ? '1' : '0');
+
+    if (opts.staged === 1) {
+      delay(slopeArrow, 500);
+      delay(slopeLabel, 500);
+      delay(status, 750);
+    } else if (opts.staged === 2) {
+      delay(ball, 250);
+      delay(fitLine, 250);
+      delay(lossBar, 250);
+      delay(ballRing, 550);
+      delay(slopeArrow, 550);
+      delay(slopeLabel, 550);
+      delay(status, 550);
+    }
   }
 
   function applyFrame(i: number, api: SceneApi) {
     if (i === 0) {
       showStep(0, { showSlope: false, showResiduals: false, showRing: false, text: '' });
     } else if (i === 1) {
-      showStep(0, { showSlope: true, showResiduals: true, showRing: false, text: api.t('step').replace('{n}', '0') });
+      showStep(0, { showSlope: true, showResiduals: true, showRing: false, text: api.t('step').replace('{n}', '0'), staged: 1 });
     } else if (i === 2) {
-      showStep(1, { showSlope: true, showResiduals: false, showRing: true, text: api.t('step').replace('{n}', '1') });
+      showStep(1, { showSlope: true, showResiduals: false, showRing: true, text: api.t('step').replace('{n}', '1'), staged: 2 });
     } else {
       showStep(states.length - 1, { showSlope: false, showResiduals: false, showRing: true, text: api.t('bottom') });
     }
@@ -261,7 +291,7 @@ export default function gradientDescentScene() {
       const browser = api.svg.ownerDocument.defaultView;
       if (i !== 3 || api.reduced || !browser) return () => {};
       const timers: number[] = [];
-      const phaseMs = 420;
+      const phaseMs = 380;
       for (let s = 1; s < states.length; s++) {
         const idx = s;
         const text = idx === states.length - 1 ? api.t('bottom') : api.t('step').replace('{n}', String(idx));
