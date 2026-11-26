@@ -109,6 +109,28 @@ describe('Learn playback on built lesson pages', () => {
     expect(svg.classList.contains('learn-instant')).toBe(false);
   });
 
+  it('restarts the scene loop on each replay of a held step, except under reduced motion', async () => {
+    const setIntervalSpy = vi.spyOn(window, 'setInterval');
+    const clearIntervalSpy = vi.spyOn(window, 'clearInterval');
+    const { steps, svg } = await mount('cnn');
+    steps[0].dispatchEvent(new PointerEvent('pointerenter', { pointerType: 'mouse' }));
+    setIntervalSpy.mockClear();
+    clearIntervalSpy.mockClear();
+    vi.advanceTimersByTime(2600 * 2 + 50);
+    expect(clearIntervalSpy).toHaveBeenCalledTimes(2);
+    expect(setIntervalSpy.mock.calls.filter(([, delay]) => delay === 65)).toHaveLength(2);
+    expect(svg.querySelector('.scene-filter')!.getAttribute('x')).toBe('30');
+
+    mounted.pop()!();
+    setIntervalSpy.mockClear();
+    vi.stubGlobal('matchMedia', () => ({ matches: true, addEventListener() {} }));
+    const reduced = await mount('cnn');
+    reduced.steps[0].dispatchEvent(new PointerEvent('pointerenter', { pointerType: 'mouse' }));
+    vi.advanceTimersByTime(2600 * 2 + 50);
+    expect(setIntervalSpy).not.toHaveBeenCalled();
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
   it('persists the view across lessons and languages', async () => {
     const { radios } = await mount();
     radios[1].click();

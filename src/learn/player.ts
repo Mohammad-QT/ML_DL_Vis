@@ -66,9 +66,11 @@ export async function mountLearn(root: HTMLElement) {
   let replaying: number | undefined;
   let resume: number | undefined;
   let stopLoop: (() => void) | undefined;
+  let replayToken = 0;
   let disposed = false;
 
   function stop() {
+    replayToken++;
     window.clearTimeout(advance);
     advance = undefined;
     window.clearInterval(replaying);
@@ -122,12 +124,24 @@ export async function mountLearn(root: HTMLElement) {
   /** Jump, without animating, to the state before the current step, then animate into the step again. */
   function replay() {
     if (!scene) return;
+    stopLoop?.();
+    stopLoop = undefined;
     svg.classList.add('learn-instant');
     if (scene.before) scene.before(current, api);
     else scene.frame((current + steps.length - 1) % steps.length, api);
     svg.getBoundingClientRect();
     svg.classList.remove('learn-instant');
-    window.requestAnimationFrame(() => scene?.frame(current, api));
+    const token = ++replayToken;
+    const step = current;
+    window.requestAnimationFrame(() => {
+      if (disposed) return;
+      if (token === replayToken || (replaying === undefined && advance === undefined && step === current)) {
+        scene?.frame(current, api);
+      }
+      if (token === replayToken && !api.reduced) {
+        stopLoop = scene?.loop?.(current, api);
+      }
+    });
   }
 
   function clearResume() {
