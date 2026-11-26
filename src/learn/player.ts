@@ -5,6 +5,8 @@ import { loadScene } from './scenes';
 
 const frameTime = 3000;
 const resumeDelay = 1500;
+/** While a step is held (pointed at, focused or tapped), it replays this often. */
+const replayTime = 2600;
 const modeKey = 'mlv-learn-mode';
 type Mode = 'simple' | 'detailed';
 
@@ -16,7 +18,10 @@ export async function mountLearn(root: HTMLElement) {
   const window = document.defaultView!;
   const lang: Lang = document.documentElement.lang === 'ar' ? 'ar' : 'en';
   const ui = learn[lang];
-  const words: Record<string, string> = ui;
+  // Shared scene words, plus the lesson's own `quick.words` from its frontmatter.
+  let own: Record<string, string> = {};
+  try { own = JSON.parse(root.dataset.learnWords ?? '{}'); } catch { /* bad words: fall back to the shared ones */ }
+  const words: Record<string, string> = { ...ui, ...own };
   const heading = root.querySelector<HTMLElement>('[data-learn-heading]')!;
   const simple = root.querySelector<HTMLElement>('[data-learn-simple]')!;
   const detailed = root.querySelector<HTMLElement>('[data-learn-detailed]')!;
@@ -54,8 +59,11 @@ export async function mountLearn(root: HTMLElement) {
   let paused = false;
   let hovering = false;
   let focused = false;
+  /** A touch tap holds a step until the same step is tapped again. */
+  let tapped = false;
   let pointerType = '';
   let advance: number | undefined;
+  let replaying: number | undefined;
   let resume: number | undefined;
   let stopLoop: (() => void) | undefined;
   let disposed = false;
@@ -63,6 +71,8 @@ export async function mountLearn(root: HTMLElement) {
   function stop() {
     window.clearTimeout(advance);
     advance = undefined;
+    window.clearInterval(replaying);
+    replaying = undefined;
     root.removeAttribute('data-playing');
     stopLoop?.();
     stopLoop = undefined;
@@ -73,9 +83,18 @@ export async function mountLearn(root: HTMLElement) {
     pause.textContent = isPaused ? ui.play : ui.pause;
     pause.setAttribute('aria-pressed', String(isPaused));
     pause.disabled = api.reduced;
-    if (!scene || mode !== 'simple' || !open || !visible || document.hidden ||
-        isPaused || hovering || focused || resume !== undefined) {
+    const held = hovering || focused || tapped;
+    if (!scene || mode !== 'simple' || !open || !visible || document.hidden || isPaused ||
+        (!held && resume !== undefined)) {
       stop();
+    } else if (held) {
+      // Keep the held step playing instead of freezing it.
+      if (advance !== undefined) stop();
+      if (replaying === undefined) {
+        replaying = window.setInterval(replay, replayTime);
+        root.setAttribute('data-playing', '');
+        stopLoop = scene.loop?.(current, api);
+      }
     } else if (advance === undefined) {
       advance = window.setTimeout(() => select((current + 1) % steps.length), frameTime);
       root.setAttribute('data-playing', '');
@@ -100,13 +119,24 @@ export async function mountLearn(root: HTMLElement) {
     sync();
   }
 
+  /** Jump, without animating, to the state before the current step, then animate into the step again. */
+  function replay() {
+    if (!scene) return;
+    svg.classList.add('learn-instant');
+    if (scene.before) scene.before(current, api);
+    else scene.frame((current + steps.length - 1) % steps.length, api);
+    svg.getBoundingClientRect();
+    svg.classList.remove('learn-instant');
+    window.requestAnimationFrame(() => scene?.frame(current, api));
+  }
+
   function clearResume() {
     window.clearTimeout(resume);
     resume = undefined;
   }
 
   function release() {
-    if (hovering || focused) return;
+    if (hovering || focused || tapped) return;
     clearResume();
     resume = window.setTimeout(() => {
       resume = undefined;
@@ -127,7 +157,7 @@ export async function mountLearn(root: HTMLElement) {
       button.setAttribute('aria-checked', String(active));
       button.tabIndex = active ? 0 : -1;
     }
-    hovering = focused = false;
+    hovering = focused = tapped = false;
     clearResume();
     sync();
     if (value === 'detailed' || scene) return;
@@ -199,10 +229,17 @@ export async function mountLearn(root: HTMLElement) {
       select(i);
     }, options);
     step.addEventListener('click', event => {
-      if ((event as PointerEvent).pointerType === 'touch' || pointerType === 'touch') {
-        paused = !(paused && current === i);
-      }
+      const touch = (event as PointerEvent).pointerType === 'touch' || pointerType === 'touch';
       pointerType = '';
+      if (touch) {
+        // Tap a step to keep it playing; tap it again to let the whole animation run.
+        const release_ = tapped && current === i;
+        tapped = !release_;
+        clearResume();
+        select(i);
+        if (release_) release();
+        return;
+      }
       select(i);
     }, options);
     step.addEventListener('keydown', event => {
@@ -224,6 +261,7 @@ export async function mountLearn(root: HTMLElement) {
   }, options);
   pause.addEventListener('click', () => {
     paused = !paused;
+    tapped = false;
     clearResume();
     sync();
   }, options);
@@ -247,7 +285,7 @@ export async function mountLearn(root: HTMLElement) {
     const next = root.classList.contains('on');
     if (open === next) return;
     open = next;
-    hovering = focused = false;
+    hovering = focused = tapped = false;
     clearResume();
     sync();
   });

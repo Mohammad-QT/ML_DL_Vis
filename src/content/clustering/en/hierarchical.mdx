@@ -10,6 +10,20 @@ steps:
   - Use Ward linkage. Merge the pair that adds the least to the total squared spread around the group centres.
   - Draw the merge as a join in the tree. A higher join means a more costly merge.
   - Cut the tree at one height. Each vertical branch you cross is one cluster.
+quick:
+  steps:
+    - "Start with each point in its own group"
+    - "Merge the pair with the lowest Ward cost"
+    - "Record each merge as a join higher up the tree"
+    - "Cut the tree across to pick your clusters"
+  caution: "A low cut keeps small groups; a high cut merges them."
+  scene: hierarchical
+  words:
+    points: "Points"
+    tree: "Merge tree"
+    cost: "Cost"
+    cut: "Cut"
+    clusters: "Clusters"
 caution:
   h: The height is a choice
   p: 'A low cut keeps small groups separate. A high cut combines them. Look for a tall gap between joins, where moving the cut a little leaves the same groups.'

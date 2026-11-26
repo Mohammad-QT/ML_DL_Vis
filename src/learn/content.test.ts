@@ -6,7 +6,7 @@ import { loadScene } from './scenes';
 
 interface Lesson {
   steps: string[];
-  quick?: { steps: string[]; scene: string };
+  quick?: { steps: string[]; scene: string; words?: Record<string, string> };
 }
 
 it('keeps Simple steps and scenes in sync across both languages', async () => {
@@ -25,6 +25,7 @@ it('keeps Simple steps and scenes in sync across both languages', async () => {
       expect(ar.quick, `${name} Arabic quick`).toBeDefined();
       expect(ar.quick!.scene, name).toBe(en.quick!.scene);
       expect(ar.quick!.steps, name).toHaveLength(en.quick!.steps.length);
+      expect(Object.keys(ar.quick!.words ?? {}).sort(), `${name} scene words`).toEqual(Object.keys(en.quick!.words ?? {}).sort());
       const module = await loadScene(en.quick!.scene);
       expect(module, name).toBeDefined();
       expect(module!.default().frames, name).toBe(en.quick!.steps.length);

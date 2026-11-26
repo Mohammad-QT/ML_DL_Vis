@@ -23,6 +23,8 @@ const quick = z.object({
   steps: z.array(z.string()).min(3).max(4),
   caution: z.string(),
   scene: z.string(),
+  /** Short words drawn inside this lesson's scene (labels, axis names). Same keys in every language. */
+  words: z.record(z.string(), z.string()).optional(),
 }).optional();
 
 // One MDX file per lesson per language: `lessons/<lang>/<model>.mdx`. The body is the "idea" text.

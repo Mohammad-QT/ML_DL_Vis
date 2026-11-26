@@ -10,6 +10,19 @@ steps:
   - Assign each point to its nearest centre.
   - Move each centre to the average position of its assigned points. The dashed trail shows where it moved.
   - Repeat until the centres stop moving.
+quick:
+  steps:
+    - "Pick <b>K</b> and drop K starting centres"
+    - "Assign each point to its nearest centre"
+    - "Move each centre to the average of its points"
+    - "Repeat until the centres stop moving"
+  caution: "Each centre claims a straight-edged region, so curved groups get split."
+  scene: kmeans
+  words:
+    k: "K = 3"
+    centre: "Centre"
+    round: "Round {n}"
+    done: "Settled"
 caution:
   h: A small error does not guarantee useful groups
   p: 'Try Moons with two centres. Each region has a straight edge, so it splits the curved groups instead of following them.'

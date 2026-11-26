@@ -14,6 +14,12 @@ export interface Scene {
   frames: number;
   setup(api: SceneApi): void;
   frame(i: number, api: SceneApi): void;
+  /**
+   * Optional: draw the state just *before* step `i`, without animating. While the learner points at step `i`, the
+   * player calls this, then `frame(i)`, over and over, so the step keeps playing. Defaults to `frame(i - 1)`
+   * (the last frame for step 0).
+   */
+  before?(i: number, api: SceneApi): void;
   loop?(i: number, api: SceneApi): () => void;
 }
 

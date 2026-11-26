@@ -68,6 +68,8 @@ describe('Learn playback on built lesson pages', () => {
     for (const i of [1, 3]) {
       steps[i].dispatchEvent(new PointerEvent('pointerenter', { pointerType: 'mouse' }));
       expect(active()).toBe(i);
+      // The held step keeps playing (it replays) but autoplay does not move on.
+      expect(root.hasAttribute('data-playing')).toBe(true);
       vi.advanceTimersByTime(6000);
       expect(active()).toBe(i);
     }
@@ -82,18 +84,29 @@ describe('Learn playback on built lesson pages', () => {
     expect(active()).toBe(0);
   });
 
-  it('pins a tapped step until the same step is tapped again', async () => {
-    const { active, pause, steps } = await mount();
+  it('keeps a tapped step playing until the same step is tapped again', async () => {
+    const { active, pause, root, steps } = await mount();
     const tap = () => steps[2].dispatchEvent(new PointerEvent('click', { pointerType: 'touch' }));
     tap();
     expect(active()).toBe(2);
-    expect(pause.textContent).toBe(learn.en.play);
+    expect(pause.textContent).toBe(learn.en.pause);
+    expect(root.hasAttribute('data-playing')).toBe(true);
     vi.advanceTimersByTime(9000);
     expect(active()).toBe(2);
     tap();
-    expect(pause.textContent).toBe(learn.en.pause);
-    vi.advanceTimersByTime(3000);
+    vi.advanceTimersByTime(1500 + 3000);
     expect(active()).toBe(3);
+  });
+
+  it('replays the held step: rewinds to the step before, then animates into it again', async () => {
+    const { steps, svg } = await mount();
+    const add = vi.spyOn(svg.classList, 'add');
+    const remove = vi.spyOn(svg.classList, 'remove');
+    steps[1].dispatchEvent(new PointerEvent('pointerenter', { pointerType: 'mouse' }));
+    vi.advanceTimersByTime(2600 * 2 + 50);
+    expect(add.mock.calls.filter(([name]) => name === 'learn-instant')).toHaveLength(2);
+    expect(remove.mock.calls.filter(([name]) => name === 'learn-instant')).toHaveLength(2);
+    expect(svg.classList.contains('learn-instant')).toBe(false);
   });
 
   it('persists the view across lessons and languages', async () => {

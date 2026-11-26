@@ -10,6 +10,21 @@ steps:
   - Mark a point as core if its count reaches minPts.
   - Join nearby core points into clusters. A chain of core points can bend around a curve.
   - Attach any remaining point within eps of a core point as a border point. Mark the rest as noise.
+quick:
+  steps:
+    - "Count every point inside radius eps around a point"
+    - "Mark points with at least minPts neighbours as core"
+    - "Chain nearby core points together into clusters"
+    - "Attach nearby border points and mark leftovers as noise"
+  caution: "One radius sets every group, so scale features before choosing eps."
+  scene: dbscan
+  words:
+    minPts: "minPts = 4"
+    count: "Count"
+    core: "Core"
+    border: "Border"
+    noise: "Noise"
+    clusters: "Clusters"
 caution:
   h: One radius for all clusters
   p: A small radius can break up a sparse group. A large radius can connect groups you meant to keep separate. If your features use different units, scale them before choosing the radius.

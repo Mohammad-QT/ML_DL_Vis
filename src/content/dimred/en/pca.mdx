@@ -11,6 +11,19 @@ steps:
   - "Find the direction along which the points spread out the most. Call it the first principal component, or PC1."
   - "Find the next direction at a right angle to PC1. Call it PC2."
   - "Keep the coordinates along the axes you chose. Use those coordinates to draw the data or train a classifier."
+quick:
+  steps:
+    - "Find the average point where the new axes meet"
+    - "Turn an axis until the projected points spread out most: <b>PC1</b>"
+    - "Add the next axis at a right angle: <b>PC2</b>"
+    - "Keep the new coordinates along those axes"
+  caution: "Scale columns first when their units differ, or big numbers dominate."
+  scene: pca
+  words:
+    mean: "Mean"
+    pc1: "PC1"
+    pc2: "PC2"
+    spread: "Spread: {n}%"
 caution:
   h: "Check the feature scales"
   p: "A feature measured in large units can dominate the spread. Scale columns first when their units differ. The board uses the same scale on both axes."
