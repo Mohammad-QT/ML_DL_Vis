@@ -131,6 +131,7 @@ npm run build    # static site in dist/
 ```
 
 Run `node scripts/og.mjs` to regenerate the social preview at [`public/og.png`](public/og.png).
+Regenerate the README screenshots and banners with `node scripts/shots.mjs` (Node 24 and Chrome or Edge); pass a base URL to capture a local preview instead of the live site.
 
 ## Tech
 
